@@ -248,3 +248,98 @@ auto-captured log would need a Claude Code hook - not built, and out of scope to
 *Decision.* Accepted WITH that limitation, as a lab notebook rather than an audit log.
 `DAILY_KICKOFF.md` should gain a closing step so the write-up is prompted; until that is
 added, this file depends on it being remembered.
+
+*Follow-up (same day).* `DAILY_KICKOFF.md` updated: closing SESSION_LOG step added to the
+ritual, plus a "HOW CLAUDE SHOULD WORK" section (effort suggestions + the handshake,
+assess-before-implementing, the equity-hash rule) and `DECISIONS.md` added to the
+read-before-acting line.
+
+---
+
+## Entry #005 - 2026-07-21 - Stock swap / rotation when the book is full --- DEFERRED
+
+*Proposal (user).* "If we are holding a weak stock, can we exchange it for the next one
+we are going to buy?" i.e. when the book is at 4/4 and a new signal fires, drop the
+weakest holding and take the new candidate.
+
+*The inefficiency is REAL - stated plainly because it is a fair point.* With the cap
+binding, a new signal is simply DISCARDED (SHRIRAMFIN twice now). So the book holds the
+FIRST four candidates that happened to appear, not the BEST four. That selection is
+path-dependent and arbitrary. Choosing deliberately would, in principle, be better.
+
+*Why it is deferred anyway - three reasons.*
+
+1. **It changes the strategy family.** `ts_mom` is TIME-SERIES momentum: each stock is
+   judged only against its own history (close>MA200, 126d ret>0, close>MA50). There is no
+   cross-stock ranking anywhere in the system. Rotation makes it CROSS-SECTIONAL - a
+   different family. The measured +54.5bp/trade (deflated CI LB +11.5bp) was earned under
+   the current rules and DOES NOT TRANSFER. A rotation rule is a new rule and needs its
+   own pre-registration, IS/OOS, and deflation as trials 10+.
+
+2. **The cost arithmetic is hostile at Rs.60k.** Rotation raises turnover by
+   construction. One round trip costs ~Rs.38 (measured on AXISBANK: 34.96 costs + 5.29
+   slippage). Two extra swaps a month = ~Rs.912/yr against an OOS CAGR of 1.06% =
+   Rs.636/yr on this book. **The rotation cost would exceed the entire modeled return.**
+   Direct precedent: the 8 x Rs.900 variant lost ~3x to the 4 x Rs.1,800 variant purely
+   on round-trip count and flat-cost drag. Rotation pushes back toward the losing end.
+
+3. **Whipsaw.** Trend systems earn by letting winners run; forced rotation can cut
+   positions that have not broken their trend, repeatedly.
+
+*TRAP recorded for whoever builds this.* Do NOT rank "weak" by unrealized P&L. The market
+does not know your entry price; ranking on it is anchoring - a behavioural bias wearing a
+rule's clothing. Any rank must be a MARKET metric (e.g. 126d momentum).
+
+*Cheap next step instead (recommended, not yet built).* **Log every skipped candidate** -
+symbol, date, signal, and the incumbent it lost to. In 2-3 months that answers the
+question with data: did the skipped candidates actually outperform the positions we kept?
+If yes, rotation has a measurable prize and gets tested properly; if no, we avoided
+adding turnover to a cost-bound book. Same instrument-first pattern that caught the `tom`
+bug and #003.
+
+*Decision.* DEFERRED pending that measurement. Note the idea gets BETTER as the book
+grows - flat-cost drag shrinks with position size, so at Rs.5-10 lakh the arithmetic
+could flip. Worth revisiting at a larger book size even if it fails now.
+
+---
+
+## Entry #006 - 2026-07-21 - Version control (`git init`) --- APPLIED
+
+*Proposal.* The project had NO version control at all.
+
+*Reasoning.* On a codebase with real correctness stakes this was the cheapest available
+safety win. Concretely: in this one session four edits were made to
+`p11b_swing_report.py` with no diff and no revert path - only the equity-hash gate stood
+between a silent regression and the book, and that gate covers the book, not the
+renderer. Separately, the config has been through three re-baselines (Rs.10L -> 60k
+8x900 -> 60k 4x1800) whose reasoning survives in prose but whose CODE STATE is gone.
+
+*Repo scope decision.* Initialised at **`nse_paper_v1/`**, NOT at the `Hedge funds` root.
+Reason: the sibling `integrated_mm_v2/` is **2.6 GB** with no `.gitignore` of its own, so
+a root repo would risk committing gigabytes of tick data on one wrong ignore rule.
+CONSEQUENCE, stated so it is not forgotten: `DAILY_KICKOFF.md`, `EXPLAIN_MODE.md` and
+`PROJECT_SUMMARY.*` live in the root and remain UNVERSIONED. Worth solving later (a
+second small repo, or a root repo with strict ignores).
+
+*Ignore rules.* Pre-existing `.gitignore` already covered secrets and `data/`; added
+`*.log` (stray `p11_*.log` scratch) and `reports/` (re-rendered from state every run).
+
+*Secret-safety procedure followed.* Staged everything, then grepped the staged list for
+secret-like names BEFORE committing. The check fired on `secrets.env.example` - inspected
+it rather than assuming: placeholders only (`your_api_key_here`), safe to commit. Real
+`secrets.env` confirmed ignored via `git check-ignore -v` (`.gitignore:3`). **Always
+verify rather than trust the filename.**
+
+*Result.* Commit `9122d6a`, 48 files tracked, `.git` 1.1 MB, clean tree. Nothing is
+pushed anywhere - this is a purely LOCAL repository, no remote configured.
+
+*Unlocks.* `/code-review ultra` now becomes possible (it requires a git repo). It is
+user-triggered and separately billed; Claude cannot launch it. Recommended target when
+the user wants it: `p9_swing_portfolio.py` and `p11_swing_paper.py`, where every
+correctness bug so far has lived.
+
+*Open question, deliberately NOT decided unilaterally.* The live book state
+(`data/paper_state.json`, `paper_ledger.parquet`, `paper_equity_curve.parquet`, ~12 KB
+total) sits inside the ignored `data/` folder and therefore has NO backup or history. A
+`!` exception in `.gitignore` would give a daily audit trail of the actual trading
+record. Offered to the user; awaiting their call.
