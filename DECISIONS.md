@@ -178,6 +178,68 @@ cosmetic one - a stop that can drift DOWN is strictly worse than one that cannot
 clamping the stop until the CAUSE is understood - clamping would hide a data problem
 rather than solve it.
 
+### DIAGNOSED 2026-07-21 - CAUSE FOUND. Not a code bug: KITE REVISED A PAST BAR.
+
+Decisive measurement (read-only diagnostic against live Kite):
+
+| SBIN close for 2026-07-20 | value |
+|---|---|
+| risk panel `ref_px`, written Monday evening | **1060.60** |
+| Kite `historical_data`, asked Tuesday | **1060.00** |
+| difference | **-0.60** |
+
+Stop reconstruction confirms the chain exactly - both stops were CORRECT for the data
+each run saw, and the ratchet worked as written:
+
+```
+2026-07-20  close=1060.00  atr=19.900008  close-3.5*atr = 990.3499725341796  (Tue value)
+            close=1060.60  atr=19.900008  close-3.5*atr = 990.9499725341796  (Mon value)
+```
+
+**Mechanism.** `p11` rebuilds `panel2` - the ENTIRE live era - from Kite on every run and
+never persists it (line 378); `swing_daily.parquet` is frozen at the research cutoff
+2026-07-10. So each run re-derives live history from whatever Kite currently returns.
+Monday's 18:16 run almost certainly captured a PROVISIONAL candle (NSE's official close
+is a 30-minute weighted average, settled afterwards). Compounding it, the risk panel
+dedups `keep="first"` while the tape takes latest - **so the two stores now disagree with
+each other**: the dashboard marks positions with one and the engine decides with the other.
+
+### SECOND FINDING (arguably more serious) - the source-consistency check is BLIND
+
+G4.6 reported "source diff 0.0bp on all 20 symbols", which is what made this look
+impossible. Line 342:
+
+```python
+common = kh[kh["date"] == pd.Timestamp(last_panel_date)]
+```
+
+`last_panel_date` is the RESEARCH TAPE's last date (2026-07-10). The gate compares Kite
+against a bar from eleven days ago that never changes, and will report 0.0bp forever. **It
+cannot see the live era at all.** That is false assurance, and it is why this went
+unnoticed. Fix must compare OVERLAPPING LIVE-ERA dates.
+
+### What is actually at risk (the 0.60 itself is trivial)
+
+- Replay is NOT reproducible - "the book self-heals by replay" assumes stable history.
+- If a revision ever touches an OPEN price, a past FILL price changes retroactively, so
+  realized P&L in the ledger could silently shift.
+- Mark-to-market (risk panel `ref_px`) and decision data (tape close) can diverge.
+
+### Fix options - user decision required (design fork, not a detail)
+
+(a) **Freeze first-seen** - immutable history, reproducible replay; but may enshrine a
+    provisional value.
+(b) **Always take latest** - most accurate prices; history keeps mutating, reproducibility
+    lost.
+(c) **Freeze first-seen AND log every revision loudly** - RECOMMENDED. A decision made on
+    Monday was made on Monday's data and cannot be un-made, so the book should reflect
+    what it actually saw; a later revision becomes a VISIBLE finding rather than a silent
+    rewrite. Plus repair the G4.6 check to compare live-era overlap.
+
+**Honest limitation of any fix:** Monday's original OHLC is already lost. Only the close
+survives (risk panel, 1060.60) plus fill prices in the ledger. A persisted live tape
+necessarily starts with partial history for 2026-07-17..21.
+
 ---
 
 ## Entry #003 - 2026-07-21 - "Costs paid" dashboard section --- APPLIED
