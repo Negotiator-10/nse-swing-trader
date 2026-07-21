@@ -129,6 +129,25 @@ revert path; only the equity-hash gate stood between the user and a silent regre
 `git init` also unlocks `/code-review ultra`, which requires a git repo, is user-triggered
 and billed, and cannot be launched by Claude.
 
+**Version control added.** `git init` at `nse_paper_v1/` (NOT the Hedge funds root - the
+sibling `integrated_mm_v2` is 2.6GB with no gitignore, so a root repo risked committing
+gigabytes). Baseline commit `9122d6a`, 48 files, .git 1.1MB, purely local, no remote.
+Secret-safety procedure: grepped the STAGED name list before committing - it fired on
+`secrets.env.example`, which was INSPECTED rather than assumed (placeholders only, safe);
+real `secrets.env` confirmed ignored via `git check-ignore -v`. Second commit `7f5a118`
+logged DECISIONS #005 (rotation) and #006 (git).
+
+**`PROJECT_HANDBOOK.md` written** (user: "I am forgetting things - make a document from
+the start of this project, every question I asked, every file and what it holds"). Covers
+the whole project: what it is, the philosophy, Phases 0-4 with headline numbers, how a
+trade happens end to end, the cost stack, a complete file inventory, the bug track record,
+carried caveats, every question from this session with its status, daily operating
+instructions, and open items. **Effort call given honestly: medium, not high** - the task
+was bounded by reading files carefully rather than by reasoning depth, so upselling would
+have been wrong. **Limitation stated in the document itself:** questions from sessions
+BEFORE 2026-07-21 are unrecoverable (never captured), so the handbook documents what was
+BUILT for that period rather than inventing a plausible question list.
+
 **State at end of session.** 4/4 positions at cap: ICICIBANK 8, SBIN 6, BAJFINANCE 2,
 INDIGO 1. Cash Rs.34,573.60, NAV Rs.59,971.40. SHRIRAMFIN armed for Wed but will likely
 skip again - the book is full and nothing is armed to exit.
