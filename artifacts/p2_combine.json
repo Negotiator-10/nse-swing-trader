@@ -1,0 +1,139 @@
+{
+  "trials_total": 7,
+  "mr_family": {
+    "mr_rsi": {
+      "is": {
+        "n": 1429,
+        "win_rate": 0.6270118964310707,
+        "mean_net_ret_bp": 48.56039610386113,
+        "median_net_ret_bp": 104.94457025070984,
+        "ci95_mean_bp": [
+          22.049401597536836,
+          73.74637252478128
+        ],
+        "profit_factor": 1.314950027001648,
+        "avg_hold_days": 3.186843946815955,
+        "mean_cost_bp": 23.065740865407122,
+        "total_compounded_x": 163.52514171306564
+      },
+      "oos": {
+        "n": 679,
+        "win_rate": 0.5994108983799705,
+        "mean_net_ret_bp": 20.906843119318047,
+        "median_net_ret_bp": 52.05702748019709,
+        "ci95_mean_bp": [
+          -2.588854705939383,
+          43.987966488157745
+        ],
+        "profit_factor": 1.203166531174639,
+        "avg_hold_days": 3.3726067746686303,
+        "mean_cost_bp": 23.037055810612564,
+        "total_compounded_x": 2.9818838766594706
+      }
+    },
+    "mr_bb": {
+      "is": {
+        "n": 695,
+        "win_rate": 0.5510791366906475,
+        "mean_net_ret_bp": 56.50821615827671,
+        "median_net_ret_bp": 125.80138728969362,
+        "ci95_mean_bp": [
+          2.361651036207198,
+          112.08809381354591
+        ],
+        "profit_factor": 1.2158338100931931,
+        "avg_hold_days": 6.572661870503597,
+        "mean_cost_bp": 23.07398514612886,
+        "total_compounded_x": 7.832314116169049
+      },
+      "oos": {
+        "n": 352,
+        "win_rate": 0.5255681818181818,
+        "mean_net_ret_bp": 14.183305089542632,
+        "median_net_ret_bp": 37.14636037679345,
+        "ci95_mean_bp": [
+          -37.397245087940256,
+          64.64155860208325
+        ],
+        "profit_factor": 1.0757973249573862,
+        "avg_hold_days": 7.0397727272727275,
+        "mean_cost_bp": 23.030081478710077,
+        "total_compounded_x": 1.0926089443896991
+      }
+    },
+    "mr_down3": {
+      "is": {
+        "n": 2828,
+        "win_rate": 0.629066478076379,
+        "mean_net_ret_bp": 30.229871044899316,
+        "median_net_ret_bp": 100.01979483638256,
+        "ci95_mean_bp": [
+          11.77971176899311,
+          48.63525655778332
+        ],
+        "profit_factor": 1.1897759559042214,
+        "avg_hold_days": 3.687765205091938,
+        "mean_cost_bp": 23.046726595666694,
+        "total_compounded_x": 103.59628443878421
+      },
+      "oos": {
+        "n": 1331,
+        "win_rate": 0.6183320811419984,
+        "mean_net_ret_bp": 15.319726854991604,
+        "median_net_ret_bp": 67.32205281337447,
+        "ci95_mean_bp": [
+          -1.0270037859150176,
+          31.029810273088373
+        ],
+        "profit_factor": 1.1409727833155001,
+        "avg_hold_days": 3.6040570999248684,
+        "mean_cost_bp": 23.03126029000531,
+        "total_compounded_x": 4.000755643469859
+      }
+    }
+  },
+  "mr_confirmation": {
+    "selected": "mr_bb",
+    "n_oos": 352,
+    "oos_mean_bp": 14.183305089542632,
+    "ci95_bp": [
+      -37.397245087940256,
+      64.64155860208325
+    ],
+    "ci_deflated_bp": [
+      -56.54249643960229,
+      82.05612162838081
+    ],
+    "passes_deflated": false
+  },
+  "diversification": {
+    "corr_monthly": 0.08026374591367072,
+    "ts_mom": {
+      "n_months": 112,
+      "mean_monthly_bp": 70.18254867891058,
+      "ann_sharpe": 0.713367917209716,
+      "max_drawdown_pct": -18.738606952158733,
+      "worst_month_bp": -641.2966577471406,
+      "total_return_pct": 105.74163318876285
+    },
+    "mr_best": {
+      "n_months": 112,
+      "mean_monthly_bp": 34.262453718413305,
+      "ann_sharpe": 0.4096582643430165,
+      "max_drawdown_pct": -19.133132228633652,
+      "worst_month_bp": -1029.492528560774,
+      "total_return_pct": 40.01254579468547
+    },
+    "combined_5050": {
+      "n_months": 112,
+      "mean_monthly_bp": 52.22250119866194,
+      "ann_sharpe": 0.7785956199399108,
+      "max_drawdown_pct": -11.630702656155867,
+      "worst_month_bp": -743.5819189898414,
+      "total_return_pct": 73.9778660715069
+    },
+    "combining_improves_risk_adjusted": true
+  },
+  "verdict": "USEFUL DIVERSIFIER: combined book improves Sharpe AND drawdown vs ts_mom alone.",
+  "seed": 42
+}

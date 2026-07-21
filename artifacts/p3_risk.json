@@ -1,0 +1,51 @@
+{
+  "horizon_days": 12,
+  "q": 0.99,
+  "refit_every": 63,
+  "min_window": 1000,
+  "evt_min_exceedances": 80,
+  "threshold_pcts": [
+    0.9,
+    0.925,
+    0.95
+  ],
+  "drift_zero": true,
+  "n_snapshots": 105717,
+  "n_tradable": 92108,
+  "median_var_frac": 0.2114397479802287,
+  "median_es_frac": 0.2783065290821325,
+  "gates": {
+    "G3.1": {
+      "unit_shares": 200,
+      "unit_ok": true,
+      "n_tradable": 92108,
+      "n_sizeable": 92108,
+      "max_risk_used": 14999.999673114464,
+      "budget": 15000.0
+    },
+    "G3.2": {
+      "es_ge_var": true,
+      "var_pos": true,
+      "garch_converged": true,
+      "min_exceedances_ok": true,
+      "min_n_u": 81,
+      "xi_median": 0.13083792608970385,
+      "tradable_coverage": 0.8712695214582328
+    },
+    "G3.3": {
+      "probes": 40,
+      "mismatches": 0,
+      "worst_abs_diff": 0.0
+    },
+    "G3.5_engine": {
+      "hash": "d3980066c9e06f0e9c9449de7027c7a6a6c86d537a7695525458e2a80ecf4737",
+      "identical": true
+    },
+    "all_passed": true
+  },
+  "seed": 42,
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3"
+  }
+}

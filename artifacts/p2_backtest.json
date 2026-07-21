@@ -1,0 +1,75 @@
+{
+  "signal": "momentum/breakout + trend filter + ATR trailing stop",
+  "params": {
+    "trend_ma": 50,
+    "breakout_lookback": 20,
+    "atr_len": 14,
+    "atr_stop_mult": 2.5,
+    "hold_max_days": 25,
+    "slippage_bps": 3.0,
+    "notional_inr": 200000.0
+  },
+  "exec": "next-open fills, NSE equity delivery costs (Zerodha), per-symbol walk-forward",
+  "n_trades": 2747,
+  "n_oos": 882,
+  "exit_reasons": {
+    "stop": 1483,
+    "maxhold": 650,
+    "trend": 382,
+    "stop_gap": 226,
+    "eod_open": 6
+  },
+  "gates": {
+    "G2.1": {
+      "model_net": 0.0975972254,
+      "hand_net": 0.0975972254,
+      "abs_err": 0.0,
+      "cost_frac": 0.0024027746
+    },
+    "G2.2": {
+      "oos": {
+        "n": 882,
+        "win_rate": 0.35714285714285715,
+        "mean_net_ret_bp": 18.424926785523652,
+        "median_net_ret_bp": -190.89266172215628,
+        "ci95_mean_bp": [
+          -29.19406228147274,
+          70.16611683580072
+        ],
+        "profit_factor": 1.076661848349696,
+        "avg_hold_days": 13.850340136054422,
+        "mean_cost_bp": 23.034481316620052,
+        "total_compounded_x": 0.5742489272276339
+      }
+    },
+    "G2.3": {
+      "buy_hold_oos": {
+        "n_symbols": 20,
+        "mean_net_ret_pct": 296.7177308679134,
+        "median_net_ret_pct": 236.32082171021463
+      },
+      "in_sample": {
+        "n": 1865,
+        "win_rate": 0.3892761394101877,
+        "mean_net_ret_bp": 62.23345794666655,
+        "median_net_ret_bp": -215.529105954626,
+        "ci95_mean_bp": [
+          16.02974699161285,
+          108.94360921244727
+        ],
+        "profit_factor": 1.1878361769169385,
+        "avg_hold_days": 14.046648793565684,
+        "mean_cost_bp": 23.07992394446352,
+        "total_compounded_x": 15.399750980650579
+      },
+      "flat_baseline_ret": 0.0
+    },
+    "all_passed": false,
+    "verdict": "NO-EDGE FINDING: signal does not clear the OOS net-of-cost bar -- valid outcome, system still proven; iterate the signal (this is v1's expected result)."
+  },
+  "seed": 42,
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3"
+  }
+}

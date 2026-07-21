@@ -1,0 +1,161 @@
+{
+  "protocol": "select-on-IS, confirm-on-OOS, Bonferroni-deflate by n_specs",
+  "n_specs": 4,
+  "specs": [
+    "breakout_mom",
+    "mean_rev",
+    "ts_mom",
+    "dual_ma"
+  ],
+  "per_spec": {
+    "breakout_mom": {
+      "is": {
+        "n": 1865,
+        "win_rate": 0.3892761394101877,
+        "mean_net_ret_bp": 62.23345794666655,
+        "median_net_ret_bp": -215.529105954626,
+        "ci95_mean_bp": [
+          16.02974699161285,
+          108.94360921244727
+        ],
+        "profit_factor": 1.1878361769169385,
+        "avg_hold_days": 14.046648793565684,
+        "mean_cost_bp": 23.07992394446352,
+        "total_compounded_x": 15.399750980650579
+      },
+      "oos": {
+        "n": 882,
+        "win_rate": 0.35714285714285715,
+        "mean_net_ret_bp": 18.424926785523652,
+        "median_net_ret_bp": -190.89266172215628,
+        "ci95_mean_bp": [
+          -29.19406228147274,
+          70.16611683580072
+        ],
+        "profit_factor": 1.076661848349696,
+        "avg_hold_days": 13.850340136054422,
+        "mean_cost_bp": 23.034481316620052,
+        "total_compounded_x": 0.5742489272276339
+      },
+      "n_total": 2747
+    },
+    "mean_rev": {
+      "is": {
+        "n": 2384,
+        "win_rate": 0.6270973154362416,
+        "mean_net_ret_bp": 32.475075051747574,
+        "median_net_ret_bp": 133.12719827644088,
+        "ci95_mean_bp": [
+          9.64034890932459,
+          55.28406930525784
+        ],
+        "profit_factor": 1.165310141038606,
+        "avg_hold_days": 4.866191275167785,
+        "mean_cost_bp": 23.049055547754598,
+        "total_compounded_x": 15.389916998425988
+      },
+      "oos": {
+        "n": 1148,
+        "win_rate": 0.6289198606271778,
+        "mean_net_ret_bp": 20.45929986360015,
+        "median_net_ret_bp": 90.28189626638172,
+        "ci95_mean_bp": [
+          -1.9791268082563818,
+          43.433362571227065
+        ],
+        "profit_factor": 1.1468057711694475,
+        "avg_hold_days": 5.124564459930314,
+        "mean_cost_bp": 23.036591573600408,
+        "total_compounded_x": 4.440192927222707
+      },
+      "n_total": 3532
+    },
+    "ts_mom": {
+      "is": {
+        "n": 2999,
+        "win_rate": 0.377459153051017,
+        "mean_net_ret_bp": 155.80387969244637,
+        "median_net_ret_bp": -132.80036635914706,
+        "ci95_mean_bp": [
+          110.43558014640733,
+          205.72754366717092
+        ],
+        "profit_factor": 1.5955133859277766,
+        "avg_hold_days": 13.289096365455151,
+        "mean_cost_bp": 23.17698462510832,
+        "total_compounded_x": 1209804359971.6606
+      },
+      "oos": {
+        "n": 1474,
+        "win_rate": 0.3283582089552239,
+        "mean_net_ret_bp": 54.53357599984746,
+        "median_net_ret_bp": -133.1560510334644,
+        "ci95_mean_bp": [
+          21.589389888281183,
+          89.8739503127159
+        ],
+        "profit_factor": 1.2811105666993026,
+        "avg_hold_days": 12.367028493894166,
+        "mean_cost_bp": 23.071936850158508,
+        "total_compounded_x": 151.38627805294217
+      },
+      "n_total": 4473
+    },
+    "dual_ma": {
+      "is": {
+        "n": 580,
+        "win_rate": 0.43103448275862066,
+        "mean_net_ret_bp": 72.49851135448104,
+        "median_net_ret_bp": -157.75939037531967,
+        "ci95_mean_bp": [
+          -7.959649714628049,
+          156.5401780868168
+        ],
+        "profit_factor": 1.2149228387800322,
+        "avg_hold_days": 17.510344827586206,
+        "mean_cost_bp": 23.090571893377597,
+        "total_compounded_x": 4.397191538043128
+      },
+      "oos": {
+        "n": 287,
+        "win_rate": 0.4146341463414634,
+        "mean_net_ret_bp": 102.70595625045564,
+        "median_net_ret_bp": -141.73716465774606,
+        "ci95_mean_bp": [
+          15.753404865169621,
+          191.9137535515645
+        ],
+        "profit_factor": 1.4439760732984235,
+        "avg_hold_days": 17.773519163763066,
+        "mean_cost_bp": 23.121906102494545,
+        "total_compounded_x": 8.156032780656641
+      },
+      "n_total": 867
+    }
+  },
+  "selected": "ts_mom",
+  "confirmation": {
+    "selected": "ts_mom",
+    "n_oos": 1474,
+    "trials": 4,
+    "oos_mean_bp": 54.53357599984746,
+    "ci95_bp": [
+      21.589389888281183,
+      89.8739503127159
+    ],
+    "alpha_bonferroni": 0.0125,
+    "ci_deflated_bp": [
+      11.548720510533332,
+      99.16356087084012
+    ],
+    "p_one_sided": 0.000875,
+    "passes_deflated": true
+  },
+  "buy_hold_oos": {
+    "n_symbols": 20,
+    "mean_net_ret_pct": 296.7177308679134,
+    "median_net_ret_pct": 236.32082171021463
+  },
+  "verdict": "EDGE (deflated)",
+  "seed": 42
+}

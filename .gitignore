@@ -1,0 +1,21 @@
+# secrets -- NEVER commit Kite keys/tokens
+.env
+secrets.env
+*.secret
+access_token*.txt
+
+# data + captured tapes (large, re-fetchable)
+data/
+logs/
+
+# python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# scratch
+*.tmp
+*.log
+
+# derived render -- rebuilt from state by p11b_swing_report.py every run
+reports/

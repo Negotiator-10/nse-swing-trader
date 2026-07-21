@@ -1,0 +1,218 @@
+{
+  "watchlist": [
+    "RELIANCE",
+    "HDFCBANK",
+    "INFY",
+    "TCS",
+    "ICICIBANK"
+  ],
+  "included": [
+    "AXISBANK",
+    "BAJFINANCE",
+    "BEL",
+    "BHARTIARTL",
+    "ETERNAL",
+    "HDFCBANK",
+    "HINDALCO",
+    "ICICIBANK",
+    "INDIGO",
+    "INFY",
+    "ITC",
+    "KOTAKBANK",
+    "LT",
+    "M&M",
+    "MARUTI",
+    "RELIANCE",
+    "SBIN",
+    "SHRIRAMFIN",
+    "TATASTEEL",
+    "TCS"
+  ],
+  "dropped": {},
+  "source": "yfinance daily (dev+backtest); broker for live orders",
+  "history": "max",
+  "oos_frac": 0.3,
+  "split": "per-symbol (each symbol's last OOS_FRAC of rows = test)",
+  "cutoff_range": [
+    "2017-03-24",
+    "2025-01-16"
+  ],
+  "cutoffs": {
+    "HDFCBANK": "2017-03-24",
+    "ICICIBANK": "2019-04-16",
+    "RELIANCE": "2017-03-27",
+    "INFY": "2017-03-24",
+    "BHARTIARTL": "2019-04-16",
+    "SBIN": "2017-03-24",
+    "ETERNAL": "2025-01-16",
+    "TCS": "2019-05-03",
+    "M&M": "2017-03-24",
+    "AXISBANK": "2018-02-22",
+    "LT": "2019-04-15",
+    "BAJFINANCE": "2019-04-16",
+    "KOTAKBANK": "2018-12-20",
+    "MARUTI": "2019-08-13",
+    "BEL": "2019-04-16",
+    "SHRIRAMFIN": "2019-04-15",
+    "INDIGO": "2023-05-03",
+    "ITC": "2017-03-27",
+    "TATASTEEL": "2017-03-24",
+    "HINDALCO": "2017-03-24"
+  },
+  "hold_target_days": 12,
+  "hold_max_days": 25,
+  "n_rows": 125737,
+  "n_ohlc_repaired": 151,
+  "n_zero_volume_bars": 1716,
+  "data_quality_note": "OHLC adjustment-artifact rows (pre-1997) repaired by clamping high/low to include open/close; zero-volume bars flagged (treat as untradeable in the backtest).",
+  "gates": {
+    "G1.1": {
+      "per_symbol_monotone": true,
+      "n_duplicate_dates": 0
+    },
+    "G1.2": {
+      "ohlc_sane": true,
+      "n_rows": 125737
+    },
+    "G1.3": {
+      "per_symbol": {
+        "AXISBANK": {
+          "n_days": 6902,
+          "start": "1998-11-27",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "BAJFINANCE": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "BEL": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "BHARTIARTL": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ETERNAL": {
+          "n_days": 1230,
+          "start": "2021-07-23",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "HDFCBANK": {
+          "n_days": 7664,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "HINDALCO": {
+          "n_days": 7664,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ICICIBANK": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "INDIGO": {
+          "n_days": 2634,
+          "start": "2015-11-10",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "INFY": {
+          "n_days": 7664,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ITC": {
+          "n_days": 7661,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "KOTAKBANK": {
+          "n_days": 6228,
+          "start": "2001-07-02",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "LT": {
+          "n_days": 5969,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "M&M": {
+          "n_days": 7662,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "MARUTI": {
+          "n_days": 5702,
+          "start": "2003-07-09",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "RELIANCE": {
+          "n_days": 7661,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "SBIN": {
+          "n_days": 7662,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "SHRIRAMFIN": {
+          "n_days": 5969,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "TATASTEEL": {
+          "n_days": 7664,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "TCS": {
+          "n_days": 5937,
+          "start": "2002-08-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        }
+      },
+      "min_days_required": 750,
+      "total_gaps_gt_10d": 0
+    },
+    "G1.4": {
+      "cutoff_range": [
+        "2017-03-24",
+        "2025-01-16"
+      ],
+      "n_train": 88015,
+      "n_test": 37722
+    },
+    "all_passed": true
+  },
+  "seed": 42,
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3"
+  }
+}

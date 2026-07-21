@@ -1,0 +1,130 @@
+{
+  "config": {
+    "capital": 60000.0,
+    "per_pos_budget": 1800.0,
+    "portfolio_budget": 4800.0,
+    "max_positions": 4,
+    "kill_dd": 0.2,
+    "horizon_days": 12,
+    "sleeve_method": "risk_parity"
+  },
+  "sleeve_weights_mean": {
+    "ts_mom": 0.3723375297887873,
+    "tom": 0.6276624702112127
+  },
+  "combined_exposure_turnover": {
+    "n_trades": 1732,
+    "turnover_x_per_yr": 4.528256659383699,
+    "win_rate": 0.35912240184757505,
+    "mean_exposure": 0.22442558394659773,
+    "max_concurrent": 4,
+    "n_skips": 22055
+  },
+  "metrics": {
+    "combo_full": {
+      "n_days": 7664,
+      "years": 30.41269841269841,
+      "cagr": 0.011853891874832101,
+      "ann_sharpe": 0.18609334412222694,
+      "max_drawdown": -0.2837289989356545,
+      "total_return": 0.4310219782228124,
+      "end_equity": 85861.31869336874
+    },
+    "combo_IS": {
+      "n_days": 5365,
+      "years": 21.28968253968254,
+      "cagr": 0.012381634808217745,
+      "ann_sharpe": 0.18087848221121763,
+      "max_drawdown": -0.2837289989356545,
+      "total_return": 0.2995038202124465,
+      "end_equity": 77970.2292127468
+    },
+    "combo_OOS": {
+      "n_days": 2299,
+      "years": 9.123015873015873,
+      "cagr": 0.0105537393321542,
+      "ann_sharpe": 0.23207011274861725,
+      "max_drawdown": -0.10662932956439641,
+      "total_return": 0.10051407424564718,
+      "end_equity": 85861.31869336874
+    },
+    "ts_mom_alone_OOS": {
+      "n_days": 2299,
+      "years": 9.123015873015873,
+      "cagr": 0.007943031964089853,
+      "ann_sharpe": 0.18429478989260553,
+      "max_drawdown": -0.11447924702590861,
+      "total_return": 0.07484678741410011,
+      "end_equity": 92558.2216530077
+    },
+    "buy_hold_OOS": {
+      "n_days": 2299,
+      "years": 9.123015873015873,
+      "cagr": 0.1554545269055263,
+      "ann_sharpe": 0.830543656208628,
+      "max_drawdown": -0.4236286252626329,
+      "total_return": 2.736761015826347,
+      "end_equity": 28336588.792966127
+    },
+    "buy_hold_full": {
+      "n_days": 7664,
+      "years": 30.41269841269841,
+      "cagr": 0.22445807319426891,
+      "ann_sharpe": 0.5249682977410034,
+      "max_drawdown": -0.753424786318381,
+      "total_return": 471.7286082901958,
+      "end_equity": 28336588.792966127
+    }
+  },
+  "gates": {
+    "G3.4a_killswitch": {
+      "fills_during_halt": 0,
+      "kill_exits": 7,
+      "crash_at": "2019-03-28",
+      "exposure_at_crash": 0.43668924354470207,
+      "mtm_shock": 0.31301261839006056
+    },
+    "G3.4b_capbinding": {
+      "n_skips": 31734,
+      "skip_reasons": {
+        "max_positions": 31729,
+        "risk_budget": 5
+      },
+      "max_concurrent": 2,
+      "cap": 2
+    },
+    "G3.5": {
+      "hash": "bb1a6ecb40656ab7eb490644e7f1435fba17496377657e452375d04a12f3f9e7",
+      "identical": true
+    },
+    "G3.6": {
+      "oos_ts_mom_alone": {
+        "n_days": 2299,
+        "years": 9.123015873015873,
+        "cagr": 0.007943031964089853,
+        "ann_sharpe": 0.18429478989260553,
+        "max_drawdown": -0.11447924702590861,
+        "total_return": 0.07484678741410011,
+        "end_equity": 92558.2216530077
+      },
+      "oos_risk_parity_combo": {
+        "n_days": 2299,
+        "years": 9.123015873015873,
+        "cagr": 0.0105537393321542,
+        "ann_sharpe": 0.23207011274861725,
+        "max_drawdown": -0.10662932956439641,
+        "total_return": 0.10051407424564718,
+        "end_equity": 85861.31869336874
+      },
+      "risk_parity_improves_sharpe": true,
+      "risk_parity_improves_drawdown": true,
+      "verdict": "risk-parity 2-sleeve improves BOTH Sharpe and drawdown vs ts_mom-alone"
+    },
+    "all_passed": true
+  },
+  "seed": 42,
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3"
+  }
+}

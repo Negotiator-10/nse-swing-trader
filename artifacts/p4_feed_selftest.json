@@ -1,0 +1,25 @@
+{
+  "run_mode": "REPLAY",
+  "mode_info": {
+    "keys_present": false,
+    "token_present": false,
+    "requested": "REPLAY",
+    "note": "REPLAY (default). Set RUN_MODE=LIVE + env secrets to arm the live pull."
+  },
+  "fault_injection": {
+    "fresh_accepted": true,
+    "duplicate_rejected": true,
+    "out_of_order_rejected": true,
+    "malformed_rejected": true,
+    "holiday_counted_not_error": true,
+    "dead_man_trips_on_stale_gap": true,
+    "weekend_does_not_trip_dead_man": true,
+    "stats": {
+      "accepted": 2,
+      "duplicates": 1,
+      "out_of_order": 1,
+      "no_bar": 2
+    }
+  },
+  "replay_smoke": true
+}

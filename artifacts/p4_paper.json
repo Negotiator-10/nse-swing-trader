@@ -1,0 +1,142 @@
+{
+  "phase": 4,
+  "run_mode": "LIVE",
+  "mode_info": {
+    "keys_present": true,
+    "token_present": true,
+    "requested": "LIVE",
+    "note": "LIVE armed: Kite key+token present in env (values never read here)."
+  },
+  "gates": {
+    "G4.1": {
+      "max_equity_err": 0.0,
+      "n_trades_batch": 1732,
+      "n_trades_online": 1732,
+      "trades_identical": true,
+      "equity_hash": "bb1a6ecb40656ab7eb490644e7f1435fba17496377657e452375d04a12f3f9e7"
+    },
+    "G4.2": {
+      "fault_injection": {
+        "fresh_accepted": true,
+        "duplicate_rejected": true,
+        "out_of_order_rejected": true,
+        "malformed_rejected": true,
+        "holiday_counted_not_error": true,
+        "dead_man_trips_on_stale_gap": true,
+        "weekend_does_not_trip_dead_man": true,
+        "stats": {
+          "accepted": 2,
+          "duplicates": 1,
+          "out_of_order": 1,
+          "no_bar": 2
+        }
+      },
+      "replay_stream_clean": true
+    },
+    "G4.3": {
+      "cost_hand_check_err": 0.0,
+      "restart_at_k": 3832,
+      "resume_equity_err": 0.0,
+      "resume_trades_identical": true
+    },
+    "G4.4": {
+      "tight_cap": {
+        "n_skips": 31734,
+        "max_concurrent": 2
+      },
+      "kill": {
+        "kill_exits": 7,
+        "fills_during_halt": 0,
+        "crash_at": "2019-03-28",
+        "mtm_shock": 0.31301261839006056
+      }
+    },
+    "G4.5": {
+      "equity_hash": "bb1a6ecb40656ab7eb490644e7f1435fba17496377657e452375d04a12f3f9e7",
+      "rerun_identical": true,
+      "run_mode_stamped": "LIVE",
+      "secrets_presence_only": {
+        "keys_present": true,
+        "token_present": true
+      }
+    },
+    "all_passed_replay": true,
+    "G4.6": {
+      "n_symbols": 20,
+      "n_fresh": 20,
+      "n_stale": 0,
+      "stale_symbols": [],
+      "dead_man": false,
+      "bar_date": "2026-07-21",
+      "source_diff_bp": {
+        "AXISBANK": 0.0,
+        "BAJFINANCE": 0.0,
+        "BEL": -0.0,
+        "BHARTIARTL": -0.0,
+        "ETERNAL": 0.0,
+        "HDFCBANK": -0.0,
+        "HINDALCO": -0.0,
+        "ICICIBANK": 0.0,
+        "INDIGO": 0.0,
+        "INFY": 0.0,
+        "ITC": 0.0,
+        "KOTAKBANK": -0.0,
+        "LT": -0.0,
+        "M&M": 0.0,
+        "MARUTI": 0.0,
+        "RELIANCE": -0.0,
+        "SBIN": 0.0,
+        "SHRIRAMFIN": 0.0,
+        "TATASTEEL": -0.0,
+        "TCS": 0.0
+      },
+      "source_consistent_lt_2pct": true,
+      "decision_date": "2026-07-21",
+      "n_new_bars": 140,
+      "n_fresh_risk_snapshots": 0,
+      "open_positions": {
+        "BAJFINANCE": {
+          "shares": 2,
+          "sleeve": "ts_mom",
+          "entry_px": 1057.32
+        },
+        "ICICIBANK": {
+          "shares": 8,
+          "sleeve": "ts_mom",
+          "entry_px": 1444.93
+        },
+        "SBIN": {
+          "shares": 6,
+          "sleeve": "ts_mom",
+          "entry_px": 1041.91
+        },
+        "INDIGO": {
+          "shares": 1,
+          "sleeve": "ts_mom",
+          "entry_px": 5250.57
+        }
+      },
+      "armed_entries_next_open": {
+        "SHRIRAMFIN": {
+          "sleeve": "ts_mom",
+          "budget_inr": 1541.0
+        }
+      },
+      "armed_exits_next_open": {},
+      "equity_close": 59971.4,
+      "state_persisted": "paper_state.json",
+      "ledger_rows": 1,
+      "verdict": "LIVE SMOKE OK: real EOD bar -> one decision -> paper actions recorded"
+    }
+  },
+  "seed": 42,
+  "config": {
+    "stale_max_days": 5,
+    "kite_interval": "day",
+    "lookback_days": 400
+  },
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3"
+  }
+}

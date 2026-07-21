@@ -1,0 +1,56 @@
+{
+  "trials_total": 9,
+  "candidates": [
+    "vol_squeeze",
+    "tom"
+  ],
+  "results": {
+    "vol_squeeze": {
+      "spec": "vol_squeeze",
+      "n_oos": 374,
+      "oos_mean_bp": -22.04885734252988,
+      "ci95_bp": [
+        -82.01267536781171,
+        42.34659148573004
+      ],
+      "ci_deflated_bp": [
+        -103.28635535746976,
+        73.91254367323998
+      ],
+      "corr_to_ts_mom": 0.36983672126100675,
+      "combined_sharpe": 0.15237579847453558,
+      "combined_maxdd_pct": -23.331275522892327,
+      "ts_sharpe": 0.713367917209716,
+      "ts_maxdd_pct": -18.738606952158733,
+      "significant_deflated": false,
+      "uncorrelated": false,
+      "combining_improves": false,
+      "is_real_diversifier": false
+    },
+    "tom": {
+      "spec": "tom",
+      "n_oos": 1261,
+      "oos_mean_bp": 39.191907759074844,
+      "ci95_bp": [
+        13.839839558796177,
+        66.026893409072
+      ],
+      "ci_deflated_bp": [
+        2.822120363747834,
+        74.23097580430344
+      ],
+      "corr_to_ts_mom": 0.2225402782320516,
+      "combined_sharpe": 0.7474806873517468,
+      "combined_maxdd_pct": -20.387236188149938,
+      "ts_sharpe": 0.713367917209716,
+      "ts_maxdd_pct": -18.738606952158733,
+      "significant_deflated": true,
+      "uncorrelated": true,
+      "combining_improves": false,
+      "is_real_diversifier": false
+    }
+  },
+  "winner": null,
+  "verdict": "NO proven long-only diversifier in the pre-registered set. Honest conclusion: the genuine diversifier is a MARKET-NEUTRAL long/short sleeve (strips the market beta ts_mom carries) -- a separate, larger build. Keep ts_mom single-sleeve meanwhile.",
+  "seed": 42
+}

@@ -1,0 +1,89 @@
+{
+  "baseline_oos_bp": 54.53357599984746,
+  "R1_param_sensitivity": {
+    "ma_long": {
+      "150": 57.3,
+      "200": 54.5,
+      "250": 54.2
+    },
+    "ret_lb": {
+      "63": 65.7,
+      "126": 54.5,
+      "189": 44.6,
+      "252": 43.5
+    },
+    "ma_mid": {
+      "40": 52.2,
+      "50": 54.5,
+      "60": 60.4
+    },
+    "stop_mult": {
+      "2.5": 44.7,
+      "3.5": 54.5,
+      "4.5": 61.6
+    },
+    "hold_max": {
+      "15": 40.2,
+      "25": 54.5,
+      "35": 63.1
+    },
+    "frac_positive": 1.0
+  },
+  "R2_cost_stress": {
+    "cost_x1.0": {
+      "+0bp_slip": 54.5,
+      "+5bp_slip": 44.5,
+      "+10bp_slip": 34.5,
+      "+15bp_slip": 24.5,
+      "+20bp_slip": 14.5
+    },
+    "cost_x1.5": {
+      "+0bp_slip": 43.0,
+      "+5bp_slip": 33.0,
+      "+10bp_slip": 23.0,
+      "+15bp_slip": 13.0,
+      "+20bp_slip": 3.0
+    },
+    "cost_x2.0": {
+      "+0bp_slip": 31.5,
+      "+5bp_slip": 21.5,
+      "+10bp_slip": 11.5,
+      "+15bp_slip": 1.5,
+      "+20bp_slip": -8.5
+    },
+    "breakeven_extra_slip_bp_at_cost_x1": 28
+  },
+  "R3_random_null": {
+    "base_oos_bp": 54.53357599984746,
+    "null_mean_bp": 5.863669848631003,
+    "null_p95_bp": 10.132917218703277,
+    "null_p_ge_base": 0.0,
+    "n_mc": 200
+  },
+  "R4_out_of_universe": {
+    "symbols": [
+      "ADANIGREEN",
+      "AMBUJACEM",
+      "BANKBARODA",
+      "DABUR",
+      "DLF",
+      "GAIL",
+      "GODREJCP",
+      "HAVELLS",
+      "PIDILITIND",
+      "SIEMENS",
+      "TVSMOTOR",
+      "VEDL"
+    ],
+    "n_oos_trades": 736,
+    "oos_mean_bp": 79.60294375670792,
+    "ci95_bp": [
+      22.885188267848807,
+      140.75608214641787
+    ],
+    "breadth_pos": "9/12"
+  },
+  "robust": true,
+  "verdict": "ROBUST: edge survives param neighborhood, cost stress, beats random entry, and GENERALIZES out-of-universe.",
+  "seed": 42
+}

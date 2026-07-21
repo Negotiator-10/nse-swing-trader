@@ -1,0 +1,52 @@
+{
+  "underlying": "NIFTY",
+  "yf_ticker": "^NSEI",
+  "interval": "5m",
+  "period": "60d",
+  "source": "yfinance (dev); Kite for live",
+  "proxy_note": "index series is an intraday proxy for the near-month future",
+  "n_bars": 4205,
+  "n_sessions": 57,
+  "date_range": [
+    "2026-04-20",
+    "2026-07-10"
+  ],
+  "oos_frac": 0.3,
+  "bars_per_session": 75,
+  "gates": {
+    "G1.1": {
+      "monotone": true,
+      "n_duplicates": 0
+    },
+    "G1.2": {
+      "ohlc_sane": true,
+      "n_bars": 4205
+    },
+    "G1.3": {
+      "n_sessions": 57,
+      "n_full_sessions": 56,
+      "frac_full": 0.9824561403508771,
+      "min_bars": 5,
+      "max_bars": 75,
+      "sessions_within_1_bar": 56
+    },
+    "G1.4": {
+      "n_train_rows": 2930,
+      "n_test_rows": 1275,
+      "train_dates": [
+        "2026-04-20",
+        "2026-06-16"
+      ],
+      "test_dates": [
+        "2026-06-17",
+        "2026-07-10"
+      ]
+    },
+    "all_passed": true
+  },
+  "seed": 42,
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3"
+  }
+}
