@@ -151,3 +151,42 @@ BUILT for that period rather than inventing a plausible question list.
 **State at end of session.** 4/4 positions at cap: ICICIBANK 8, SBIN 6, BAJFINANCE 2,
 INDIGO 1. Cash Rs.34,573.60, NAV Rs.59,971.40. SHRIRAMFIN armed for Wed but will likely
 skip again - the book is full and nothing is armed to exit.
+
+---
+
+## Session 2026-07-22 (Wed) - fixing #002, and a bug the fix uncovered
+
+**Effort handshake used.** User asked to "solve these bugs". Flagged that #002 was a
+DIAGNOSIS (cause unknown), high effort; user said proceed at current level. Also gave the
+honest recommendation NOT to fix #003 now (cost-timing accrual, ~Rs.30, understood) and to
+keep the change budget on #002.
+
+**Before starting, user asked what real hedge funds do about data revisions.** Answered:
+(1) point-in-time / bitemporal storage - store both the value and when it was known, never
+overwrite; this IS option (c). (2) They decide off the exchange's OFFICIAL settlement
+price (NSE = VWAP of the last 30 min, in the bhavcopy published after close), not a near-
+close snapshot - which is the root cause of our incident (Monday's 18:16 run caught a
+provisional candle). User then chose option (c).
+
+**#002 DIAGNOSED then RESOLVED.** Read-only diagnostic proved the cause: Kite REVISED
+SBIN's 2026-07-20 close from 1060.60 (what Monday's run saved) to 1060.00 (Tuesday) - a
+data restatement, not a code bug; the stop ratchet worked correctly on each run's data.
+Mechanism: p11 rebuilt the entire live era from Kite every run and never froze it. Fix
+(option c): freeze-first-seen live tape + logged revisions + panel2 built from the frozen
+tape + repaired the blind G4.6 source check. The SEED revealed the scale - 38 restatements
+across nearly every symbol on 07-20 and 07-21, so every past run had silently rebuilt live
+history. Read-only rebuild restores SBIN's stop to 990.95.
+
+**#007 - a serious bug the fix uncovered.** Running the gate suite standalone (to verify
+the hash) CLOBBERED the live book: G4.3's resume test wrote the PRODUCTION state path, so
+any REPLAY run without the live leg overwrote paper_state.json with a mid-backtest book
+(caught it stamped with a 2010 date, equity Rs.75,811). Fixed to a temp path; audited and
+guarded a second REPLAY default-path write (the bootstrap). Restored the live book to the
+exact last-known-good Tuesday state. Lesson recorded: test/gate code must never write
+production paths.
+
+**All verified offline** (no live decision - it was ~15:00, pre-close): equity hash
+bb1a6ecb40656ab7 UNCHANGED, reconcile unit test, frozen rebuild reproduces the book to the
+paise, gate suite now leaves live state intact. Committed b5814e2. **First live exercise =
+tonight's post-15:45 run**, which will show SBIN's stop move 990.35 -> 990.95 as the fix
+applies. Book state unchanged and correct going into it.
