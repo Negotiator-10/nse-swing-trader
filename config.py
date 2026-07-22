@@ -205,6 +205,13 @@ FEED_STALE_MAX_DAYS = 5              # dead-man: halt if the newest bar is older
                                      #   means the feed is broken, not a long weekend)
 PAPER_STATE_PATH = DATA_DIR / "paper_state.json"      # engine state (positions/cash/halt)
 PAPER_LEDGER_PATH = DATA_DIR / "paper_ledger.parquet" # append-only paper-fill ledger
+# POINT-IN-TIME live tape (DECISIONS #002): live-era Kite bars FROZEN at first-seen, so
+# replay is reproducible and a later Kite revision cannot silently rewrite a past
+# decision. Revisions are appended to a log (never applied) -- the bitemporal discipline
+# real desks use. swing_daily.parquet (research tape) is frozen at the research cutoff;
+# this file carries everything after it.
+PAPER_LIVE_TAPE_PATH = DATA_DIR / "paper_live_tape.parquet"    # frozen first-seen live bars
+PAPER_REVISIONS_PATH = DATA_DIR / "paper_bar_revisions.parquet" # logged Kite restatements
 # The LIVE paper book starts FLAT with INITIAL_CAPITAL on this date (2026-07-18 user
 # ruling: "my capital is 60k, not the simulation's grown equity"). History before this
 # date is signal/risk warmup + backtest evidence only; the live ledger begins here.

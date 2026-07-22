@@ -48,6 +48,7 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import json
+import os
 import warnings
 
 import numpy as np
@@ -242,12 +243,17 @@ def run_gates(panel, mkt, budget_fn, run_mode) -> tuple[bool, dict, dict]:
             + dc["gst_pct"] * (dc["exch_txn_pct"] + dc["sebi_pct"]) * shares * (epx + xpx)
             + dc["dp_charge_sell_inr"])
     acct_ok = abs(cost - hand) < 1e-9
-    # (b) kill the loop mid-history, persist, reload, resume -> identical to uninterrupted
+    # (b) kill the loop mid-history, persist, reload, resume -> identical to uninterrupted.
+    # Round-trip through a TEMP path, NOT the production state file: this gate runs on
+    # every REPLAY invocation, and writing C.PAPER_STATE_PATH here would clobber the LIVE
+    # book whenever the suite runs without the live leg (found 2026-07-22).
     half = len(mkt.dates) // 2
+    tmp_state = C.DATA_DIR / "_gate_resume_tmp.json"
     part1 = online_replay(mkt, budget_fn, caps=caps, kill=kill, end_k=half, finalize=False)
-    save_state(part1["state"], half, mkt.syms)
+    save_state(part1["state"], half, mkt.syms, path=tmp_state)
     led1 = trades_df(part1["trades"])
-    st2, k_next = load_state(mkt.syms)
+    st2, k_next = load_state(mkt.syms, path=tmp_state)
+    tmp_state.unlink(missing_ok=True)
     part2 = online_replay(mkt, budget_fn, caps=caps, kill=kill, st=st2, start_k=k_next,
                           finalize=True, use_feed=False)
     resumed_eq = np.concatenate([part1["equity"], part2["equity"]])
@@ -304,6 +310,95 @@ def run_gates(panel, mkt, budget_fn, run_mode) -> tuple[bool, dict, dict]:
     return ok, rep, {"online": online, "batch": batch}
 
 
+# ================================================================ point-in-time tape
+# DECISIONS #002: live-era Kite bars are FROZEN at first-seen. A later Kite restatement
+# is LOGGED as a finding but NEVER applied -- so a past decision cannot be silently
+# rewritten and replay is reproducible (the bitemporal discipline real desks use).
+REV_TOL = 1e-6   # price revision tolerance (rupees); below this = float noise, not a change
+
+_TAPE_COLS = ["open", "high", "low", "close", "volume", "date", "symbol", "split",
+              "first_seen_utc"]
+
+
+def load_live_tape() -> pd.DataFrame:
+    """The frozen first-seen live-era bars (empty frame if none yet)."""
+    if C.PAPER_LIVE_TAPE_PATH.exists():
+        t = pd.read_parquet(C.PAPER_LIVE_TAPE_PATH)
+        t["date"] = pd.to_datetime(t["date"])
+        return t
+    return pd.DataFrame(columns=_TAPE_COLS)
+
+
+def reconcile_live_bars(fresh, kite_hist, last_panel_date, tape):
+    """Freeze-first-seen reconciliation. For every Kite bar newer than the research tape:
+      - if that (symbol, date) is already frozen -> KEEP the frozen values, and if Kite
+        now differs, record a REVISION (logged, never applied);
+      - else -> take Kite's values and FREEZE them (first-seen).
+    Returns (rows_for_panel, revisions, updated_tape). rows_for_panel always carries the
+    FROZEN value, so the book replays identically run to run."""
+    frozen = {(r.symbol, pd.Timestamp(r.date)): r for r in tape.itertuples()}
+    now_utc = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    rows, revisions, appended = [], [], []
+    for s in fresh:
+        newer = kite_hist[s][kite_hist[s]["date"] > pd.Timestamp(last_panel_date)]
+        for r in newer.itertuples():
+            key = (s, pd.Timestamp(r.date))
+            fr = frozen.get(key)
+            if fr is not None:
+                for fld in ("open", "high", "low", "close"):
+                    fv, kv = float(getattr(fr, fld)), float(getattr(r, fld))
+                    if abs(kv - fv) > REV_TOL:
+                        revisions.append({"symbol": s, "date": pd.Timestamp(r.date),
+                                          "field": fld, "frozen": fv, "kite": kv,
+                                          "diff_bp": round((kv / fv - 1) * 1e4, 2)
+                                          if fv else float("nan"),
+                                          "detected_utc": now_utc})
+                rows.append({"open": float(fr.open), "high": float(fr.high),
+                             "low": float(fr.low), "close": float(fr.close),
+                             "volume": int(fr.volume), "date": pd.Timestamp(r.date),
+                             "symbol": s, "split": "test"})
+            else:
+                row = {"open": float(r.open), "high": float(r.high), "low": float(r.low),
+                       "close": float(r.close), "volume": int(r.volume),
+                       "date": pd.Timestamp(r.date), "symbol": s, "split": "test"}
+                rows.append(row)
+                appended.append({**row, "first_seen_utc": now_utc})
+    tape2 = (pd.concat([tape, pd.DataFrame(appended)], ignore_index=True)
+             if appended else tape.copy())
+    return rows, revisions, tape2
+
+
+def log_revisions(revisions: list) -> int:
+    """Append NEW restatements to the durable revisions log (loud on console).
+
+    Content-deduped by (symbol, date, field, kite-value): a persistent restatement --
+    Kite reporting the same changed value on every later run -- is recorded ONCE. A
+    FURTHER settlement to a new value is a new row (genuinely new information). Returns
+    the count actually appended."""
+    if not revisions:
+        return 0
+    old = (pd.read_parquet(C.PAPER_REVISIONS_PATH)
+           if C.PAPER_REVISIONS_PATH.exists() else pd.DataFrame())
+    seen = set()
+    if len(old):
+        seen = {(r.symbol, str(pd.Timestamp(r.date))[:10], r.field, round(float(r.kite), 4))
+                for r in old.itertuples()}
+    fresh = [r for r in revisions
+             if (r["symbol"], str(r["date"])[:10], r["field"], round(r["kite"], 4)) not in seen]
+    if not fresh:
+        return 0
+    new = pd.DataFrame(fresh)
+    new["date"] = pd.to_datetime(new["date"])
+    pd.concat([old, new], ignore_index=True).to_parquet(C.PAPER_REVISIONS_PATH, index=False)
+    print(f"  [REVISION] Kite restated {len(fresh)} frozen live-era value(s) "
+          f"-- KEPT the first-seen values, logged the change:")
+    for r in fresh[:20]:
+        print(f"    {r['symbol']:<11} {str(r['date'])[:10]} {r['field']:<5} "
+              f"first-seen {r['frozen']:.4f} -> Kite {r['kite']:.4f} "
+              f"({r['diff_bp']:+.1f}bp)")
+    return len(fresh)
+
+
 # ================================================================ LIVE leg (G4.6)
 def live_smoke(panel, mkt, budget_fn) -> dict:
     """Pull real EOD bars from Kite, validate, run ONE decision on today's completed
@@ -328,7 +423,7 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
 
     # freshness + schema per symbol
     last_panel_date = pd.to_datetime(panel["date"]).max().date()
-    fresh, stale, src_diff_bp = [], [], {}
+    fresh, stale = [], []
     kite_hist = src.fetch_daily()
     for s in watch:
         b = bars.get(s)
@@ -337,16 +432,33 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
             continue
         age = (today - b.date).days
         (fresh if age <= 1 else stale).append(s)
-        # source-consistency: Kite close vs panel close on the last COMMON date
-        kh = kite_hist[s]
-        common = kh[kh["date"] == pd.Timestamp(last_panel_date)]
-        if len(common):
-            pc = float(panel[(panel["symbol"] == s)
-                             & (pd.to_datetime(panel["date"]) == pd.Timestamp(last_panel_date))
-                             ]["close"].iloc[0])
-            kc = float(common["close"].iloc[0])
-            src_diff_bp[s] = (kc / pc - 1.0) * 1e4
     dead = fh.is_dead(today)
+
+    # SOURCE-CONSISTENCY (DECISIONS #002 fix): compare Kite against the FROZEN LIVE TAPE
+    # on the most recent OVERLAPPING live-era date -- NOT the research tape's stale last
+    # date (which never changes, so the old check was blind to the live era and reported
+    # 0.0bp forever). This proves Kite still tracks the same series (wrong token/symbol
+    # would blow past 2%); genuine day-to-day restatements are caught separately by the
+    # freeze-first-seen reconciliation below and logged as revisions.
+    tape = load_live_tape()
+    src_diff_bp = {}
+    for s in fresh:
+        kh = kite_hist[s]
+        ts = tape[tape["symbol"] == s]
+        common = pd.Timestamp(last_panel_date)
+        if len(ts):
+            cand = sorted(set(ts["date"]) & set(kh["date"]))
+            if cand:
+                common = cand[-1]
+        pref = ts[ts["date"] == common] if len(ts) else pd.DataFrame()
+        base = (float(pref["close"].iloc[0]) if len(pref)
+                else float(panel[(panel["symbol"] == s)
+                                 & (pd.to_datetime(panel["date"]) == common)]["close"].iloc[0])
+                if len(panel[(panel["symbol"] == s)
+                             & (pd.to_datetime(panel["date"]) == common)]) else None)
+        kc = kh[kh["date"] == common]
+        if base and len(kc):
+            src_diff_bp[s] = (float(kc["close"].iloc[0]) / base - 1.0) * 1e4
     diffs = np.array(list(src_diff_bp.values())) if src_diff_bp else np.array([np.nan])
     src_ok = np.isfinite(diffs).all() and np.nanmax(np.abs(diffs)) < 200.0  # <2% => same series
 
@@ -359,21 +471,23 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
         result["verdict"] = "NO DECISION: no fresh bars (holiday?) or dead-man tripped"
         return result
 
-    # ---- extend the tape: BACKFILL every Kite bar newer than the tape's end (the tape
-    # may lag by days if research data wasn't refreshed), then decide on the newest ----
-    new_rows = []
-    for s in fresh:
-        kh = kite_hist[s]
-        newer = kh[kh["date"] > pd.Timestamp(last_panel_date)]
-        for r in newer.itertuples():
-            new_rows.append({"open": float(r.open), "high": float(r.high),
-                             "low": float(r.low), "close": float(r.close),
-                             "volume": int(r.volume), "date": pd.Timestamp(r.date),
-                             "symbol": s, "split": "test"})
+    # ---- extend the tape: FREEZE-FIRST-SEEN reconciliation (DECISIONS #002). Every Kite
+    # bar newer than the research tape is frozen the first time it is seen; a later
+    # restatement is logged, never applied -- so replay is reproducible and a past
+    # decision is never silently rewritten. The tape may lag by days (research data not
+    # refreshed); we decide on the newest frozen bar. ----
+    new_rows, revisions, tape2 = reconcile_live_bars(fresh, kite_hist, last_panel_date, tape)
     if not new_rows:
         result["verdict"] = ("NO NEW BAR: Kite's latest bar == tape's last date "
                              "(run after 15:30 on a trading day)")
         return result
+    if len(tape2) != len(tape):
+        tape2.to_parquet(C.PAPER_LIVE_TAPE_PATH, index=False)
+    n_logged = log_revisions(revisions)
+    result["n_revisions_detected"] = len(revisions)
+    result["n_revisions_newly_logged"] = n_logged
+    result["revisions"] = [{k: (str(v) if k == "date" else v) for k, v in r.items()}
+                           for r in revisions[:20]]
 
     panel2 = pd.concat([panel, pd.DataFrame(new_rows)], ignore_index=True)
     # Walk-forward risk snapshots for EVERY new bar date, PERSISTED -- so each day's
@@ -475,15 +589,31 @@ def main() -> int:
             print(f"  [warn] dashboard refresh failed: {type(e).__name__}: {e}")
 
     # ---- persist the live-era bootstrap: a FLAT book at INITIAL_CAPITAL on era start ----
+    # GUARD (DECISIONS #007): this REPLAY-only path overwrites the live book + ledger. It
+    # is a first-init / deliberate-reset tool, but a stray REPLAY run (e.g. checking the
+    # hash) must NOT wipe an ongoing live book. Refuse if an existing state was already
+    # saved on/after the era start, unless FORCE_REPLAY_BOOTSTRAP=1 is set explicitly.
     if run_mode != "LIVE":
-        era_k = int(np.argmax(pd.to_datetime(mkt.dates) >= pd.Timestamp(C.PAPER_ERA_START)))
-        boot = online_replay(mkt, budget_fn, caps=P9.default_caps(), kill=P9.default_kill(),
-                             start_k=era_k, finalize=False, use_feed=False)
-        save_state(boot["state"], len(mkt.dates), mkt.syms)
-        trades_df(boot["state"].trades).to_parquet(C.PAPER_LEDGER_PATH, index=False)
-        print(f"  live-era bootstrap persisted: flat Rs.{C.INITIAL_CAPITAL_INR:,.0f} book "
-              f"stepped from {C.PAPER_ERA_START} (era_k={era_k}); "
-              f"state={C.PAPER_STATE_PATH.name} ledger={C.PAPER_LEDGER_PATH.name}")
+        existing_live = False
+        if C.PAPER_STATE_PATH.exists():
+            try:
+                saved = json.loads(C.PAPER_STATE_PATH.read_text()).get("saved_utc", "")
+                existing_live = str(saved)[:10] >= C.PAPER_ERA_START
+            except Exception:
+                existing_live = False
+        force = os.environ.get("FORCE_REPLAY_BOOTSTRAP") == "1"
+        if existing_live and not force:
+            print(f"  [skip] live-era bootstrap: an existing live book (saved {saved[:10]}) "
+                  f"is preserved. Set FORCE_REPLAY_BOOTSTRAP=1 to reset it deliberately.")
+        else:
+            era_k = int(np.argmax(pd.to_datetime(mkt.dates) >= pd.Timestamp(C.PAPER_ERA_START)))
+            boot = online_replay(mkt, budget_fn, caps=P9.default_caps(), kill=P9.default_kill(),
+                                 start_k=era_k, finalize=False, use_feed=False)
+            save_state(boot["state"], len(mkt.dates), mkt.syms)
+            trades_df(boot["state"].trades).to_parquet(C.PAPER_LEDGER_PATH, index=False)
+            print(f"  live-era bootstrap persisted: flat Rs.{C.INITIAL_CAPITAL_INR:,.0f} book "
+                  f"stepped from {C.PAPER_ERA_START} (era_k={era_k}); "
+                  f"state={C.PAPER_STATE_PATH.name} ledger={C.PAPER_LEDGER_PATH.name}")
 
     meta = {"phase": 4, "run_mode": run_mode, "mode_info": mode_info,
             "gates": rep, "seed": C.SEED,

@@ -240,6 +240,73 @@ unnoticed. Fix must compare OVERLAPPING LIVE-ERA dates.
 survives (risk panel, 1060.60) plus fill prices in the ledger. A persisted live tape
 necessarily starts with partial history for 2026-07-17..21.
 
+### RESOLVED 2026-07-22 - option (c) implemented (user choice): freeze-first-seen + log.
+
+**Point-in-time live tape.** New store `data/paper_live_tape.parquet` holds live-era bars
+FROZEN at first-seen; new `data/paper_bar_revisions.parquet` logs every later Kite
+restatement (never applied). `p11.reconcile_live_bars()` does the freeze; `p11.live_smoke`
+now builds `panel2` from the frozen tape instead of raw Kite, so replay is reproducible.
+Revisions are content-deduped so a persistent restatement is logged once.
+
+**The seed exposed how big this is.** `seed_live_tape.py` reconstructed the frozen tape
+(close = risk-panel first-seen `ref_px`; O/H/L/V from current Kite, clamped) and logged
+**38 restatements** across nearly every symbol on both 2026-07-20 and 2026-07-21, up to
+~38bp. So the silent rewrite was NOT an SBIN one-off - every run has been rebuilding the
+whole live era from restated Kite data. All diffs < 0.4% (< the 2% "same series" gate) =
+genuine settlement restatement, not bad data.
+
+**G4.6 source check repaired.** Now compares Kite against the frozen tape on the most
+recent OVERLAPPING live-era date, not the stale research boundary - so it can actually see
+the live era. (Old check compared against 2026-07-10 forever and reported 0.0bp always.)
+
+**Verification (all offline, no state touched):**
+- Backtest equity hash **bb1a6ecb40656ab7 UNCHANGED** (REPLAY gates via run_gates).
+- `reconcile_live_bars` unit test: keeps frozen 07-20 close (1060.60), takes first-seen
+  new 07-21 (1044.00), logs exactly 1 revision, grows the tape.
+- Read-only rebuild from the frozen tape reproduces the live book to the paise
+  (cash 34573.5992, NAV 59971.3992) and RESTORES SBIN's stop to **990.9500** (Monday's
+  first-seen value) vs the current 990.3500. Tonight's run applies this authoritatively.
+
+**Honest limitation confirmed:** for the seed period O/H/L are today's possibly-restated
+values (original intraday never persisted); only the CLOSE (which drives signals, stops,
+and mark-to-market) is genuine first-seen. Every bar from 2026-07-22 onward is frozen at
+TRUE first-seen. `paper_live_tape.parquet` + revisions log live in gitignored `data/`
+(same status as the book state, DECISIONS #006 open question).
+
+---
+
+## Entry #007 - 2026-07-22 - G4.3 resume gate CLOBBERS the live book state --- FIXED
+
+**Found while testing the #002 fix** (running `run_gates` standalone corrupted
+`paper_state.json`). NOT caused by #002 - a latent bug the test surfaced.
+
+**The bug.** G4.3's kill/reload/resume test did
+`save_state(part1["state"], half, mkt.syms)` then `load_state(mkt.syms)` - both default to
+the PRODUCTION paths. The gate suite runs on EVERY invocation, so any run that executes
+the gates without the live leg overwrites the real live book with a mid-history backtest
+book (observed: `paper_state.json` stamped with k=3832, a 2010 date, equity Rs.75,811).
+
+**Why it stayed hidden.** A normal LIVE run's `live_smoke` rewrites the correct state at
+the end (line ~522), so the clobber was invisible - until this session ran the gates ALONE
+to verify the hash, leaving the corrupted state behind.
+
+**Severity.** High latent: anyone running `python p11_swing_paper.py` in REPLAY (e.g. to
+check the hash) silently destroys the live book. The ledger was spared (the resume test
+never wrote it).
+
+**Fix.** Route the resume round-trip through a TEMP path
+(`data/_gate_resume_tmp.json`, unlinked after), never the production state. Verified: after
+the fix, running the full gate suite leaves `paper_state.json` INTACT (k_next 7671, the
+4 correct positions, NAV 59971.40).
+
+**Recovery.** The clobbered state was restored to the exact last-known-good Tuesday book
+(read from the file earlier in the same session, before the clobber). Since tonight's run
+recomputes the book authoritatively from the frozen tape, the state file is only a
+snapshot/fallback in the interim.
+
+**Lesson (recorded so it is not repeated):** test/gate code must NEVER write production
+data paths. Audit the rest of the suite for other default-path writes.
+
 ---
 
 ## Entry #003 - 2026-07-21 - "Costs paid" dashboard section --- APPLIED
