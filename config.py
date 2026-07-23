@@ -212,6 +212,10 @@ PAPER_LEDGER_PATH = DATA_DIR / "paper_ledger.parquet" # append-only paper-fill l
 # this file carries everything after it.
 PAPER_LIVE_TAPE_PATH = DATA_DIR / "paper_live_tape.parquet"    # frozen first-seen live bars
 PAPER_REVISIONS_PATH = DATA_DIR / "paper_bar_revisions.parquet" # logged Kite restatements
+# Skipped-candidate log (DECISIONS #005 prerequisite): every armed entry the caps
+# discarded, with the incumbents it lost to. Answers "did the skips outperform the
+# holds?" with real data in 2-3 months, so rotation can be decided by evidence not guess.
+PAPER_SKIPS_PATH = DATA_DIR / "paper_skips.parquet"           # live-era discarded candidates
 # The LIVE paper book starts FLAT with INITIAL_CAPITAL on this date (2026-07-18 user
 # ruling: "my capital is 60k, not the simulation's grown equity"). History before this
 # date is signal/risk warmup + backtest evidence only; the live ledger begins here.

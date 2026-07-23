@@ -138,6 +138,11 @@ class BookState:
     fills_during_halt: int = 0
     trades: list = field(default_factory=list)
     last_equity: float = float("nan")
+    # Per-candidate skip log (DECISIONS #005 prerequisite): every armed entry the caps
+    # DISCARDED, with the incumbents it lost to. Diagnostic only -- never read by the
+    # decision path, so it cannot move the equity hash. The live path persists the
+    # live-era slice; the batch backtest fills it in memory and drops it.
+    skip_log: list = field(default_factory=list)
 
 
 @dataclass
@@ -215,6 +220,11 @@ def step_day(st: BookState, cx: DayCtx) -> tuple[float, float]:
         if shares <= 0:
             st.n_skips += 1
             st.skip_reasons[reason] = st.skip_reasons.get(reason, 0) + 1
+            st.skip_log.append({
+                "date": cx.date, "symbol": cx.syms[j], "sleeve": pe["sleeve"],
+                "reason": reason, "budget": float(pe["budget"]),
+                "vpu": float(pe["vpu"]), "atr_sig": float(pe["atr_sig"]),
+                "incumbents": ";".join(sorted(cx.syms[jj] for jj in st.pos))})
             continue
         st.cash -= shares * entry_px
         st.pos[j] = {"symbol": cx.syms[j], "shares": shares, "entry_px": entry_px,

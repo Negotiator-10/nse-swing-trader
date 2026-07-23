@@ -529,6 +529,15 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
     led = trades_df(st.trades)
     led.to_parquet(C.PAPER_LEDGER_PATH, index=False)
 
+    # Skipped-candidate log (DECISIONS #005): freeze the live-era slice of the discards.
+    # Rebuilt in full from the frozen tape each run, exactly like the ledger.
+    SKIP_COLS = ["date", "symbol", "sleeve", "reason", "budget", "vpu", "atr_sig", "incumbents"]
+    skips = pd.DataFrame(st.skip_log, columns=SKIP_COLS)
+    if len(skips):
+        skips["date"] = pd.to_datetime(skips["date"])
+        skips = skips[skips["date"] >= pd.Timestamp(C.PAPER_ERA_START)].reset_index(drop=True)
+    skips.to_parquet(C.PAPER_SKIPS_PATH, index=False)
+
     result.update({
         "decision_date": str(pd.Timestamp(mkt2.dates[k_last]).date()),
         "n_new_bars": len(new_rows),
@@ -544,6 +553,7 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
         "equity_close": round(float(st.last_equity), 2),
         "state_persisted": str(C.PAPER_STATE_PATH.name),
         "ledger_rows": int(len(led)),
+        "skips_logged": int(len(skips)),
         "verdict": "LIVE SMOKE OK: real EOD bar -> one decision -> paper actions recorded",
     })
     return result

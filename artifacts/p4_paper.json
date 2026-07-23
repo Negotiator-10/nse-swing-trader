@@ -67,32 +67,216 @@
       "n_stale": 0,
       "stale_symbols": [],
       "dead_man": false,
-      "bar_date": "2026-07-21",
+      "bar_date": "2026-07-23",
       "source_diff_bp": {
         "AXISBANK": 0.0,
         "BAJFINANCE": 0.0,
-        "BEL": -0.0,
-        "BHARTIARTL": -0.0,
+        "BEL": 0.0,
+        "BHARTIARTL": 0.0,
         "ETERNAL": 0.0,
-        "HDFCBANK": -0.0,
-        "HINDALCO": -0.0,
+        "HDFCBANK": 0.0,
+        "HINDALCO": 0.0,
         "ICICIBANK": 0.0,
         "INDIGO": 0.0,
         "INFY": 0.0,
         "ITC": 0.0,
-        "KOTAKBANK": -0.0,
-        "LT": -0.0,
+        "KOTAKBANK": 0.0,
+        "LT": 0.0,
         "M&M": 0.0,
         "MARUTI": 0.0,
-        "RELIANCE": -0.0,
+        "RELIANCE": 0.0,
         "SBIN": 0.0,
         "SHRIRAMFIN": 0.0,
-        "TATASTEEL": -0.0,
+        "TATASTEEL": 0.0,
         "TCS": 0.0
       },
       "source_consistent_lt_2pct": true,
-      "decision_date": "2026-07-21",
-      "n_new_bars": 140,
+      "n_revisions_detected": 56,
+      "n_revisions_newly_logged": 0,
+      "revisions": [
+        {
+          "symbol": "AXISBANK",
+          "date": "2026-07-20 00:00:00",
+          "field": "close",
+          "frozen": 1257.0,
+          "kite": 1256.0,
+          "diff_bp": -7.96,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "AXISBANK",
+          "date": "2026-07-22 00:00:00",
+          "field": "close",
+          "frozen": 1233.5,
+          "kite": 1238.4,
+          "diff_bp": 39.72,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "BAJFINANCE",
+          "date": "2026-07-20 00:00:00",
+          "field": "close",
+          "frozen": 1061.4,
+          "kite": 1064.0,
+          "diff_bp": 24.5,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "BAJFINANCE",
+          "date": "2026-07-21 00:00:00",
+          "field": "close",
+          "frozen": 1071.0,
+          "kite": 1069.2,
+          "diff_bp": -16.81,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "BAJFINANCE",
+          "date": "2026-07-22 00:00:00",
+          "field": "close",
+          "frozen": 1056.1,
+          "kite": 1060.3,
+          "diff_bp": 39.77,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "BEL",
+          "date": "2026-07-20 00:00:00",
+          "field": "close",
+          "frozen": 408.5,
+          "kite": 408.15,
+          "diff_bp": -8.57,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "BEL",
+          "date": "2026-07-21 00:00:00",
+          "field": "close",
+          "frozen": 410.1,
+          "kite": 410.05,
+          "diff_bp": -1.22,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "BEL",
+          "date": "2026-07-22 00:00:00",
+          "field": "close",
+          "frozen": 406.9,
+          "kite": 406.75,
+          "diff_bp": -3.69,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "BHARTIARTL",
+          "date": "2026-07-20 00:00:00",
+          "field": "close",
+          "frozen": 1939.9,
+          "kite": 1940.1,
+          "diff_bp": 1.03,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "BHARTIARTL",
+          "date": "2026-07-21 00:00:00",
+          "field": "close",
+          "frozen": 1949.0,
+          "kite": 1948.4,
+          "diff_bp": -3.08,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "BHARTIARTL",
+          "date": "2026-07-22 00:00:00",
+          "field": "close",
+          "frozen": 1948.0,
+          "kite": 1949.0,
+          "diff_bp": 5.13,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "ETERNAL",
+          "date": "2026-07-20 00:00:00",
+          "field": "close",
+          "frozen": 287.0,
+          "kite": 286.95,
+          "diff_bp": -1.74,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "ETERNAL",
+          "date": "2026-07-21 00:00:00",
+          "field": "close",
+          "frozen": 287.6,
+          "kite": 286.6,
+          "diff_bp": -34.77,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "ETERNAL",
+          "date": "2026-07-22 00:00:00",
+          "field": "close",
+          "frozen": 289.5,
+          "kite": 284.4,
+          "diff_bp": -176.17,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "HDFCBANK",
+          "date": "2026-07-20 00:00:00",
+          "field": "close",
+          "frozen": 777.95,
+          "kite": 777.6,
+          "diff_bp": -4.5,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "HDFCBANK",
+          "date": "2026-07-21 00:00:00",
+          "field": "close",
+          "frozen": 761.5,
+          "kite": 761.45,
+          "diff_bp": -0.66,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "HDFCBANK",
+          "date": "2026-07-22 00:00:00",
+          "field": "close",
+          "frozen": 753.9,
+          "kite": 753.15,
+          "diff_bp": -9.95,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "HINDALCO",
+          "date": "2026-07-20 00:00:00",
+          "field": "close",
+          "frozen": 949.0,
+          "kite": 947.8,
+          "diff_bp": -12.64,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "HINDALCO",
+          "date": "2026-07-21 00:00:00",
+          "field": "close",
+          "frozen": 955.0,
+          "kite": 951.4,
+          "diff_bp": -37.7,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        },
+        {
+          "symbol": "HINDALCO",
+          "date": "2026-07-22 00:00:00",
+          "field": "close",
+          "frozen": 949.5,
+          "kite": 950.0,
+          "diff_bp": 5.27,
+          "detected_utc": "2026-07-23T11:33:35+00:00"
+        }
+      ],
+      "decision_date": "2026-07-23",
+      "n_new_bars": 180,
       "n_fresh_risk_snapshots": 0,
       "open_positions": {
         "BAJFINANCE": {
@@ -117,15 +301,20 @@
         }
       },
       "armed_entries_next_open": {
+        "ETERNAL": {
+          "sleeve": "ts_mom",
+          "budget_inr": 1541.0
+        },
         "SHRIRAMFIN": {
           "sleeve": "ts_mom",
           "budget_inr": 1541.0
         }
       },
       "armed_exits_next_open": {},
-      "equity_close": 59971.4,
+      "equity_close": 59228.2,
       "state_persisted": "paper_state.json",
       "ledger_rows": 1,
+      "skips_logged": 6,
       "verdict": "LIVE SMOKE OK: real EOD bar -> one decision -> paper actions recorded"
     }
   },

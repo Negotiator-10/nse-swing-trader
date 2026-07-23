@@ -472,3 +472,46 @@ correctness bug so far has lived.
 total) sits inside the ignored `data/` folder and therefore has NO backup or history. A
 `!` exception in `.gitignore` would give a daily audit trail of the actual trading
 record. Offered to the user; awaiting their call.
+
+---
+
+## Entry #008 - 2026-07-23 - Skipped-candidate logger (the #005 prerequisite) --- APPLIED
+
+**Context.** Live day 4. User asked to "make a few advancements" and selected all four
+proposed directions. This is the FIRST built - deliberately, because it is both a cheap
+integrity win AND the hard prerequisite the DEFERRED rotation idea (#005) is blocked on.
+#005's recommended cheap next step was verbatim: "LOG every skipped candidate now, and
+decide with real data in 2-3 months." This builds exactly that.
+
+**The gap.** At `p9_swing_portfolio.py` section (B), when the caps discard an armed entry
+the engine did `st.n_skips += 1; st.skip_reasons[reason] += 1` and threw away WHICH
+symbol was skipped and WHICH incumbents it lost to. So the path-dependence #005 worries
+about ("we hold the first four candidates, not the best four") was invisible after the
+fact. SHRIRAMFIN had been discarded 3 times with no record of it.
+
+**Applied as.**
+  - `BookState.skip_log` (new list field, `p9`) - additive, never read by the decision path.
+  - At the skip point, append `{date, symbol, sleeve, reason, budget, vpu, atr_sig,
+    incumbents}` where `incumbents` is the `;`-joined held symbols it lost to.
+  - `config.PAPER_SKIPS_PATH = data/paper_skips.parquet`.
+  - `p11.live_smoke` freezes the LIVE-ERA slice to that parquet after the ledger write -
+    rebuilt in full from the frozen tape each run, exactly like the ledger. Result JSON
+    gains `skips_logged`.
+
+**Why it cannot move the book (the acceptance gate).** The equity hash is taken over the
+equity array only; a log that touches no cash/pos/trade cannot change it. Verified: full
+LIVE re-run, all 6 gates PASS, G4.5 `sha256=bb1a6ecb40656ab7 identical=True` UNCHANGED.
+This is the same guardrail that licensed the Entry #001 display changes to touch nothing.
+
+**First capture (6 live-era rows).** INDIGO skipped 07-20 (risk_budget, before it later
+filled), ETERNAL skipped 07-23, and **SHRIRAMFIN skipped all four days** (07-20..07-23,
+max_positions). Every row carries the incumbents. In 2-3 months a forward-return join
+(skipped symbol vs the incumbents it lost to, off the frozen tape) answers #005 with data.
+
+**Deliberately NOT done (kept for a later, separately-gated step):** ranking skips by a
+market momentum metric at capture time (the #005 TRAP: never rank by unrealized P&L). The
+forward-return study can compute momentum from the tape when run, so storing it now is
+unnecessary and would bloat the row. Surfacing the log in the dashboard is a cheap p11b
+follow-up (renderer only, no hash risk), not built this session.
+
+**Status.** APPLIED. #005 stays DEFERRED but is now ACCRUING the evidence it needs.

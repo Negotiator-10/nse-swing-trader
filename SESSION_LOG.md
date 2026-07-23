@@ -190,3 +190,120 @@ bb1a6ecb40656ab7 UNCHANGED, reconcile unit test, frozen rebuild reproduces the b
 paise, gate suite now leaves live state intact. Committed b5814e2. **First live exercise =
 tonight's post-15:45 run**, which will show SBIN's stop move 990.35 -> 990.95 as the fix
 applies. Book state unchanged and correct going into it.
+
+---
+
+## Session 2026-07-22 (Wed, evening) - RSI/GFS backtested to a verdict, + live day 3
+
+**Two threads:** the user's RSI/GFS strategy (pending thread #1), and the evening day-3
+decision run (the "first live exercise" of the #002 fix the earlier entry anticipated).
+
+**RSI/GFS - built, tested, RESOLVED (verdict: no robust edge).** At the user's direction
+("make this a whole different project, don't mix it with the live system"), built a
+STANDALONE `gfs_backtest/` (own data/code/results; copies the NSE cost model; shares no
+trading logic with nse_paper_v1). Pulled NIFTY 200 via yfinance (178 names pass an ex-ante
+liquidity+history screen), pre-registered GFS exactly (monthly&weekly RSI>=60 + daily RSI
+crosses up through 40 + green candle; trigger-candle-low stop + 3-candle trail; higher-TF
+RSI uses only COMPLETED bars = no look-ahead), ran it honestly (per-symbol 70/30, deflate as
+trial #10).
+- **As pre-registered: NOT SIGNIFICANT.** OOS +13.8 bp/trade net @Rs50k but CI includes 0,
+  and negative in-sample. Weaker than ts_mom (+54.5, significant). Causality gate 25/25 pass.
+- Diagnosed the leak (user's sharp questions): the 3-candle exit shakes trades out of live
+  trends (72% of exits are followed by new highs within 20d). Compared 5 exits; E4 (ATR
+  trail) looked great (+197 all-history). **A fallen-angels survivorship test killed it:**
+  same GFS+E4 makes +197 on survivors vs **-330** on 21 collapsed names (YESBANK/RCOM/RPOWER
+  ...); on losers, let-it-run rides them down. The exit "fix" was mostly survivorship.
+- **Lessons taught along the way:** (1) IS/OOS splitting guards against overfitting the TIME
+  period but NOT survivorship - both halves used winner-stocks. (2) "Pick the exit with the
+  highest return" is the p-hacking trap; shown live (best-on-all-data +325 vs honest-OOS
+  +187, the shrinkage = the overfit premium). (3) Clearing a chat does NOT un-peek data - the
+  data is fixed and the rules were designed from it; only forward paper-trade or a genuinely
+  untouched universe is clean.
+- Frozen record: `gfs_backtest/GFS_FINAL_REPORT.md` (+ RESULTS.md, prereg_gfs_v1.md, memory
+  `gfs-backtest-verdict`). **PENDING THREAD #1 resolved: GFS tested, not proven, not
+  deployed.** Open decision left with user: walk away, or forward paper-trade the frozen rules.
+
+**Evening run (day 3; clock verified ~21:2x IST Wed, well past the 15:45 guard).** All 6
+gates PASS in LIVE; token present (morning login done). **#002 fix's first live application
+worked: SBIN stop now 990.95** (was 990.35), as predicted. Equity hash bb1a6ecb40656ab7
+UNCHANGED.
+- No trades (ledger still 1). Same 4 held: ICICIBANK 8, SBIN 6, BAJFINANCE 2, INDIGO 1.
+- Armed for Thu open: ETERNAL + SHRIRAMFIN (both ts_mom, ~Rs.1,541) - both likely skip at
+  the 4/4 cap (nothing armed to exit).
+- NAV Rs.59,464.40, day -507.00 (-0.85%), PURE mark-to-market on the 4 holdings (cash
+  unchanged ~Rs.34,574). Live era: 60,000 -> 59,464.40 = -0.89% over 3 trading days. 20/20
+  fresh bars, source diff <2% (max ~38bp HINDALCO/ETERNAL), 38 restatements handled (0 new).
+
+**Broken/caught (mine, not the system's):** first p11 launch used a stdin heredoc + os.chdir
+that left the project dir off sys.path -> `ModuleNotFoundError: config`. Fixed with an
+explicit `sys.path.insert`, re-ran clean. The blessed kickoff command (bash `cd` + `python
+-c`) avoids this; my variant did not.
+
+**State at end:** 4/4 at cap, NAV Rs.59,464.40, cash ~Rs.34,574, all gates green, SBIN stop
+corrected to 990.95. Thursday's two armed buys likely skip.
+
+---
+
+## Session 2026-07-23 (Thu) - live day 4, afternoon routine, armed buys skip as predicted
+
+**Afternoon ritual only** (user: "run the afternoon routine" then "run it"). Effort call
+given up front: mechanical daily ritual, routine effort, no upgrade - the only judgment was
+whether we were past the 15:45 guard.
+
+**Clock verified** against Google + Cloudflare HTTP Date headers (both 11:08 UTC = 16:38
+IST), agreeing with the system clock to the second. Well past 15:45. `DAILY_KICKOFF.md` does
+NOT exist at the repo path the handbook references (`../DAILY_KICKOFF.md`, one level up,
+unversioned) - operated from PROJECT_HANDBOOK.md section 9 instead.
+
+**First p11 launch fell back to REPLAY** - key/token were not in the shell env. `secrets.env`
+was present and freshly written 09:41 today (this morning's `kite_login.py`), so login WAS
+done; the file just wasn't loaded into my shell. Sourced it CR-stripped
+(`source <(tr -d '\r' < secrets.env)`, values never printed) and re-ran - LIVE armed clean.
+
+**LIVE decision run - all 6 gates PASS in LIVE.** Equity hash bb1a6ecb40656ab7 UNCHANGED.
+- **No trades** (ledger still 1). Wednesday's two armed buys ETERNAL + SHRIRAMFIN **skipped
+  at the 4/4 cap** exactly as predicted - nothing armed to exit, so no slot freed.
+- Same 4 held: ICICIBANK 8, SBIN 6, BAJFINANCE 2, INDIGO 1 (all ts_mom). Cash unchanged
+  Rs.34,573.60.
+- **NAV Rs.59,228.20, day -236.20 (-0.40%)**, pure mark-to-market. Live era 60,000 ->
+  59,228.20 = -1.29% over 4 trading days; -1.47% from the Rs.60,114.55 peak.
+- Armed for Fri open: ETERNAL + SHRIRAMFIN AGAIN (~Rs.1,541 each). **SHRIRAMFIN now armed a
+  THIRD time** (skipped 07-21, 07-22 arming, now 07-23) - will skip Friday too unless a
+  holding exits. This is the cross-sectional-rotation inefficiency from DECISIONS #005 in
+  the wild: the book holds the first four candidates, not the best four.
+- Data: 20/20 fresh Kite bars, source diff <2% (max ETERNAL -176bp), 56 revisions detected /
+  18 newly logged, frozen-first-seen kept (#002 fix). Kill switch not tripped.
+
+**State at end:** 4/4 at cap, NAV Rs.59,228.20, cash Rs.34,573.60, all gates green in LIVE.
+Friday's two armed buys likely skip a third time. Dashboard refreshed.
+
+**Same session (cont.) - "what is our status + I want to make advancements".** Gave an
+honest status: the MACHINE is healthy (gates green, #002/#007 fixes holding live) but
+PERFORMANCE is unmeasurable at 4 days / 1 realized trade - anyone reading a trend into
+-1.29% is fooling themselves. Restated the real constraint: at Rs.60k the strategy is
+nearly cost-bound (OOS CAGR ~1.06% / Sharpe ~0.23), it is drawdown-control not a return
+engine; the biggest lever is CAPITAL + TIME, not a feature. Laid out four advancement
+directions with honest cost/benefit; user picked ALL FOUR.
+
+**Sequenced and built the KEYSTONE (DECISIONS #008): the skipped-candidate logger.** Chosen
+first because it is both a cheap integrity win AND the hard prerequisite the DEFERRED
+rotation idea (#005) was blocked on - #005's own recommended next step was "log every
+skipped candidate now." Added `BookState.skip_log` + a capture at the p9 skip point +
+`config.PAPER_SKIPS_PATH` + a live-era freeze in p11. Acceptance gate = equity hash
+bb1a6ecb40656ab7 UNCHANGED (proven: the hash is over the equity array, a diagnostic log
+can't move it); all 6 gates PASS LIVE. First capture = 6 rows, SHRIRAMFIN skipped all four
+days, each row carrying the incumbents it lost to. In 2-3 months a forward-return join
+answers the rotation question with data instead of a guess.
+
+**Corrected my own error, recorded honestly.** Early in the session I said DAILY_KICKOFF.md
+was "missing" - it was not; it lives at the Hedge funds ROOT (one level up, DECISIONS #006),
+I had only globbed the project dir. Read it before touching it, found several stale threads
+(git listed as "not done" though #006 did it; #002 listed OPEN though resolved), and
+refreshed them rather than overwriting the file.
+
+**Queued (designed, not built this session):** (b) risk-budget dial = run CAGR-vs-maxDD at
+8/12/16% so capital efficiency is a numbers decision (needs the user's risk appetite); (c)
+strategy expansion (rotation / MR overlay / bigger universe) = needs pre-registration +
+more live data, must NOT be fit on 4 days (the GFS p-hacking lesson); (d) Phase 5
+reconciliation (still data-starved) + Phase 6 EOD scheduler (buildable now). Changes not yet
+committed to git (user hasn't asked).
