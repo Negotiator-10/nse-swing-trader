@@ -307,3 +307,55 @@ strategy expansion (rotation / MR overlay / bigger universe) = needs pre-registr
 more live data, must NOT be fit on 4 days (the GFS p-hacking lesson); (d) Phase 5
 reconciliation (still data-starved) + Phase 6 EOD scheduler (buildable now). Changes not yet
 committed to git (user hasn't asked).
+
+---
+
+## Session 2026-07-24 (Fri) - risk dial, rotation Piece 1 (shadow tracker), live day 5
+
+**Same rolling session as 07-23** (it crossed midnight into Friday). Threads this day:
+
+**Risk-budget dial (advancement b) - RAN.** Sweep script reused p9's exact machinery;
+self-check reproduced production (8% row = 1.06% CAGR / 0.23 Sharpe). Findings: raising the
+PORTFOLIO budget 8%->16% roughly TRIPLES OOS CAGR (1.06->2.91%) and doubles Sharpe
+(0.23->0.51) while drawdown stays ~flat (-10%) - because at 8% the budget binds hard (94%
+used) and throttles positions below their VaR size; raising it un-throttles the risk engine
+(Sharpe up = risk-ADJUSTED, not just leverage). Past 16% = diminishing returns. Raising
+max_positions instead (Track B) HURT (dilutes into weaker signals + cost). Ceiling: even at
+24% the book is only ~38% invested - the limit is SIGNAL AVAILABILITY, not budget; stays
+drawdown-control (vs buy&hold 15.5%/-42%). Caveats stated: same 2017-26 OOS period (not new
+edge, just sizing closer to it); bigger budget = bigger absolute tail loss (16% risks ~Rs.9.6k
+vs 4.8k). It's a risk-APPETITE call (3-number config change, WILL change the hash correctly).
+NOT applied - left with the user. Sweep script kept in scratchpad (offered to promote as
+p9c_risk_dial.py).
+
+**Clarified a user misunderstanding.** User thought "raise budget => hold more stocks". No:
+budget = bigger positions in the SAME 4 names (max_positions is the separate knob), and the
+data showed MORE names hurts. Also explained the idle-cash logic step by step (loss budget
+not spending budget; ~21% VaR means Rs.1 budget supports ~Rs.4.8 stock; Rs.4,800 caps
+notional ~Rs.23k so ~58% stays cash = the drawdown cushion, on purpose).
+
+**Rotation Piece 1 = the SHADOW / what-if tracker - BUILT (DECISIONS #009).** User's own
+advancement, two pieces: (1) a column that buys each SKIPPED candidate hypothetically to see
+what it would have done; (2) the real stock-swap (rotation) later. Built Piece 1 as
+`p11c_swing_shadow.py`: a shadow book runs the IDENTICAL engine with caps lifted + huge cash
+so nothing is skipped; the entries the real book never took = the waiting stocks, tracked
+with the same entry/stop/exit. Wired into p11.live_smoke (runs every LIVE decision), persists
+`data/paper_shadow.parquet`, and added a "Waiting stocks (what-if)" dashboard section. Guards:
+writes ONLY the new parquet (never a production path, #007 rule); standalone self-check
+reproduces the real ledger+state before trusting the shadow; acceptance gate = full LIVE run,
+6 gates PASS, hash bb1a6ecb40656ab7 UNCHANGED. **Teaching point that landed:** the edge
+FLIPPED +1.14% (07-23) -> -0.33% (07-24) in ONE day = proof the number is noise; the value is
+the verified mechanism, real answer needs 2-3 months. Piece 2 (the swap) still DEFERRED, now
+measurable, must be pre-registered (converts ts-mom into cross-sectional; edge won't transfer).
+
+**Afternoon routine (day 5, Fri close).** Clock verified (Google+Cloudflare 18:17 IST). All 6
+gates PASS LIVE, hash unchanged. NAV Rs.59,167.00 (day -61.20, -0.10%; live era 60,000 ->
+59,167 = -1.39% over 5 days), cash Rs.34,573.60, same 4/4 holds. No trades (ledger 1). Armed
+Monday: SHRIRAMFIN only (ts_mom ~Rs.1,541; ETERNAL's signal dropped) - likely a 5th skip.
+20/20 fresh bars, 0.0bp source diff, 0 new revisions (76 detected). Shadow read: waiting
+-3.33% vs holds -3.00%, edge -0.33%.
+
+**State at end:** 4/4 at cap, NAV Rs.59,167.00, all gates green LIVE, shadow tracker live on
+the dashboard. **UNCOMMITTED:** p11c_swing_shadow.py + the #009 wiring/dashboard/config +
+#008 logger are in the working tree; offered to commit, user ran the routine instead - commit
+still pending. NEXT candidates: commit; the risk-dial decision; rotation Piece 2 (pre-reg).

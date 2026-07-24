@@ -306,6 +306,53 @@ def cost_rows(cb: dict) -> str:
             "</tr>" + "".join(rows))
 
 
+def shadow_block(esc) -> str:
+    """The 'Waiting stocks (what-if)' section (DECISIONS #005 Piece 1). Read-only from
+    paper_shadow.parquet -- each skipped candidate tracked as a hypothetical buy vs the
+    stocks we kept. Display only; nothing here exists in the real book."""
+    if not C.PAPER_SHADOW_PATH.exists():
+        return "<p class='muted'>No shadow data yet - populated after the next LIVE run.</p>"
+    df = pd.read_parquet(C.PAPER_SHADOW_PATH)
+    wait = df[df["kind"] == "waiting"]
+    hold = df[df["kind"] == "hold"]
+    if not len(wait):
+        return ("<p class='muted'>Nothing waiting - the book is not full, so no fresh signal "
+                "is being skipped.</p>")
+
+    def rc(v):
+        return GREEN2 if v > 0 else (RED if v < 0 else INK2)
+
+    rows = []
+    for _, r in wait.sort_values("entry_date").iterrows():
+        stat = esc(str(r["status"]))
+        if str(r["exit_reason"]) not in ("-", "nan", "None"):
+            stat += f" ({esc(str(r['exit_reason']))})"
+        rows.append(f"<tr><td><b>{esc(str(r['symbol']))}</b></td>"
+                    f"<td>{esc(str(r['entry_date'])[:10])}</td>"
+                    f"<td class='r'>{r['entry_px']:,.2f}</td>"
+                    f"<td class='r'>{r['mark_px']:,.2f}</td>"
+                    f"<td class='r' style='color:{rc(r['ret_pct'])}'>{r['ret_pct']:+.2f}%</td>"
+                    f"<td class='r'>{int(r['days'])}</td><td>{stat}</td></tr>")
+    table = ("<table><tr><th>Stock (skipped)</th><th>What-if buy date</th>"
+             "<th class='r'>Buy px</th><th class='r'>Now (close)</th><th class='r'>Return</th>"
+             "<th class='r'>Days</th><th>Status</th></tr>" + "".join(rows) + "</table>")
+
+    mw = float(wait["ret_pct"].mean())
+    mh = float(hold["ret_pct"].mean()) if len(hold) else float("nan")
+    edge = mw - mh
+    verdict = ("skipped stocks did BETTER so far - rotation may have a prize (keep watching)"
+               if edge > 0 else
+               "skipped stocks did WORSE so far - the cap saved turnover + cost (keep watching)")
+    summ = (f"<div class='sub' style='margin-top:8px'>Mean price return so far: "
+            f"<b style='color:{rc(mw)}'>waiting {mw:+.2f}%</b> vs "
+            f"<b style='color:{rc(mh)}'>holds {mh:+.2f}%</b> "
+            f"(edge <b style='color:{rc(edge)}'>{edge:+.2f}%</b>) - {esc(verdict)}. "
+            f"<b>Preliminary:</b> gross price return, pre-cost, on only a few live days - the "
+            f"real answer needs 2-3 months of data. These are HYPOTHETICAL buys; nothing here "
+            f"is in your real Zerodha book. See DECISIONS.md #005 / #008.</div>")
+    return table + summ
+
+
 def build() -> str:
     st, led, g46, last_close, pxs = load_inputs()
     pos = {sym: p for sym, p in st.get("pos", {}).items()}
@@ -450,6 +497,8 @@ def build() -> str:
  <h2>NAV curve (live era)</h2><div class='card'>{svg_curve(curve)}</div>
  <h2>Open positions (marked to last close)</h2><table>{pos_tbl}</table>
  <h2>Orders armed for the next open</h2><table>{arm_tbl}</table>
+ <h2>Waiting stocks (what-if) - candidates skipped at the {C.MAX_CONCURRENT_POSITIONS}/{C.MAX_CONCURRENT_POSITIONS} cap, tracked as if we had bought them</h2>
+ {shadow_block(esc)}
  <h2>Trade blotter (closed round trips; hover Costs for the full breakdown)</h2>
  <table>{blot_tbl}</table>
  <h2>Per-stock trade charts (live era) - green = BUY, red = SELL, shaded = held; hover a

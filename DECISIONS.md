@@ -515,3 +515,94 @@ unnecessary and would bloat the row. Surfacing the log in the dashboard is a che
 follow-up (renderer only, no hash risk), not built this session.
 
 **Status.** APPLIED. #005 stays DEFERRED but is now ACCRUING the evidence it needs.
+
+---
+
+## Entry #009 - 2026-07-24 - Shadow / what-if tracker: rotation Piece 1 --- APPLIED
+
+**Context.** User's own advancement, stated in two pieces: (1) a "waiting stock" column
+that BUYS the skipped candidate hypothetically to see what it would have done; (2) the real
+stock-exchange (rotation) feature that swaps a weak hold for the waiting candidate. Piece 1
+is the MEASUREMENT that must exist before Piece 2 is built, so rotation is decided by data.
+User confirmed my read-back, then: "start with piece one", then "yes do both" (promote to a
+module + put it on the dashboard).
+
+**Applied as `p11c_swing_shadow.py`.** A SHADOW book runs the IDENTICAL engine
+(`p11.online_replay` -> `p9.step_day`) with caps LIFTED and huge notional cash, so NOTHING
+is ever skipped: every armed signal fills at standard VaR size -- same next-open entry, same
+ATR stop, same trend/max-hold exit; kill switch OFF (each what-if runs its own course). The
+shadow entries the REAL book never took = the waiting/skipped stocks. Writes a labelled
+`data/paper_shadow.parquet` (kind = waiting|hold), rebuilt in full each run like the ledger.
+`config.PAPER_SHADOW_PATH` added.
+
+**Wired + surfaced.** `p11.live_smoke` calls `run_shadow(mkt2, budget_fn, era_k, st)` right
+after it persists the real book -- so it runs on every LIVE decision, no manual step (result
+JSON gains `shadow`). `p11b_swing_report.py` gained a "Waiting stocks (what-if)" dashboard
+section (skipped stocks + hypothetical return vs the real holds + the preliminary edge).
+
+**Read-only + trustworthy (the guards).** Writes ONLY paper_shadow.parquet, never a
+production path (the #007 rule). Standalone `main()` SELF-CHECKS that the reconstructed real
+book reproduces the persisted ledger + state to the paise before trusting the shadow (same
+principle as the #008 hash gate). Acceptance gate: full LIVE run, all 6 gates PASS, equity
+hash bb1a6ecb40656ab7 UNCHANGED -- the feature provably touches no decision.
+
+**First readings (the point: DO NOT trust the number yet).** 07-23: waiting -1.22% vs holds
+-2.36%, edge +1.22... +1.14%. 07-24 (next day): waiting -3.33% vs holds -3.00%, edge -0.33%.
+The edge FLIPPED sign in ONE day -- proof that a handful of down days is pure noise. The
+value delivered is the verified measurement mechanism; the honest answer needs 2-3 months.
+
+**Deliberately deferred:** (a) partial cases -- a stock skipped then bought a day later
+(INDIGO, skipped 07-20 / bought 07-21) is currently classed as a real hold, not tracked as a
+"what if we had bought it a day earlier"; (b) cost/risk adjustment of the comparison (today
+it is gross price return); (c) a per-day edge time-series for the eventual verdict. All fine
+for Piece 1's job, which is to START accruing the record. Piece 2 (the actual swap) is the
+next, separately-gated advancement and must be pre-registered (it converts time-series into
+cross-sectional momentum -- the +54.5bp edge does NOT transfer; see #005).
+
+**Status.** APPLIED. Piece 1 done. Piece 2 (rotation) still DEFERRED, now measurable.
+
+---
+
+## Entry #010 - 2026-07-24 - Re-baseline to TRACK A 24% risk budget --- APPLIED
+
+**Context.** User asked "why so much idle cash"; explained sizing is by tail risk not
+capital (Rs.4,800 loss budget capped notional ~Rs.23k regardless of cash). Then ran the
+risk-dial sweep (advancement b): scaling the PORTFOLIO risk budget with per-position held at
+the 3:8 ratio, max_positions FIXED at 4. Self-check reproduced production (8% row = 1.06%
+CAGR / 0.23 Sharpe). User chose **Track A, 24%**.
+
+**Why (the sweep's finding).** At 8% the budget BINDS hard (~94% used), throttling positions
+below their VaR size. Raising it un-throttles the risk engine -- OOS CAGR 1.06%->3.52%,
+Sharpe 0.23->0.54, maxDD ~flat (-10.7%->-10.9%), exposure 22%->38%. Sharpe UP = the extra
+return is risk-adjusted, not naive leverage. Track B (more NAMES) was worse across the board
+(dilutes into weaker signals + turnover), so max_positions stayed 4. Past 16% is diminishing
+returns; user took the full 24% end of the dial.
+
+**Applied as** `config.py`: PER_POSITION_RISK_BUDGET_INR 1_800 -> **5_400** (9%),
+PORTFOLIO_RISK_BUDGET_INR 4_800 -> **14_400** (24%). max 4, notional-frac 20%, no leverage
+UNCHANGED. This is the 4th baseline (10L -> 60k 8x900 -> 60k 4x1800 -> **60k 24%/9%**).
+
+**This is NOT a display change -- it re-bases the book, correctly.** The engine rebuilds the
+live era from config each run, so the whole 5-day live history re-sized at 24%. Equity hash
+therefore CHANGED bb1a6ecb40656ab7 -> **0e3e8313789f284a** (the new baseline; the hash guard
+is for changes that should NOT move the book -- this one should). Verified: all 6 gates PASS
+at the new budget, G4.5 rerun byte-identical to the new hash.
+
+**Effect (07-24 book, before -> after):** cash Rs.34,574 -> **Rs.17,661** (58% -> 30% of
+NAV); invested Rs.24,600 -> **Rs.40,761** (42% -> **70% exposure**); positions resized
+ICICIBANK 8/SBIN 6/BAJFIN 2/INDIGO 1 -> 8/**11**/**8**/**2** (ICICIBANK now bound by the 20%
+notional cap, not risk); AXISBANK realized trade 7 sh -Rs.250.25 -> **9 sh -Rs.317.37**;
+backtest trades 1732 -> 1711. NAV Rs.59,167 -> **Rs.58,422** -- LOWER, and honestly so: more
+capital deployed into a DOWN week = bigger losses (live era -1.39% -> -2.63% over 5 days).
+The long-run backtest CAGR gain (3.5% vs 1.06%) comes with bigger swings BOTH ways; this week
+showed the downside half first.
+
+**Binding constraint SHIFTED.** Risk budget now 68% used (was 94%), so MAX_POSITIONS=4 is now
+the binding cap. SHRIRAMFIN armed Monday with a Rs.4,488 budget but will STILL skip -- book
+full at 4 names, not a risk-budget skip. (Consistent with Track B: 4 names is the right cap.)
+
+**Honest caveat carried:** the dial sizes closer to an edge already MEASURED on 2017-26 OOS;
+it does not create new edge, and a bigger budget = bigger absolute tail loss in a real crash.
+Reversible: restore the two config values + re-run to recover the 8% book exactly.
+
+**Status.** APPLIED. New baseline hash **0e3e8313789f284a**. Supersedes the 4x1800 baseline.

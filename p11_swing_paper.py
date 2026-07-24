@@ -538,6 +538,12 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
         skips = skips[skips["date"] >= pd.Timestamp(C.PAPER_ERA_START)].reset_index(drop=True)
     skips.to_parquet(C.PAPER_SKIPS_PATH, index=False)
 
+    # Shadow / what-if tracker (DECISIONS #005 Piece 1): track every skipped candidate as a
+    # hypothetical position vs the stocks we kept. Read-only measurement -- reuses the market
+    # + real book we just built, writes ONLY paper_shadow.parquet, never a production path.
+    import p11c_swing_shadow as P11C   # lazy: p11c imports us, avoid an import cycle
+    shadow_summary = P11C.run_shadow(mkt2, budget_fn, era_k, st, persist=True)
+
     result.update({
         "decision_date": str(pd.Timestamp(mkt2.dates[k_last]).date()),
         "n_new_bars": len(new_rows),
@@ -554,6 +560,7 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
         "state_persisted": str(C.PAPER_STATE_PATH.name),
         "ledger_rows": int(len(led)),
         "skips_logged": int(len(skips)),
+        "shadow": shadow_summary,
         "verdict": "LIVE SMOKE OK: real EOD bar -> one decision -> paper actions recorded",
     })
     return result

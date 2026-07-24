@@ -169,12 +169,17 @@ EVT_THRESHOLD_PCTS = [0.90, 0.925, 0.95]   # candidate GPD thresholds (percentil
 # measured not hidden: flat costs (DP Rs.15.34/sell) weigh more per trade, and stocks
 # whose single-share VaR exceeds the per-position budget become unsizeable (skipped).
 INITIAL_CAPITAL_INR = 60_000.0         # starting book equity = real future budget
-# 2026-07-18 OPTION B (user choice): CONCENTRATED book for the small account -- fewer,
-# larger positions so the flat costs (DP Rs.15.34/sell) bite ~40% less often at the
-# SAME total portfolio risk. Compared honestly vs the 8x900 variant: OOS CAGR 1.1% vs
-# 0.3%, Sharpe 0.23 vs 0.10, maxDD -10.7% vs -9.9% (less diversification, deeper dips).
-PER_POSITION_RISK_BUDGET_INR = 1_800.0 # 99% horizon loss budget PER position (3%)
-PORTFOLIO_RISK_BUDGET_INR = 4_800.0    # 99% horizon loss budget across open positions (8%)
+# 2026-07-18 OPTION B (superseded): CONCENTRATED book, per-pos 3% / portfolio 8%, max 4.
+# 2026-07-24 RE-BASELINE to TRACK A 24% (user choice, DECISIONS #010). The risk-dial sweep
+# (p9c/scratchpad) showed the 8% budget BINDS hard (~94% used), throttling positions below
+# their VaR size. Raising the dial un-throttles the risk engine: OOS CAGR 1.06%->3.52%,
+# Sharpe 0.23->0.54, maxDD ~flat (-10.7%->-10.9%), mean exposure 22%->38%. Same 4-name
+# structure (Track B = more names HURT). Ratio 3%-pos:8%-port preserved -> 9%-pos:24%-port.
+# NOTE: raising the dial sizes closer to an edge already measured (2017-26 OOS); it does not
+# create new edge, and a bigger budget means a bigger absolute tail loss. This is a risk-
+# APPETITE choice; it re-bases the whole live book and mints a new equity hash (both correct).
+PER_POSITION_RISK_BUDGET_INR = 5_400.0 # 99% horizon loss budget PER position (9%)
+PORTFOLIO_RISK_BUDGET_INR = 14_400.0   # 99% horizon loss budget across open positions (24%)
 MAX_CONCURRENT_POSITIONS = 4           # hard cap on simultaneous open names
 MAX_POSITION_NOTIONAL_FRAC = 0.20      # <= 20% of current equity in any single name
 MAX_GROSS_EXPOSURE_FRAC = 1.00         # long-only, no leverage: invested <= equity
@@ -216,6 +221,10 @@ PAPER_REVISIONS_PATH = DATA_DIR / "paper_bar_revisions.parquet" # logged Kite re
 # discarded, with the incumbents it lost to. Answers "did the skips outperform the
 # holds?" with real data in 2-3 months, so rotation can be decided by evidence not guess.
 PAPER_SKIPS_PATH = DATA_DIR / "paper_skips.parquet"           # live-era discarded candidates
+# Shadow / what-if tracker (DECISIONS #005 Piece 1, p11c_swing_shadow.py): each skipped
+# candidate tracked as a hypothetical position vs the stocks we kept -- the evidence for
+# the eventual stock-exchange (rotation) feature. Rebuilt in full each run, like the ledger.
+PAPER_SHADOW_PATH = DATA_DIR / "paper_shadow.parquet"         # waiting-vs-holds what-if table
 # The LIVE paper book starts FLAT with INITIAL_CAPITAL on this date (2026-07-18 user
 # ruling: "my capital is 60k, not the simulation's grown equity"). History before this
 # date is signal/risk warmup + backtest evidence only; the live ledger begins here.
