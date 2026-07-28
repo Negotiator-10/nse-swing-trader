@@ -359,3 +359,45 @@ Monday: SHRIRAMFIN only (ts_mom ~Rs.1,541; ETERNAL's signal dropped) - likely a 
 the dashboard. **UNCOMMITTED:** p11c_swing_shadow.py + the #009 wiring/dashboard/config +
 #008 logger are in the working tree; offered to commit, user ran the routine instead - commit
 still pending. NEXT candidates: commit; the risk-dial decision; rotation Piece 2 (pre-reg).
+
+**COMMITTED (later same session):** all of the above committed as `17bf13b` (#009 shadow +
+#010 re-baseline); the #008 logger was already `92f16a7`. Secret scan clean, secrets.env
+confirmed ignored. Working tree clean afterward.
+
+---
+
+## Session 2026-07-28 (Tue) - token-expiry incident + two-day catch-up run at 24%
+
+**Token-expiry incident (worth recording).** Monday's afternoon routine was never run. Tue
+morning the user asked to run "yesterday's" routine; the LIVE run FAILED G4.6 with
+`TokenException: Incorrect api_key or access_token`. Diagnosed WITHOUT printing secrets:
+`secrets.env` mtime was 2026-07-27 09:56 = MONDAY's token, expired overnight (Kite tokens die
+"early tomorrow morning"). api_key (794bypra16kbpknp, semi-public, in the login URL) + secret
+(32 char) were fine - purely a stale daily token. NOT a code bug. Lesson reinforced: the
+daily kite_login.py must be done ON the day you run; the presence-only G4.5 check passes on a
+stale token, only the live G4.6 call reveals expiry. Book untouched by the failure (gates
+that need no Kite passed, state intact). Also caught (clock ritual working): an earlier "run
+the afternoon routine" at 09:26 IST was correctly HELD - morning, pre-15:45 guard.
+
+**Two-day catch-up run (Tue 07-28, 16:21 IST, fresh token confirmed mtime 07-28 09:36).** All
+6 gates PASS LIVE, hash 0e3e8313789f284a unchanged. ONE run folded in BOTH Monday 07-27 and
+Tuesday 07-28 (k_next 7674->7676) - the "skipping a day self-heals by replay" promise proven
+live. **NAV Rs.59,108.83, +686.60 (+1.18%) vs Friday's re-based Rs.58,422** - the 24% book
+RECOVERED over Mon+Tue after the down week (bigger swings, this time up; live era 60k ->
+59,109 = -1.49%). 70% invested, cash Rs.17,661. No trades (ledger 1); same 4 holds (SBIN 11,
+ICICIBANK 8, BAJFINANCE 8, INDIGO 2). Armed Wed: ETERNAL + SHRIRAMFIN (~Rs.4,488 each) -
+**ETERNAL is BACK** (re-qualified after dropping 07-24 when its 126d return went negative) =
+another live proof the armed queue tracks the trend, not a stale-from-start list. 20/20 fresh
+bars, 20 revisions logged, max src diff 56bp. Shadow read: waiting +3.25% vs holds -1.24%,
+edge +4.49% - the edge has now swung +1.14 -> -0.33 -> +4.49 across three readings = textbook
+proof the number is NOISE at this sample; the tracker is the deliverable, not the figure.
+
+**Also this session (mechanics Q answered).** User suspected SHRIRAMFIN was a stale
+"recommended-at-the-start" leftover. Proved with data it is NOT: ts_mom entry (close>MA200 &
+126d ret>0 & close>MA50) is re-checked FRESH every day; SHRIRAMFIN PASSED all 3 on 07-22/23/24
+(genuinely re-qualifying), while ETERNAL PASSED 07-23 then FAILED 07-24 (126d ret -1.2%) and
+dropped off instantly. Two separate gates: "want it?" (signal, passes daily) vs "room to buy?"
+(4/4 cap, fails daily) - SHRIRAMFIN clears the first, fails the second, hence armed-but-skipped.
+
+**State at end:** 4/4 at cap, NAV Rs.59,108.83, 70% invested at 24% budget, all gates green
+LIVE, hash 0e3e8313789f284a. Wed's two armed buys (ETERNAL+SHRIRAMFIN) likely skip at the cap.

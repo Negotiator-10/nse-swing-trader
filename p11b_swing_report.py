@@ -71,16 +71,20 @@ def trade_costs(shares: int, epx: float, xpx: float) -> dict:
             "dp": dp, "total": stt + exch + sebi + stamp + gst + dp}
 
 
-def update_curve(st: dict, g46: dict, last_close: dict, mkt_syms_pos: dict) -> pd.DataFrame:
-    """Append today's NAV row (dedup by date) and return the full curve."""
+def update_curve(st: dict, asof_ts: pd.Timestamp, last_close: dict, mkt_syms_pos: dict) -> pd.DataFrame:
+    """Append today's NAV row (dedup by date) and return the full curve. asof_ts is the
+    resolved decision date -- the caller guarantees it is a valid Timestamp (never NaT), so
+    the curve never gains a dateless point again. Also self-heals: any pre-existing NaT-dated
+    row (written by an older build that read a stale/failed artifact) is dropped on load."""
     invested = sum(p["shares"] * last_close.get(sym, p["entry_px"])
                    for sym, p in mkt_syms_pos.items())
-    row = {"date": pd.Timestamp(g46.get("decision_date") or g46.get("bar_date")),
+    row = {"date": pd.Timestamp(asof_ts),
            "equity": float(st["cash"]) + invested, "cash": float(st["cash"]),
            "invested": invested, "n_positions": len(mkt_syms_pos)}
     curve = pd.read_parquet(CURVE) if CURVE.exists() else pd.DataFrame()
     curve = pd.concat([curve, pd.DataFrame([row])], ignore_index=True)
     curve["date"] = pd.to_datetime(curve["date"])
+    curve = curve.dropna(subset=["date"])                          # self-heal old NaT rows
     curve = (curve.sort_values("date").drop_duplicates(subset="date", keep="last")
              .reset_index(drop=True))
     curve.to_parquet(CURVE, index=False)
@@ -356,7 +360,16 @@ def shadow_block(esc) -> str:
 def build() -> str:
     st, led, g46, last_close, pxs = load_inputs()
     pos = {sym: p for sym, p in st.get("pos", {}).items()}
-    curve = update_curve(st, g46, last_close, pos)
+    # Resolve the decision date ROBUSTLY. The dashboard is refreshed DURING a live run, before
+    # p4_paper.json is rewritten, so g46 can be the PREVIOUS (or a failed) run's block with no
+    # decision_date -- pd.Timestamp(None) then poisoned the NAV curve with a NaT-dated point.
+    # Fall back to the latest live-era bar date in the risk panel, which this run already
+    # refreshed, so asof_ts is always valid and current.
+    _d = g46.get("decision_date") or g46.get("bar_date")
+    asof_ts = pd.Timestamp(_d) if _d else pd.NaT
+    if pd.isna(asof_ts):
+        asof_ts = pd.to_datetime(pxs["date"]).max()
+    curve = update_curve(st, asof_ts, last_close, pos)
     eq = float(curve["equity"].iloc[-1])
     invested = float(curve["invested"].iloc[-1])
     day_pnl = float(eq - curve["equity"].iloc[-2]) if len(curve) > 1 else eq - C.INITIAL_CAPITAL_INR
@@ -449,7 +462,7 @@ def build() -> str:
 
     wins = int((led["pnl"] > 0).sum()) if len(led) else 0
     kill = "HALTED" if st.get("halted") else "armed"
-    asof = esc(str(g46.get("decision_date") or g46.get("bar_date") or "?"))
+    asof = esc(str(asof_ts.date()) if pd.notna(asof_ts) else "?")
 
     body = f"""
 <style>
