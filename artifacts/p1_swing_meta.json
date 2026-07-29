@@ -7,26 +7,101 @@
     "ICICIBANK"
   ],
   "included": [
+    "ABB",
+    "ADANIENSOL",
+    "ADANIENT",
+    "ADANIGREEN",
+    "ADANIPORTS",
+    "ADANIPOWER",
+    "AMBUJACEM",
+    "APOLLOHOSP",
+    "ASIANPAINT",
     "AXISBANK",
+    "BAJAJ-AUTO",
+    "BAJAJFINSV",
+    "BAJAJHLDNG",
     "BAJFINANCE",
+    "BANKBARODA",
     "BEL",
     "BHARTIARTL",
+    "BOSCHLTD",
+    "BPCL",
+    "BRITANNIA",
+    "CANBK",
+    "CGPOWER",
+    "CHOLAFIN",
+    "CIPLA",
+    "COALINDIA",
+    "CUMMINSIND",
+    "DIVISLAB",
+    "DLF",
+    "DMART",
+    "DRREDDY",
+    "EICHERMOT",
     "ETERNAL",
+    "GAIL",
+    "GODREJCP",
+    "GRASIM",
+    "HAL",
+    "HCLTECH",
+    "HDFCAMC",
     "HDFCBANK",
+    "HDFCLIFE",
     "HINDALCO",
+    "HINDUNILVR",
+    "HINDZINC",
     "ICICIBANK",
+    "INDHOTEL",
     "INDIGO",
     "INFY",
+    "IOC",
+    "IRFC",
     "ITC",
+    "JINDALSTEL",
+    "JSWSTEEL",
     "KOTAKBANK",
+    "LODHA",
     "LT",
+    "LTM",
     "M&M",
     "MARUTI",
+    "MAXHEALTH",
+    "MAZDOCK",
+    "MOTHERSON",
+    "MUTHOOTFIN",
+    "NESTLEIND",
+    "NTPC",
+    "ONGC",
+    "PFC",
+    "PIDILITIND",
+    "PNB",
+    "POWERGRID",
+    "RECLTD",
     "RELIANCE",
+    "SBILIFE",
     "SBIN",
+    "SHREECEM",
     "SHRIRAMFIN",
+    "SIEMENS",
+    "SOLARINDS",
+    "SUNPHARMA",
+    "TATACONSUM",
+    "TATAPOWER",
     "TATASTEEL",
-    "TCS"
+    "TCS",
+    "TECHM",
+    "TITAN",
+    "TMPV",
+    "TORNTPHARM",
+    "TRENT",
+    "TVSMOTOR",
+    "ULTRACEMCO",
+    "UNIONBANK",
+    "UNITDSPR",
+    "VBL",
+    "VEDL",
+    "WIPRO",
+    "ZYDUSLIFE"
   ],
   "dropped": {},
   "source": "yfinance daily (dev+backtest); broker for live orders",
@@ -34,7 +109,7 @@
   "oos_frac": 0.3,
   "split": "per-symbol (each symbol's last OOS_FRAC of rows = test)",
   "cutoff_range": [
-    "2017-03-24",
+    "2015-08-19",
     "2025-01-16"
   ],
   "cutoffs": {
@@ -50,6 +125,7 @@
     "AXISBANK": "2018-02-22",
     "LT": "2019-04-15",
     "BAJFINANCE": "2019-04-16",
+    "VEDL": "2017-03-24",
     "KOTAKBANK": "2018-12-20",
     "MARUTI": "2019-08-13",
     "BEL": "2019-04-16",
@@ -57,13 +133,87 @@
     "INDIGO": "2023-05-03",
     "ITC": "2017-03-27",
     "TATASTEEL": "2017-03-24",
-    "HINDALCO": "2017-03-24"
+    "HINDALCO": "2017-03-24",
+    "HAL": "2024-01-17",
+    "ADANIPOWER": "2021-06-23",
+    "TMPV": "2015-08-19",
+    "SUNPHARMA": "2017-03-24",
+    "HCLTECH": "2019-05-02",
+    "TRENT": "2019-04-16",
+    "HINDUNILVR": "2017-03-24",
+    "EICHERMOT": "2017-03-27",
+    "NTPC": "2020-01-17",
+    "BAJAJ-AUTO": "2019-04-15",
+    "CANBK": "2019-06-14",
+    "POWERGRID": "2020-12-02",
+    "ADANIENT": "2019-05-10",
+    "ADANIPORTS": "2020-12-16",
+    "TITAN": "2017-03-24",
+    "ULTRACEMCO": "2019-05-03",
+    "TVSMOTOR": "2018-09-03",
+    "ONGC": "2017-03-27",
+    "APOLLOHOSP": "2019-04-16",
+    "HINDZINC": "2019-05-02",
+    "MAZDOCK": "2024-10-23",
+    "TECHM": "2020-08-05",
+    "ADANIGREEN": "2024-02-12",
+    "MAXHEALTH": "2024-10-08",
+    "WIPRO": "2017-03-24",
+    "ASIANPAINT": "2019-04-16",
+    "BPCL": "2017-03-27",
+    "COALINDIA": "2021-11-02",
+    "VBL": "2023-08-16",
+    "BANKBARODA": "2019-04-16",
+    "PFC": "2020-09-24",
+    "CHOLAFIN": "2019-04-16",
+    "HDFCAMC": "2024-02-27",
+    "CUMMINSIND": "2019-04-16",
+    "DIVISLAB": "2019-07-05",
+    "RECLTD": "2021-01-18",
+    "CGPOWER": "2019-04-15",
+    "DLF": "2020-11-03",
+    "BAJAJFINSV": "2019-05-06",
+    "DRREDDY": "2017-03-27",
+    "MOTHERSON": "2019-05-08",
+    "UNIONBANK": "2019-05-16",
+    "CIPLA": "2017-03-24",
+    "MUTHOOTFIN": "2021-12-27",
+    "TATAPOWER": "2017-03-27",
+    "HDFCLIFE": "2023-12-08",
+    "SOLARINDS": "2020-06-23",
+    "PNB": "2019-04-16",
+    "JSWSTEEL": "2019-07-24",
+    "IOC": "2017-04-28",
+    "INDHOTEL": "2019-04-15",
+    "GRASIM": "2019-04-16",
+    "SBILIFE": "2023-11-23",
+    "BRITANNIA": "2017-03-24",
+    "ADANIENSOL": "2023-03-29",
+    "ABB": "2019-04-15",
+    "DMART": "2023-09-25",
+    "GAIL": "2017-08-17",
+    "NESTLEIND": "2019-05-02",
+    "LODHA": "2024-12-18",
+    "JINDALSTEL": "2018-05-28",
+    "GODREJCP": "2019-04-15",
+    "TATACONSUM": "2017-03-27",
+    "LTM": "2023-07-14",
+    "TORNTPHARM": "2019-04-15",
+    "SIEMENS": "2018-03-06",
+    "UNITDSPR": "2019-04-16",
+    "IRFC": "2024-11-27",
+    "AMBUJACEM": "2019-04-16",
+    "BOSCHLTD": "2019-04-15",
+    "PIDILITIND": "2019-04-16",
+    "ZYDUSLIFE": "2018-08-01",
+    "SHREECEM": "2018-12-20",
+    "BAJAJHLDNG": "2019-05-06"
   },
   "hold_target_days": 12,
   "hold_max_days": 25,
-  "n_rows": 125737,
-  "n_ohlc_repaired": 151,
-  "n_zero_volume_bars": 1716,
+  "n_rows": 536145,
+  "n_ohlc_repaired": 591,
+  "n_zero_volume_bars": 10220,
   "data_quality_note": "OHLC adjustment-artifact rows (pre-1997) repaired by clamping high/low to include open/close; zero-volume bars flagged (treat as untradeable in the backtest).",
   "gates": {
     "G1.1": {
@@ -72,17 +222,95 @@
     },
     "G1.2": {
       "ohlc_sane": true,
-      "n_rows": 125737
+      "n_rows": 536145
     },
     "G1.3": {
       "per_symbol": {
+        "ABB": {
+          "n_days": 5969,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ADANIENSOL": {
+          "n_days": 2703,
+          "start": "2015-07-31",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ADANIENT": {
+          "n_days": 5921,
+          "start": "2002-09-04",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ADANIGREEN": {
+          "n_days": 1993,
+          "start": "2018-06-18",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ADANIPORTS": {
+          "n_days": 4592,
+          "start": "2007-11-27",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ADANIPOWER": {
+          "n_days": 4169,
+          "start": "2009-08-20",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "AMBUJACEM": {
+          "n_days": 5967,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "APOLLOHOSP": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ASIANPAINT": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
         "AXISBANK": {
           "n_days": 6902,
           "start": "1998-11-27",
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
+        "BAJAJ-AUTO": {
+          "n_days": 5969,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "BAJAJFINSV": {
+          "n_days": 5935,
+          "start": "2002-08-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "BAJAJHLDNG": {
+          "n_days": 5935,
+          "start": "2002-08-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
         "BAJFINANCE": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "BANKBARODA": {
           "n_days": 5966,
           "start": "2002-07-01",
           "end": "2026-07-10",
@@ -100,9 +328,129 @@
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
+        "BOSCHLTD": {
+          "n_days": 5967,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "BPCL": {
+          "n_days": 7660,
+          "start": "1996-01-02",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "BRITANNIA": {
+          "n_days": 7663,
+          "start": "1996-01-02",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "CANBK": {
+          "n_days": 5841,
+          "start": "2002-12-23",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "CGPOWER": {
+          "n_days": 5969,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "CHOLAFIN": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "CIPLA": {
+          "n_days": 7663,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "COALINDIA": {
+          "n_days": 3869,
+          "start": "2010-11-04",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "CUMMINSIND": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "DIVISLAB": {
+          "n_days": 5786,
+          "start": "2003-03-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "DLF": {
+          "n_days": 4692,
+          "start": "2007-07-05",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "DMART": {
+          "n_days": 2302,
+          "start": "2017-03-21",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "DRREDDY": {
+          "n_days": 7661,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "EICHERMOT": {
+          "n_days": 7661,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
         "ETERNAL": {
           "n_days": 1230,
           "start": "2021-07-23",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "GAIL": {
+          "n_days": 7334,
+          "start": "1997-04-02",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "GODREJCP": {
+          "n_days": 5969,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "GRASIM": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "HAL": {
+          "n_days": 2047,
+          "start": "2018-04-02",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "HCLTECH": {
+          "n_days": 5940,
+          "start": "2002-08-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "HDFCAMC": {
+          "n_days": 1958,
+          "start": "2018-08-06",
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
@@ -112,14 +460,38 @@
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
+        "HDFCLIFE": {
+          "n_days": 2137,
+          "start": "2017-11-17",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
         "HINDALCO": {
           "n_days": 7664,
           "start": "1996-01-01",
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
+        "HINDUNILVR": {
+          "n_days": 7664,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "HINDZINC": {
+          "n_days": 5939,
+          "start": "2002-08-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
         "ICICIBANK": {
           "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "INDHOTEL": {
+          "n_days": 5969,
           "start": "2002-07-01",
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
@@ -136,9 +508,33 @@
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
+        "IOC": {
+          "n_days": 7586,
+          "start": "1996-04-15",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "IRFC": {
+          "n_days": 1348,
+          "start": "2021-01-29",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
         "ITC": {
           "n_days": 7661,
           "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "JINDALSTEL": {
+          "n_days": 6692,
+          "start": "1999-09-22",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "JSWSTEEL": {
+          "n_days": 5746,
+          "start": "2003-05-08",
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
@@ -148,9 +544,21 @@
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
+        "LODHA": {
+          "n_days": 1296,
+          "start": "2021-04-19",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
         "LT": {
           "n_days": 5969,
           "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "LTM": {
+          "n_days": 2465,
+          "start": "2016-07-21",
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
@@ -166,9 +574,87 @@
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
+        "MAXHEALTH": {
+          "n_days": 1459,
+          "start": "2020-08-21",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "MAZDOCK": {
+          "n_days": 1424,
+          "start": "2020-10-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "MOTHERSON": {
+          "n_days": 5925,
+          "start": "2002-08-28",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "MUTHOOTFIN": {
+          "n_days": 3746,
+          "start": "2011-05-06",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "NESTLEIND": {
+          "n_days": 5939,
+          "start": "2002-08-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "NTPC": {
+          "n_days": 5355,
+          "start": "2004-11-05",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ONGC": {
+          "n_days": 7661,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "PFC": {
+          "n_days": 4782,
+          "start": "2007-02-23",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "PIDILITIND": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "PNB": {
+          "n_days": 5968,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "POWERGRID": {
+          "n_days": 4628,
+          "start": "2007-10-05",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "RECLTD": {
+          "n_days": 4519,
+          "start": "2008-03-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
         "RELIANCE": {
           "n_days": 7661,
           "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "SBILIFE": {
+          "n_days": 2169,
+          "start": "2017-10-03",
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
@@ -178,9 +664,45 @@
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
+        "SHREECEM": {
+          "n_days": 6226,
+          "start": "2001-07-02",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
         "SHRIRAMFIN": {
           "n_days": 5969,
           "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "SIEMENS": {
+          "n_days": 6878,
+          "start": "1999-01-04",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "SOLARINDS": {
+          "n_days": 5002,
+          "start": "2006-04-03",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "SUNPHARMA": {
+          "n_days": 7664,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "TATACONSUM": {
+          "n_days": 7661,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "TATAPOWER": {
+          "n_days": 7661,
+          "start": "1996-01-01",
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
         },
@@ -195,6 +717,84 @@
           "start": "2002-08-12",
           "end": "2026-07-10",
           "n_gaps_gt_10d": 0
+        },
+        "TECHM": {
+          "n_days": 4903,
+          "start": "2006-08-28",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "TITAN": {
+          "n_days": 7664,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "TMPV": {
+          "n_days": 8967,
+          "start": "1991-01-02",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "TORNTPHARM": {
+          "n_days": 5969,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "TRENT": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "TVSMOTOR": {
+          "n_days": 6467,
+          "start": "2000-08-02",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ULTRACEMCO": {
+          "n_days": 5936,
+          "start": "2002-08-12",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "UNIONBANK": {
+          "n_days": 5907,
+          "start": "2002-09-24",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "UNITDSPR": {
+          "n_days": 5966,
+          "start": "2002-07-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "VBL": {
+          "n_days": 2393,
+          "start": "2016-11-08",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "VEDL": {
+          "n_days": 7664,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "WIPRO": {
+          "n_days": 7664,
+          "start": "1996-01-01",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
+        },
+        "ZYDUSLIFE": {
+          "n_days": 6536,
+          "start": "2000-04-27",
+          "end": "2026-07-10",
+          "n_gaps_gt_10d": 0
         }
       },
       "min_days_required": 750,
@@ -202,11 +802,11 @@
     },
     "G1.4": {
       "cutoff_range": [
-        "2017-03-24",
+        "2015-08-19",
         "2025-01-16"
       ],
-      "n_train": 88015,
-      "n_test": 37722
+      "n_train": 375297,
+      "n_test": 160848
     },
     "all_passed": true
   },

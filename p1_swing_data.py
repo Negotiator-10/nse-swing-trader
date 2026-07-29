@@ -93,10 +93,15 @@ def load_watchlist() -> list:
 def build_panel(watchlist=None) -> pd.DataFrame:
     """Long-format daily panel for all included symbols, with a COMMON IS/OOS cutoff."""
     watchlist = watchlist or load_watchlist()
+    cutoff = pd.Timestamp(C.SWING_RESEARCH_CUTOFF)
     frames, dropped, n_repaired = [], {}, 0
     for sym in watchlist:
         d = fetch_daily(sym)
-        n_repaired += int(d.attrs.get("n_ohlc_repaired", 0))
+        n_repaired += int(d.attrs.get("n_ohlc_repaired", 0))  # read attrs BEFORE filtering
+        # RESEARCH-TAPE CUTOFF (DECISIONS #012): truncate BEFORE the split so the research
+        # tape ends where the frozen live tape (DECISIONS #002) takes over. Live-era bars
+        # must come only from paper_live_tape.parquet, never a yfinance re-pull.
+        d = d[d["date"] <= cutoff].reset_index(drop=True)
         if len(d) < C.SWING_MIN_DAYS:
             dropped[sym] = len(d)
             continue

@@ -606,3 +606,95 @@ it does not create new edge, and a bigger budget = bigger absolute tail loss in 
 Reversible: restore the two config values + re-run to recover the 8% book exactly.
 
 **Status.** APPLIED. New baseline hash **0e3e8313789f284a**. Supersedes the 4x1800 baseline.
+
+---
+
+## Entry #011 - 2026-07-29 - Max positions 4 -> 6 at the 24% budget --- APPLIED
+
+**Context.** User, after the 24% re-baseline put the extra budget into the SAME 4 names:
+"I just want to add more stock... now there are 4 but i want to invest in 6." Assessment had
+been given twice (Track B: more names hurt) and the user decided anyway - risk-owner's call.
+
+**The correction that must be recorded honestly.** Before applying, the originally-UNTESTED
+exact combo (24% budget / 6 names) was run - and it is the BEST row in the whole sweep:
+**OOS CAGR 4.05% / Sharpe 0.56 / maxDD -10.8%** vs 3.43%/0.51/-10.9% at 24%/4 (and 24%/5 is
+worse than both on Sharpe/DD: 0.48/-12.3% - 6 is a sweet spot, not a monotone trend). So the
+user's instinct was RIGHT at this budget and my Track-B generalization ("more names hurt")
+was WRONG here. **Mechanism, so the lesson survives:** at 8-16% budgets the RISK BUDGET is
+the scarce resource - extra names dilute it (Track B was honest at those levels). At 24% the
+budget was only ~68% used because the NAME-COUNT + 20% notional caps bound instead - slots
+5-6 give the surplus budget somewhere productive to go. Which constraint binds depends on the
+budget level; never extrapolate a cap conclusion across budget regimes without testing the
+exact cell. (Directly relevant to the user's queue complaint: with 6 slots the armed
+ETERNAL + SHRIRAMFIN will actually FILL.)
+
+**Applied as** `config.py` MAX_CONCURRENT_POSITIONS 4 -> **6** (budget levels unchanged:
+9%/pos, 24% portfolio). 5th baseline. Full gate suite re-run in REPLAY (pre-close, 14:0x
+IST; live leg correctly guarded): all PASS, new equity hash **118f70b0ea7f5e4f** (2,286
+backtest trades, was 1,711). Live book (07-28 state) preserved by the #007 bootstrap guard;
+it RE-BASES at tonight's post-15:45 LIVE run, where the armed ETERNAL + SHRIRAMFIN should
+fill at Wednesday's open in the era replay -> book expected at 6/6.
+
+**Carried caveats:** same 2017-26 OOS window as every dial number (sizing closer to a
+measured edge, not new edge); turnover rises (2,286 vs 1,711 trades - flat-cost drag is
+already inside the net numbers); 6 x 20% notional = 120% > 100% gross, so the gross/cash
+caps will now bind at times (by design, shrink-only).
+
+**Status.** APPLIED. New baseline hash **118f70b0ea7f5e4f**. Supersedes #010's hash.
+
+---
+
+## Entry #012 - 2026-07-29 - Universe expansion: NIFTY 50 top-20 -> NIFTY 100 all-passing (95) --- APPLIED
+
+**Context.** User: "expand the screening stocks... early we were screening only 20 stocks."
+Motivation is sound: after #010/#011 the binding constraint was SIGNAL SUPPLY (the dial
+sweep's honest ceiling - ~40% invested even at 24%/6 because signals don't fire often
+enough on 20 names), and R4 already showed ts_mom generalizes out-of-universe (+79.6bp on
+12 Next-50 names). User chose (AskUserQuestion): NIFTY 100, ALL that pass the screen.
+
+**Applied as.**
+  - `p0_universe.py`: candidates now fetched from the OFFICIAL niftyindices.com
+    ind_nifty100list.csv (same source/pattern as gfs_backtest; cached to
+    data/nifty100_symbols.json for offline re-runs); selection = ALL passing the unchanged
+    ex-ante screen (liquidity >= Rs.20cr median daily turnover, history >= 750d, data
+    quality; NEVER returns). Result: **95 of 100 pass** (dropped: ENRIN, HYUNDAI, JIOFIN,
+    TATACAP, TMCV - short history).
+  - `config.SWING_RESEARCH_CUTOFF = "2026-07-10"` + p1 truncation: any research-tape
+    rebuild ends at the original cutoff, so the frozen first-seen live tape (#002) stays
+    the ONLY source for live-era bars. Without this, the yfinance re-pull would have
+    silently replaced frozen live-era history.
+  - Data backed up to `data/backup_pre_012/` BEFORE overwriting (tape, risk panel,
+    watchlist, book state, ledger, live tape) - restores the 20-stock world in seconds.
+  - Live-era risk snapshots (240 rows, the decision lineage) preserved VERBATIM by a
+    post-p8 merge from the backup - recomputation is near- but not guaranteed-identical.
+
+**Verified (all gates, full chain).** P1: 536,145 rows x 95 symbols, 4 gates PASS.
+P3 risk: 441,050 snapshots, causality 40 probes 0 mismatches, all gates PASS (median VaR
+21.2%, consistent with the 20-stock 21.1%). P3 portfolio + P4 REPLAY suite: ALL PASS,
+online==batch 2,756/2,756 trades byte-identical. **New baseline hash `45a27ba622b6e021`**
+(6th baseline; supersedes #011's 118f70b0ea7f5e4f).
+
+**OOS scoreboard (rules frozen, wider universe - accepted as-is):** combo 2.2% CAGR /
+0.32 Sharpe / -26.9% maxDD; ts_mom-ALONE 4.0% / 0.59 / -21.0%; buy&hold 25.5% / 0.96 /
+-49.8%. CAVEAT: the OOS window itself widened (~2015-2026, includes the COVID crash) as
+per-symbol cutoffs moved with longer histories - NOT apples-to-apples vs the 20-stock
+-10.8%.
+
+**OPEN SUB-FINDING (user decision pending): G3.6 FLIPPED - `tom` no longer earns its
+seat.** On 95 names ts_mom-alone dominates the 2-sleeve risk-parity combo on BOTH axes
+(Sharpe 0.59 vs 0.32, maxDD -21.0% vs -26.9%); tom's marginal edge dilutes away and its
+~55% risk-parity weight drags. Options offered: (1) drop tom -> ts_mom-alone (the gate's
+own verdict; recommended), (2) keep 2-sleeve pending live evidence. G3.6 exists precisely
+to make this call at each re-baseline; it has flipped before (60k 8x900) and flipped back
+(Option B). Awaiting the user.
+
+**Carried caveats.** Survivorship: current NIFTY-100 membership (deeper than the 50);
+same mitigation (ex-ante screen), same limitation (no point-in-time membership data).
+Slippage realism thinner on the smallest names (min Rs.20cr turnover floor retained;
+BAJAJHLDNG-class ~Rs.54cr/day is the thinnest). NESTLEIND 29% zero-volume bars (yfinance
+quirk) - handled by the tradable flag. First LIVE run must backfill live-era Kite bars +
+compute catch-up risk snapshots for ~75 new symbols (~800 GARCH fits) - EXPECT IT SLOW
+(likely 10-30 min); also the live-era replay reruns with 95 candidates, so the live book
+re-bases retroactively (same paper-accounting artifact as #011, will be labelled).
+
+**Status.** APPLIED (pending first LIVE exercise tonight). Baseline `45a27ba622b6e021`.

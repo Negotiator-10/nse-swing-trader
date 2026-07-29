@@ -70,6 +70,11 @@ SWING_YF_SUFFIX = ".NS"
 SWING_HISTORY = "max"            # yfinance daily history to pull (deep: many symbols to 1996/2002)
 SWING_OOS_FRAC = 0.30           # last 30% of the common date range held out (walk-forward)
 SWING_MIN_DAYS = 750            # a symbol needs >= ~3y of daily bars to be included
+# RESEARCH-TAPE CUTOFF (DECISIONS #012). Any p1 rebuild truncates here so the research
+# tape can never overlap the live era: bars after this date are governed EXCLUSIVELY by
+# the frozen first-seen live tape (paper_live_tape.parquet, DECISIONS #002). Without
+# this, a re-pull would overwrite frozen live-era history with restated yfinance bars.
+SWING_RESEARCH_CUTOFF = "2026-07-10"
 
 # hold horizon (trading days)
 SWING_HOLD_TARGET_DAYS = 12     # intended hold
@@ -178,9 +183,14 @@ INITIAL_CAPITAL_INR = 60_000.0         # starting book equity = real future budg
 # NOTE: raising the dial sizes closer to an edge already measured (2017-26 OOS); it does not
 # create new edge, and a bigger budget means a bigger absolute tail loss. This is a risk-
 # APPETITE choice; it re-bases the whole live book and mints a new equity hash (both correct).
+# 2026-07-29 (DECISIONS #011, user choice): max positions 4 -> 6. The originally-untested
+# 24%/6 sweep row turned out the BEST config: OOS CAGR 4.05% / Sharpe 0.56 / maxDD -10.8%
+# (vs 3.43%/0.51/-10.9% at 4). Mechanism: at 24% the budget was only ~68% used -- the name
+# count/notional caps bound, not risk -- so slots 5-6 deploy the surplus productively.
+# (At 8-16% budgets the OPPOSITE held: budget bound, extra names diluted. Both recorded.)
 PER_POSITION_RISK_BUDGET_INR = 5_400.0 # 99% horizon loss budget PER position (9%)
 PORTFOLIO_RISK_BUDGET_INR = 14_400.0   # 99% horizon loss budget across open positions (24%)
-MAX_CONCURRENT_POSITIONS = 4           # hard cap on simultaneous open names
+MAX_CONCURRENT_POSITIONS = 6           # hard cap on simultaneous open names
 MAX_POSITION_NOTIONAL_FRAC = 0.20      # <= 20% of current equity in any single name
 MAX_GROSS_EXPOSURE_FRAC = 1.00         # long-only, no leverage: invested <= equity
 

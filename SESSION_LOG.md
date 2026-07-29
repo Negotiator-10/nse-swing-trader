@@ -401,3 +401,59 @@ dropped off instantly. Two separate gates: "want it?" (signal, passes daily) vs 
 
 **State at end:** 4/4 at cap, NAV Rs.59,108.83, 70% invested at 24% budget, all gates green
 LIVE, hash 0e3e8313789f284a. Wed's two armed buys (ETERNAL+SHRIRAMFIN) likely skip at the cap.
+
+---
+
+## Session 2026-07-29 (Wed) - max-pos 6 (#011), UNIVERSE EXPANSION to 95 (#012), first live run
+
+**Three advancements in one day, each verified before the next.** Full detail in DECISIONS
+#011/#012; this is the story.
+
+**Morning/afternoon:** P&L tiles explained (Total = NAV-60000 = realized -317 + unrealized
+-574; Day = vs previous curve point, stretched over the Mon gap). NAV-curve NaT-date bug
+found+fixed+committed (7c7d125). User-authored README.md found untracked (their call
+pending). Then #011: user insisted on 6 slots; the untested 24%/6 sweep cell proved the BEST
+row (4.05%/0.56/-10.8%) - user right, my Track-B generalization wrong at 24% (which-cap-binds
+depends on budget regime; lesson recorded). Applied, gates PASS, hash 118f70b0ea7f5e4f.
+Explained the 6-slot allocation process with the exact preview table (each stock Rs.7-11.6k,
+gross cap binds, cash ~0). Answered "are we screening daily?" (yes, all names re-tested daily
+vs own history; universe fixed; no cross-ranking) and "what happens to the shadow column?"
+(ETERNAL/SHRIRAMFIN graduate to real holds; column empties until 6/6 + a 7th signal).
+
+**#012 UNIVERSE EXPANSION 20 -> 95 (user: "expand the screening stocks"; chose NIFTY 100 /
+all-passing).** Built+verified in one afternoon: official niftyindices CSV -> 95/100 pass the
+unchanged ex-ante screen; new SWING_RESEARCH_CUTOFF=2026-07-10 so the frozen live tape stays
+the only live-era source; full backup at data/backup_pre_012/; live-era snapshots (240 rows)
+merged back verbatim; p1 gates PASS (536,145 bars), p8 gates PASS (441,050 snapshots,
+causality clean), p9+p11 ALL PASS. New baseline hash 45a27ba622b6e021. OOS scoreboard
+accepted: combo 2.2%/0.32/-26.9%, ts_mom-ALONE 4.0%/0.59/-21.0% (window now ~2015-26 incl
+COVID - not comparable to old numbers). **G3.6 FLIPPED: tom no longer earns its seat on 95
+names - drop-tom recommended, USER DECISION STILL PENDING.** Whole-model recap given at
+user's request (they were confused - fair, 3 re-baselines in a week).
+
+**First LIVE run on 95 (16:03 IST, token fresh).** ALL 6 GATES PASS LIVE, 95/95 fresh Kite
+bars, every symbol resolved, 19 new revisions logged, max source diff 125.5bp (<2% gate).
+**The re-based book is a NEW book:** 6/6 = ABB 1, ADANIENSOL 6, APOLLOHOSP 1, ASIANPAINT 4,
+BAJAJ-AUTO 1, BAJFINANCE 7; 95% invested, cash Rs.2,895; ledger now 4 trades (retro-replay:
+ADANIGREEN -434.82, ADANIPORTS -473.06, ADANIENT -476.24 all trend exits + ASIANPAINT
++137.63). NAV Rs.58,824.56. **Labelled honestly: the NAV drop vs Monday's 59,108 is the
+retroactive-replay artifact** - the book now pretends 95 names were always watched, and that
+pretend history bought three Adani names on 07-20 that trend-exited at losses. Real money
+was not lost this week; the baseline changed.
+
+**QUIRK SURFACED (worth a future decision): alphabetical tie-break.** With 95 candidates,
+many qualified simultaneously on 07-20; section (F) iterates symbols in sorted order, so the
+first seats went to ABB + three ADANI* names purely by alphabet. Deterministic and unbiased
+by returns, but arbitrary - and the 3 realized losses came from exactly those fills. A
+pre-registered smarter tie-break (liquidity? momentum?) is a candidate future trial - NOT
+changed now (it is a rule change; protocol applies).
+
+**Queue explosion, as designed:** 29 stocks armed for Thu open at ~Rs.6,087 budget each -
+ALL will skip (6/6 full, nothing armed to exit). Shadow column reborn at scale: 39 waiting
+rows, incl. our FORMER holds (ICICIBANK, SBIN, SHRIRAMFIN, INDIGO, ETERNAL). Early read:
+waiting +1.18% vs holds +0.11%. The rotation question (#005, Piece 2) is now MUCH louder at
+95 names - the skip/shadow instruments will accumulate evidence fast.
+
+**State at end:** 6/6 (new names), NAV Rs.58,824.56, 95% invested, hash 45a27ba622b6e021,
+all gates green LIVE. PENDING: tom decision (drop vs keep), commit of #011+#012 (large
+uncommitted set: p0/p1/config/p9-p11 docs), README.md call, Thu ritual.

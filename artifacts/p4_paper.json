@@ -10,10 +10,10 @@
   "gates": {
     "G4.1": {
       "max_equity_err": 0.0,
-      "n_trades_batch": 1711,
-      "n_trades_online": 1711,
+      "n_trades_batch": 2756,
+      "n_trades_online": 2756,
       "trades_identical": true,
-      "equity_hash": "0e3e8313789f284a32cfcb43fcc19c6e61ce67a1199b84362c977a6849223f7a"
+      "equity_hash": "45a27ba622b6e0210f421271435419cf681599ae489f176d14495860b95608d5"
     },
     "G4.2": {
       "fault_injection": {
@@ -35,24 +35,24 @@
     },
     "G4.3": {
       "cost_hand_check_err": 0.0,
-      "restart_at_k": 3832,
+      "restart_at_k": 4484,
       "resume_equity_err": 0.0,
       "resume_trades_identical": true
     },
     "G4.4": {
       "tight_cap": {
-        "n_skips": 31722,
+        "n_skips": 162348,
         "max_concurrent": 2
       },
       "kill": {
-        "kill_exits": 13,
+        "kill_exits": 32,
         "fills_during_halt": 0,
-        "crash_at": "2017-07-06",
-        "mtm_shock": 0.5160417138651898
+        "crash_at": "2018-07-16",
+        "mtm_shock": 0.5316682788314959
       }
     },
     "G4.5": {
-      "equity_hash": "0e3e8313789f284a32cfcb43fcc19c6e61ce67a1199b84362c977a6849223f7a",
+      "equity_hash": "45a27ba622b6e0210f421271435419cf681599ae489f176d14495860b95608d5",
       "rerun_identical": true,
       "run_mode_stamped": "LIVE",
       "secrets_presence_only": {
@@ -62,37 +62,112 @@
     },
     "all_passed_replay": true,
     "G4.6": {
-      "n_symbols": 20,
-      "n_fresh": 20,
+      "n_symbols": 95,
+      "n_fresh": 95,
       "n_stale": 0,
       "stale_symbols": [],
       "dead_man": false,
-      "bar_date": "2026-07-28",
+      "bar_date": "2026-07-29",
       "source_diff_bp": {
-        "AXISBANK": -13.0,
-        "BAJFINANCE": -56.0,
-        "BEL": -12.3,
-        "BHARTIARTL": -9.5,
-        "ETERNAL": -7.1,
-        "HDFCBANK": -9.4,
-        "HINDALCO": -12.7,
-        "ICICIBANK": -21.6,
-        "INDIGO": -30.0,
-        "INFY": 18.3,
-        "ITC": -19.4,
-        "KOTAKBANK": 3.9,
-        "LT": -10.8,
-        "M&M": -11.4,
-        "MARUTI": -5.2,
-        "RELIANCE": -18.0,
-        "SBIN": 35.6,
-        "SHRIRAMFIN": -8.9,
-        "TATASTEEL": -1.6,
-        "TCS": 10.2
+        "ABB": 0.0,
+        "ADANIENSOL": 0.0,
+        "ADANIENT": -0.0,
+        "ADANIGREEN": 0.0,
+        "ADANIPORTS": 0.0,
+        "ADANIPOWER": 0.0,
+        "AMBUJACEM": -0.0,
+        "APOLLOHOSP": 0.0,
+        "ASIANPAINT": -0.0,
+        "AXISBANK": 1.6,
+        "BAJAJ-AUTO": 0.0,
+        "BAJAJFINSV": 0.0,
+        "BAJAJHLDNG": 0.0,
+        "BAJFINANCE": -13.3,
+        "BANKBARODA": 0.0,
+        "BEL": 0.0,
+        "BHARTIARTL": -15.2,
+        "BOSCHLTD": 0.0,
+        "BPCL": 0.0,
+        "BRITANNIA": 0.0,
+        "CANBK": 0.0,
+        "CGPOWER": 0.0,
+        "CHOLAFIN": 3.9,
+        "CIPLA": -0.0,
+        "COALINDIA": 0.0,
+        "CUMMINSIND": 82.9,
+        "DIVISLAB": 41.2,
+        "DLF": 125.5,
+        "DMART": -0.0,
+        "DRREDDY": -0.0,
+        "EICHERMOT": 0.0,
+        "ETERNAL": 27.6,
+        "GAIL": 0.0,
+        "GODREJCP": -0.0,
+        "GRASIM": -0.0,
+        "HAL": 0.0,
+        "HCLTECH": 102.1,
+        "HDFCAMC": 0.0,
+        "HDFCBANK": -18.3,
+        "HDFCLIFE": -0.0,
+        "HINDALCO": -37.2,
+        "HINDUNILVR": -0.0,
+        "HINDZINC": -0.0,
+        "ICICIBANK": 90.3,
+        "INDHOTEL": 0.0,
+        "INDIGO": -14.2,
+        "INFY": 6.3,
+        "IOC": -0.0,
+        "IRFC": -0.0,
+        "ITC": -7.0,
+        "JINDALSTEL": -0.0,
+        "JSWSTEEL": -0.0,
+        "KOTAKBANK": -10.4,
+        "LODHA": 0.0,
+        "LT": 5.2,
+        "LTM": 0.0,
+        "M&M": 2.1,
+        "MARUTI": -2.2,
+        "MAXHEALTH": 0.0,
+        "MAZDOCK": -0.0,
+        "MOTHERSON": 17.4,
+        "MUTHOOTFIN": 0.0,
+        "NESTLEIND": 0.0,
+        "NTPC": 0.0,
+        "ONGC": -0.0,
+        "PFC": 0.0,
+        "PIDILITIND": 72.0,
+        "PNB": -0.0,
+        "POWERGRID": -0.0,
+        "RECLTD": -0.0,
+        "RELIANCE": -30.7,
+        "SBILIFE": -0.0,
+        "SBIN": -3.9,
+        "SHREECEM": 26.0,
+        "SHRIRAMFIN": -38.3,
+        "SIEMENS": 49.1,
+        "SOLARINDS": 5.9,
+        "SUNPHARMA": 0.0,
+        "TATACONSUM": -0.0,
+        "TATAPOWER": 0.0,
+        "TATASTEEL": -14.8,
+        "TCS": 0.0,
+        "TECHM": -0.0,
+        "TITAN": 0.0,
+        "TMPV": -0.0,
+        "TORNTPHARM": 0.0,
+        "TRENT": -0.0,
+        "TVSMOTOR": -0.0,
+        "ULTRACEMCO": 0.0,
+        "UNIONBANK": 0.0,
+        "UNITDSPR": 0.0,
+        "VBL": -0.0,
+        "VEDL": 0.0,
+        "WIPRO": 114.2,
+        "ZYDUSLIFE": 9.0
       },
       "source_consistent_lt_2pct": true,
-      "n_revisions_detected": 96,
-      "n_revisions_newly_logged": 20,
+      "n_revisions_detected": 115,
+      "n_revisions_newly_logged": 19,
       "revisions": [
         {
           "symbol": "AXISBANK",
@@ -101,7 +176,7 @@
           "frozen": 1257.0,
           "kite": 1256.0,
           "diff_bp": -7.96,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "AXISBANK",
@@ -110,7 +185,7 @@
           "frozen": 1233.5,
           "kite": 1238.4,
           "diff_bp": 39.72,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "AXISBANK",
@@ -119,7 +194,7 @@
           "frozen": 1223.8,
           "kite": 1223.0,
           "diff_bp": -6.54,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "AXISBANK",
@@ -128,7 +203,16 @@
           "frozen": 1228.9,
           "kite": 1227.3,
           "diff_bp": -13.02,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
+        },
+        {
+          "symbol": "AXISBANK",
+          "date": "2026-07-28 00:00:00",
+          "field": "close",
+          "frozen": 1223.3,
+          "kite": 1223.5,
+          "diff_bp": 1.63,
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BAJFINANCE",
@@ -137,7 +221,7 @@
           "frozen": 1061.4,
           "kite": 1064.0,
           "diff_bp": 24.5,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BAJFINANCE",
@@ -146,7 +230,7 @@
           "frozen": 1071.0,
           "kite": 1069.2,
           "diff_bp": -16.81,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BAJFINANCE",
@@ -155,7 +239,7 @@
           "frozen": 1056.1,
           "kite": 1060.3,
           "diff_bp": 39.77,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BAJFINANCE",
@@ -164,7 +248,7 @@
           "frozen": 1040.0,
           "kite": 1039.8,
           "diff_bp": -1.92,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BAJFINANCE",
@@ -173,7 +257,16 @@
           "frozen": 1018.5,
           "kite": 1012.8,
           "diff_bp": -55.96,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
+        },
+        {
+          "symbol": "BAJFINANCE",
+          "date": "2026-07-28 00:00:00",
+          "field": "close",
+          "frozen": 1049.8,
+          "kite": 1048.4,
+          "diff_bp": -13.34,
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BEL",
@@ -182,7 +275,7 @@
           "frozen": 408.5,
           "kite": 408.15,
           "diff_bp": -8.57,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BEL",
@@ -191,7 +284,7 @@
           "frozen": 410.1,
           "kite": 410.05,
           "diff_bp": -1.22,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BEL",
@@ -200,7 +293,7 @@
           "frozen": 406.9,
           "kite": 406.75,
           "diff_bp": -3.69,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BEL",
@@ -209,7 +302,7 @@
           "frozen": 405.5,
           "kite": 405.35,
           "diff_bp": -3.7,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BEL",
@@ -218,7 +311,7 @@
           "frozen": 405.5,
           "kite": 405.0,
           "diff_bp": -12.33,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BHARTIARTL",
@@ -227,7 +320,7 @@
           "frozen": 1939.9,
           "kite": 1940.1,
           "diff_bp": 1.03,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BHARTIARTL",
@@ -236,7 +329,7 @@
           "frozen": 1949.0,
           "kite": 1948.4,
           "diff_bp": -3.08,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BHARTIARTL",
@@ -245,7 +338,7 @@
           "frozen": 1948.0,
           "kite": 1949.0,
           "diff_bp": 5.13,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         },
         {
           "symbol": "BHARTIARTL",
@@ -254,77 +347,214 @@
           "frozen": 1933.0,
           "kite": 1931.0,
           "diff_bp": -10.35,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
-        },
-        {
-          "symbol": "BHARTIARTL",
-          "date": "2026-07-24 00:00:00",
-          "field": "close",
-          "frozen": 1900.0,
-          "kite": 1898.2,
-          "diff_bp": -9.47,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
-        },
-        {
-          "symbol": "ETERNAL",
-          "date": "2026-07-20 00:00:00",
-          "field": "close",
-          "frozen": 287.0,
-          "kite": 286.95,
-          "diff_bp": -1.74,
-          "detected_utc": "2026-07-28T10:52:53+00:00"
+          "detected_utc": "2026-07-29T10:34:59+00:00"
         }
       ],
-      "decision_date": "2026-07-28",
-      "n_new_bars": 240,
-      "n_fresh_risk_snapshots": 40,
+      "decision_date": "2026-07-29",
+      "n_new_bars": 1235,
+      "n_fresh_risk_snapshots": 995,
       "open_positions": {
+        "ABB": {
+          "shares": 1,
+          "sleeve": "ts_mom",
+          "entry_px": 7497.75
+        },
+        "ADANIENSOL": {
+          "shares": 6,
+          "sleeve": "ts_mom",
+          "entry_px": 1725.52
+        },
+        "APOLLOHOSP": {
+          "shares": 1,
+          "sleeve": "ts_mom",
+          "entry_px": 8827.65
+        },
+        "BAJAJ-AUTO": {
+          "shares": 1,
+          "sleeve": "ts_mom",
+          "entry_px": 11002.8
+        },
         "BAJFINANCE": {
-          "shares": 8,
+          "shares": 7,
           "sleeve": "ts_mom",
-          "entry_px": 1057.32
+          "entry_px": 1027.01
         },
-        "ICICIBANK": {
-          "shares": 8,
+        "ASIANPAINT": {
+          "shares": 4,
           "sleeve": "ts_mom",
-          "entry_px": 1444.93
-        },
-        "INDIGO": {
-          "shares": 2,
-          "sleeve": "ts_mom",
-          "entry_px": 5191.06
-        },
-        "SBIN": {
-          "shares": 11,
-          "sleeve": "ts_mom",
-          "entry_px": 1056.52
+          "entry_px": 2747.02
         }
       },
       "armed_entries_next_open": {
+        "BAJAJHLDNG": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "BOSCHLTD": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "CHOLAFIN": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "CIPLA": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "DIVISLAB": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "DLF": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "EICHERMOT": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
         "ETERNAL": {
           "sleeve": "ts_mom",
-          "budget_inr": 4488.0
+          "budget_inr": 6087.0
+        },
+        "GAIL": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "HAL": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "ICICIBANK": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "INDHOTEL": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "INDIGO": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "JSWSTEEL": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "LODHA": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "MAXHEALTH": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "MOTHERSON": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "NESTLEIND": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "PFC": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "PIDILITIND": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "RECLTD": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
         },
         "SHRIRAMFIN": {
           "sleeve": "ts_mom",
-          "budget_inr": 4488.0
+          "budget_inr": 6087.0
+        },
+        "SIEMENS": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "SUNPHARMA": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "TITAN": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "TORNTPHARM": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "TVSMOTOR": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "UNIONBANK": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
+        },
+        "ZYDUSLIFE": {
+          "sleeve": "ts_mom",
+          "budget_inr": 6087.0
         }
       },
       "armed_exits_next_open": {},
-      "equity_close": 59108.83,
+      "equity_close": 58824.56,
       "state_persisted": "paper_state.json",
-      "ledger_rows": 1,
-      "skips_logged": 11,
+      "ledger_rows": 4,
+      "skips_logged": 237,
       "shadow": {
-        "decision_date": "2026-07-28",
-        "n_waiting": 2,
+        "decision_date": "2026-07-29",
+        "n_waiting": 39,
         "waiting_symbols": [
+          "AXISBANK",
+          "BAJAJHLDNG",
+          "BOSCHLTD",
+          "CGPOWER",
+          "CHOLAFIN",
+          "CIPLA",
+          "CIPLA",
+          "CUMMINSIND",
+          "DIVISLAB",
+          "DLF",
+          "EICHERMOT",
           "ETERNAL",
-          "SHRIRAMFIN"
+          "GAIL",
+          "GRASIM",
+          "HAL",
+          "HDFCAMC",
+          "ICICIBANK",
+          "INDHOTEL",
+          "INDIGO",
+          "JSWSTEEL",
+          "LODHA",
+          "MAXHEALTH",
+          "MOTHERSON",
+          "NESTLEIND",
+          "PIDILITIND",
+          "POWERGRID",
+          "POWERGRID",
+          "RECLTD",
+          "SBIN",
+          "SHRIRAMFIN",
+          "SIEMENS",
+          "SOLARINDS",
+          "SUNPHARMA",
+          "TECHM",
+          "TITAN",
+          "TORNTPHARM",
+          "TVSMOTOR",
+          "UNIONBANK",
+          "ZYDUSLIFE"
         ],
-        "mean_waiting_ret_pct": 3.2492804208206216,
-        "mean_hold_ret_pct": -1.2405474288850167,
-        "edge_pct": 4.489827849705638
+        "mean_waiting_ret_pct": 1.1766042967199786,
+        "mean_hold_ret_pct": 0.11120607436832704,
+        "edge_pct": 1.0653982223516516
       },
       "verdict": "LIVE SMOKE OK: real EOD bar -> one decision -> paper actions recorded"
     }
