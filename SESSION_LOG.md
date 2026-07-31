@@ -457,3 +457,45 @@ waiting +1.18% vs holds +0.11%. The rotation question (#005, Piece 2) is now MUC
 **State at end:** 6/6 (new names), NAV Rs.58,824.56, 95% invested, hash 45a27ba622b6e021,
 all gates green LIVE. PENDING: tom decision (drop vs keep), commit of #011+#012 (large
 uncommitted set: p0/p1/config/p9-p11 docs), README.md call, Thu ritual.
+
+---
+
+## Session 2026-07-30 (Thu) - dashboard field guide + routine day 10
+
+**Dashboard explained end-to-end (user request).** Built a "Dashboard Field Guide" -- every
+section of paper_dashboard.html with the live 07-29 book as the worked example -- delivered
+as a rendered file + private artifact
+(https://claude.ai/code/artifact/d833cbc6-a682-4cdc-96cf-ed019bf0739c). Also re-explained
+P&L mechanics in chat (Total = realized + unrealized; sell = lock, not create).
+
+**Afternoon routine (15:48 IST, token fresh 09:22).** All 6 gates PASS LIVE, hash unchanged,
+95/95 fresh bars. **NAV Rs.58,910.86, day +86.30 (+0.15%)** - first green day on the
+95-universe book. No trades (ledger 4); same 6 holds; stops ratcheted up on APOLLOHOSP /
+BAJAJ-AUTO / BAJFINANCE. Nothing armed to exit; 30 buys armed for Fri - all will skip at
+6/6. Shadow: 42 waiting, edge +0.87% (readings so far +1.14 / -0.33 / +4.49 / +0.87 =
+noise, accumulating). 145 revisions logged - the one-time settlement restatement of the
+75 new symbols' first-seen bars; expect ~20/day again from tomorrow.
+
+**State at end:** 6/6, NAV Rs.58,910.86, 95% invested, all gates green LIVE. Still PENDING:
+tom decision, the #011+#012 commit, README.md call.
+
+---
+
+## Session 2026-07-31 (Fri) - week close, best live day yet, tom fires for the first time
+
+**Afternoon routine (16:43 IST, token fresh 09:41).** All 6 gates PASS LIVE, hash
+45a27ba622b6e021 unchanged, 95/95 fresh bars. **NAV Rs.59,323.56, day +412.70 (+0.70%) -
+best day of the live era.** Two weeks: 60,000 -> 59,323.56 = -1.13%. No trades (ledger 4);
+same 6 holds; BAJFINANCE +797.94 / BAJAJ-AUTO +516.20 unrealized, ADANIENSOL -525.10.
+Nothing armed to exit.
+
+**`tom` fired live for the first time** (last trading day of July): 45 buys armed for Monday,
+15 of them tom + 30 ts_mom - all will skip at 6/6, so it is moot in practice, but it is the
+first live illustration of the second sleeve at exactly the moment the drop-tom decision
+(#012 open sub-finding) sits undecided. Shadow: 43 waiting, edge +0.26% (five readings:
++1.14/-0.33/+4.49/+0.87/+0.26 - noise, accumulating). 94 revisions logged (new-symbol
+settlement restatements still washing through).
+
+**State at end (week close):** 6/6, NAV Rs.59,323.56, 95% invested, all gates green LIVE.
+Carries into Monday unchanged unless a stop hits. STILL PENDING: tom decision, the
+#011+#012 commit (now 3 days of verified uncommitted work), README.md call.
