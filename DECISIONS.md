@@ -698,3 +698,50 @@ compute catch-up risk snapshots for ~75 new symbols (~800 GARCH fits) - EXPECT I
 re-bases retroactively (same paper-accounting artifact as #011, will be labelled).
 
 **Status.** APPLIED (pending first LIVE exercise tonight). Baseline `45a27ba622b6e021`.
+
+---
+
+## Entry #013 - 2026-08-04 - Drop the `tom` sleeve (single-sleeve ts_mom book) --- APPLIED
+
+**Context.** Closes the OPEN sub-finding of #012. User asked what `tom` is, got the
+explanation (calendar rule: buy on the last trading day of the month if close > MA200;
+month-end flows), then: "drop it."
+
+**Evidence (the gate's own verdict, not a new idea).** On the 95-name universe the
+pre-registered G3.6 comparison flipped: ts_mom-alone dominates the 2-sleeve risk-parity
+combo on BOTH axes -- OOS **Sharpe 0.59 vs 0.32**, **maxDD -21.0% vs -26.9%**, CAGR 4.0% vs
+2.2%. `tom` was always flagged MARGINAL (Phase-2 deflated CI LB +2.8bp, and turn-of-month
+effects are well-known/decaying); its edge dilutes across 95 names while risk-parity was
+handing it **~55% of the risk budget**. G3.6 exists precisely to make this call at each
+re-baseline; it has flipped before (60k 8x900) and flipped back (Option B).
+
+**Applied as** `config.SLEEVES = ["ts_mom"]` (was `["ts_mom","tom"]`). Single sleeve =>
+weights trivially 1.0, so `budget_fn` returns the flat per-position budget. NOTE the
+side-effect: per-position budget RISES from ~Rs.4,488 (base x 2 x 0.45) to the full
+Rs.5,400 base, so positions size LARGER -- the live book will re-base accordingly.
+
+**Two code fixes the change exposed (both required, neither cosmetic).**
+  1. `p9.main()` hardcoded `standalone["tom"]` when writing swing_equity.parquet -> would
+     KeyError the moment SLEEVES shrank. Now writes one equity column per ACTIVE sleeve.
+  2. G3.6's verdict text would have printed "risk-parity improves BOTH Sharpe and drawdown"
+     when comparing the single-sleeve book **against itself** (combo == standalone, so
+     `>=` is trivially true). Now detects len(SLEEVES)==1 and says the comparison is
+     DEGENERATE, keeping the gate as a live check that no second sleeve is silently active.
+     Recorded because a self-congratulatory vacuous PASS is exactly the kind of false
+     assurance the blind G4.6 check (#002) taught us to hunt.
+
+**Verified (REPLAY, pre-close 13:20 IST Tue - live leg correctly guarded).** p9: all
+portfolio gates PASS, sleeve weight ts_mom=1.00, 2,618 trades (was 2,756). p11: all gates
+PASS, online==batch 2,618/2,618 byte-identical. **New baseline hash `5a1795c42f9c605b`**
+(7th baseline; supersedes #012's 45a27ba622b6e021). Live book PRESERVED untouched by the
+#007 bootstrap guard (still Monday's, k_next 8984, ledger 4) - it re-bases at tonight's
+post-15:45 LIVE run. Backup at `data/backup_pre_013/`.
+
+**Reversible:** restore `SLEEVES = ["ts_mom","tom"]` and re-run the chain.
+
+**Honest caveat.** This does NOT prove tom is worthless -- it proves tom does not earn a
+~55% risk allocation on THIS universe under THIS budget. The measured 2017-26 tom edge was
+real but marginal; a different universe/weighting could revive it. The retirement is a
+resource-allocation decision, recorded as such.
+
+**Status.** APPLIED. Baseline `5a1795c42f9c605b`. #012's open sub-finding is now CLOSED.

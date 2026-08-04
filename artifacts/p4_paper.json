@@ -10,10 +10,10 @@
   "gates": {
     "G4.1": {
       "max_equity_err": 0.0,
-      "n_trades_batch": 2756,
-      "n_trades_online": 2756,
+      "n_trades_batch": 2618,
+      "n_trades_online": 2618,
       "trades_identical": true,
-      "equity_hash": "45a27ba622b6e0210f421271435419cf681599ae489f176d14495860b95608d5"
+      "equity_hash": "5a1795c42f9c605b3fd477bff2ac588c4cda218e91dac62fe42c850e0544d7d2"
     },
     "G4.2": {
       "fault_injection": {
@@ -41,18 +41,18 @@
     },
     "G4.4": {
       "tight_cap": {
-        "n_skips": 162348,
+        "n_skips": 158458,
         "max_concurrent": 2
       },
       "kill": {
-        "kill_exits": 32,
+        "kill_exits": 51,
         "fills_during_halt": 0,
-        "crash_at": "2018-07-16",
-        "mtm_shock": 0.5316682788314959
+        "crash_at": "2018-07-13",
+        "mtm_shock": 0.5330442665189008
       }
     },
     "G4.5": {
-      "equity_hash": "45a27ba622b6e0210f421271435419cf681599ae489f176d14495860b95608d5",
+      "equity_hash": "5a1795c42f9c605b3fd477bff2ac588c4cda218e91dac62fe42c850e0544d7d2",
       "rerun_identical": true,
       "run_mode_stamped": "LIVE",
       "secrets_presence_only": {
@@ -67,107 +67,107 @@
       "n_stale": 0,
       "stale_symbols": [],
       "dead_man": false,
-      "bar_date": "2026-07-31",
+      "bar_date": "2026-08-04",
       "source_diff_bp": {
-        "ABB": 2.1,
-        "ADANIENSOL": 19.3,
-        "ADANIENT": -3.0,
-        "ADANIGREEN": 5.2,
-        "ADANIPORTS": 21.1,
-        "ADANIPOWER": -1.4,
-        "AMBUJACEM": -27.6,
-        "APOLLOHOSP": 31.8,
-        "ASIANPAINT": -13.8,
-        "AXISBANK": -8.1,
-        "BAJAJ-AUTO": -0.4,
-        "BAJAJFINSV": 2.1,
-        "BAJAJHLDNG": 46.7,
-        "BAJFINANCE": -33.1,
-        "BANKBARODA": -12.4,
-        "BEL": 0.0,
-        "BHARTIARTL": 52.4,
-        "BOSCHLTD": -12.0,
-        "BPCL": -19.0,
-        "BRITANNIA": -9.9,
-        "CANBK": -21.7,
-        "CGPOWER": 9.0,
-        "CHOLAFIN": -9.6,
-        "CIPLA": 9.6,
-        "COALINDIA": -4.8,
-        "CUMMINSIND": -15.7,
-        "DIVISLAB": 32.0,
-        "DLF": -11.4,
-        "DMART": -30.9,
-        "DRREDDY": -45.2,
-        "EICHERMOT": 4.4,
-        "ETERNAL": 14.5,
-        "GAIL": -6.3,
-        "GODREJCP": 1.9,
-        "GRASIM": 15.2,
-        "HAL": -18.7,
-        "HCLTECH": 8.9,
-        "HDFCAMC": -0.8,
-        "HDFCBANK": 7.3,
-        "HDFCLIFE": 9.2,
-        "HINDALCO": 9.3,
-        "HINDUNILVR": 4.3,
-        "HINDZINC": -19.6,
-        "ICICIBANK": 30.8,
-        "INDHOTEL": 30.1,
-        "INDIGO": 29.7,
-        "INFY": -13.8,
-        "IOC": 2.9,
-        "IRFC": -2.2,
-        "ITC": -17.5,
-        "JINDALSTEL": -3.7,
-        "JSWSTEEL": 1.6,
-        "KOTAKBANK": 46.4,
-        "LODHA": -18.6,
-        "LT": -7.1,
-        "LTM": 2.9,
-        "M&M": -7.3,
-        "MARUTI": 5.6,
-        "MAXHEALTH": 7.1,
-        "MAZDOCK": -29.7,
-        "MOTHERSON": 15.0,
-        "MUTHOOTFIN": -4.3,
-        "NESTLEIND": 11.2,
-        "NTPC": -8.7,
-        "ONGC": 4.1,
-        "PFC": 11.7,
-        "PIDILITIND": -0.6,
-        "PNB": -23.2,
-        "POWERGRID": -7.0,
+        "ABB": -70.5,
+        "ADANIENSOL": 27.4,
+        "ADANIENT": 19.6,
+        "ADANIGREEN": 2.9,
+        "ADANIPORTS": 28.9,
+        "ADANIPOWER": 78.8,
+        "AMBUJACEM": 45.2,
+        "APOLLOHOSP": 0.0,
+        "ASIANPAINT": 104.3,
+        "AXISBANK": 134.7,
+        "BAJAJ-AUTO": 300.6,
+        "BAJAJFINSV": 62.9,
+        "BAJAJHLDNG": 152.3,
+        "BAJFINANCE": 98.1,
+        "BANKBARODA": 34.9,
+        "BEL": 91.4,
+        "BHARTIARTL": 84.4,
+        "BOSCHLTD": 3.6,
+        "BPCL": 115.0,
+        "BRITANNIA": 94.9,
+        "CANBK": 8.7,
+        "CGPOWER": -298.3,
+        "CHOLAFIN": 96.2,
+        "CIPLA": 95.2,
+        "COALINDIA": 38.6,
+        "CUMMINSIND": 91.8,
+        "DIVISLAB": 306.1,
+        "DLF": 95.1,
+        "DMART": 27.5,
+        "DRREDDY": 89.8,
+        "EICHERMOT": 100.4,
+        "ETERNAL": 63.2,
+        "GAIL": 19.0,
+        "GODREJCP": 94.8,
+        "GRASIM": 280.7,
+        "HAL": 70.9,
+        "HCLTECH": 71.7,
+        "HDFCAMC": 95.5,
+        "HDFCBANK": 24.0,
+        "HDFCLIFE": 47.2,
+        "HINDALCO": 49.5,
+        "HINDUNILVR": 104.0,
+        "HINDZINC": 0.0,
+        "ICICIBANK": 108.7,
+        "INDHOTEL": 76.4,
+        "INDIGO": 18.6,
+        "INFY": 76.0,
+        "IOC": 49.0,
+        "IRFC": -5.5,
+        "ITC": 17.5,
+        "JINDALSTEL": -70.1,
+        "JSWSTEEL": 74.8,
+        "KOTAKBANK": 91.4,
+        "LODHA": 46.2,
+        "LT": 62.8,
+        "LTM": 64.4,
+        "M&M": 95.1,
+        "MARUTI": 35.5,
+        "MAXHEALTH": 100.0,
+        "MAZDOCK": 29.0,
+        "MOTHERSON": 39.5,
+        "MUTHOOTFIN": 0.0,
+        "NESTLEIND": 82.4,
+        "NTPC": 94.9,
+        "ONGC": 49.8,
+        "PFC": 91.0,
+        "PIDILITIND": 95.3,
+        "PNB": -10.6,
+        "POWERGRID": 95.0,
         "RECLTD": -2.7,
-        "RELIANCE": 27.1,
-        "SBILIFE": 28.3,
-        "SBIN": 12.7,
-        "SHREECEM": -20.7,
-        "SHRIRAMFIN": -15.6,
-        "SIEMENS": -5.7,
-        "SOLARINDS": 1.7,
-        "SUNPHARMA": -19.5,
-        "TATACONSUM": 11.0,
-        "TATAPOWER": -9.3,
-        "TATASTEEL": -3.7,
-        "TCS": -9.0,
-        "TECHM": 45.7,
-        "TITAN": 12.6,
-        "TMPV": -23.9,
-        "TORNTPHARM": -36.6,
-        "TRENT": -16.0,
-        "TVSMOTOR": 8.1,
-        "ULTRACEMCO": -2.5,
-        "UNIONBANK": -14.6,
-        "UNITDSPR": -7.2,
-        "VBL": 25.5,
-        "VEDL": 18.7,
-        "WIPRO": -4.3,
-        "ZYDUSLIFE": 0.9
+        "RELIANCE": 76.4,
+        "SBILIFE": 3.7,
+        "SBIN": 99.5,
+        "SHREECEM": 69.0,
+        "SHRIRAMFIN": 121.6,
+        "SIEMENS": -12.8,
+        "SOLARINDS": 31.7,
+        "SUNPHARMA": 95.1,
+        "TATACONSUM": 90.9,
+        "TATAPOWER": 14.4,
+        "TATASTEEL": 101.5,
+        "TCS": 82.7,
+        "TECHM": -11.5,
+        "TITAN": 200.5,
+        "TMPV": 89.5,
+        "TORNTPHARM": 77.8,
+        "TRENT": 32.9,
+        "TVSMOTOR": 89.7,
+        "ULTRACEMCO": 41.7,
+        "UNIONBANK": 17.8,
+        "UNITDSPR": 42.7,
+        "VBL": 9.0,
+        "VEDL": 84.9,
+        "WIPRO": -1.6,
+        "ZYDUSLIFE": 49.3
       },
-      "source_consistent_lt_2pct": true,
-      "n_revisions_detected": 354,
-      "n_revisions_newly_logged": 94,
+      "source_consistent_lt_2pct": false,
+      "n_revisions_detected": 577,
+      "n_revisions_newly_logged": 127,
       "revisions": [
         {
           "symbol": "ABB",
@@ -176,7 +176,7 @@
           "frozen": 7314.5,
           "kite": 7310.5,
           "diff_bp": -5.47,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
           "symbol": "ABB",
@@ -185,7 +185,25 @@
           "frozen": 7290.0,
           "kite": 7291.5,
           "diff_bp": 2.06,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-07-31 00:00:00",
+          "field": "close",
+          "frozen": 7201.5,
+          "kite": 7284.5,
+          "diff_bp": 115.25,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-03 00:00:00",
+          "field": "close",
+          "frozen": 7655.0,
+          "kite": 7601.0,
+          "diff_bp": -70.54,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
           "symbol": "ADANIENSOL",
@@ -194,7 +212,7 @@
           "frozen": 1663.0,
           "kite": 1667.8,
           "diff_bp": 28.86,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
           "symbol": "ADANIENSOL",
@@ -203,7 +221,25 @@
           "frozen": 1655.8,
           "kite": 1659.0,
           "diff_bp": 19.33,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
+        },
+        {
+          "symbol": "ADANIENSOL",
+          "date": "2026-07-31 00:00:00",
+          "field": "close",
+          "frozen": 1638.0,
+          "kite": 1645.4,
+          "diff_bp": 45.18,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
+        },
+        {
+          "symbol": "ADANIENSOL",
+          "date": "2026-08-03 00:00:00",
+          "field": "close",
+          "frozen": 1642.5,
+          "kite": 1647.0,
+          "diff_bp": 27.4,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
           "symbol": "ADANIENT",
@@ -212,7 +248,7 @@
           "frozen": 3025.0,
           "kite": 3024.5,
           "diff_bp": -1.65,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
           "symbol": "ADANIENT",
@@ -221,7 +257,25 @@
           "frozen": 3050.0,
           "kite": 3049.1,
           "diff_bp": -2.95,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
+        },
+        {
+          "symbol": "ADANIENT",
+          "date": "2026-07-31 00:00:00",
+          "field": "close",
+          "frozen": 3009.2,
+          "kite": 3009.5,
+          "diff_bp": 1.0,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
+        },
+        {
+          "symbol": "ADANIENT",
+          "date": "2026-08-03 00:00:00",
+          "field": "close",
+          "frozen": 3062.0,
+          "kite": 3068.0,
+          "diff_bp": 19.6,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
           "symbol": "ADANIGREEN",
@@ -230,7 +284,7 @@
           "frozen": 1372.0,
           "kite": 1373.1,
           "diff_bp": 8.02,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
           "symbol": "ADANIGREEN",
@@ -239,7 +293,25 @@
           "frozen": 1358.0,
           "kite": 1358.7,
           "diff_bp": 5.15,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
+        },
+        {
+          "symbol": "ADANIGREEN",
+          "date": "2026-07-31 00:00:00",
+          "field": "close",
+          "frozen": 1378.5,
+          "kite": 1383.0,
+          "diff_bp": 32.64,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
+        },
+        {
+          "symbol": "ADANIGREEN",
+          "date": "2026-08-03 00:00:00",
+          "field": "close",
+          "frozen": 1394.6,
+          "kite": 1395.0,
+          "diff_bp": 2.87,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
           "symbol": "ADANIPORTS",
@@ -248,7 +320,7 @@
           "frozen": 1722.0,
           "kite": 1719.7,
           "diff_bp": -13.36,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
           "symbol": "ADANIPORTS",
@@ -257,101 +329,29 @@
           "frozen": 1660.6,
           "kite": 1664.1,
           "diff_bp": 21.08,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
-          "symbol": "ADANIPOWER",
-          "date": "2026-07-29 00:00:00",
+          "symbol": "ADANIPORTS",
+          "date": "2026-07-31 00:00:00",
           "field": "close",
-          "frozen": 209.2,
-          "kite": 209.52,
-          "diff_bp": 15.3,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "frozen": 1691.0,
+          "kite": 1696.5,
+          "diff_bp": 32.53,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         },
         {
-          "symbol": "ADANIPOWER",
-          "date": "2026-07-30 00:00:00",
+          "symbol": "ADANIPORTS",
+          "date": "2026-08-03 00:00:00",
           "field": "close",
-          "frozen": 209.0,
-          "kite": 208.97,
-          "diff_bp": -1.44,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
-        },
-        {
-          "symbol": "AMBUJACEM",
-          "date": "2026-07-29 00:00:00",
-          "field": "close",
-          "frozen": 434.5,
-          "kite": 435.3,
-          "diff_bp": 18.41,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
-        },
-        {
-          "symbol": "AMBUJACEM",
-          "date": "2026-07-30 00:00:00",
-          "field": "close",
-          "frozen": 435.4,
-          "kite": 434.2,
-          "diff_bp": -27.56,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
-        },
-        {
-          "symbol": "APOLLOHOSP",
-          "date": "2026-07-29 00:00:00",
-          "field": "close",
-          "frozen": 8903.5,
-          "kite": 8935.0,
-          "diff_bp": 35.38,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
-        },
-        {
-          "symbol": "APOLLOHOSP",
-          "date": "2026-07-30 00:00:00",
-          "field": "close",
-          "frozen": 8959.5,
-          "kite": 8988.0,
-          "diff_bp": 31.81,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
-        },
-        {
-          "symbol": "ASIANPAINT",
-          "date": "2026-07-29 00:00:00",
-          "field": "close",
-          "frozen": 2761.0,
-          "kite": 2758.4,
-          "diff_bp": -9.42,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
-        },
-        {
-          "symbol": "ASIANPAINT",
-          "date": "2026-07-30 00:00:00",
-          "field": "close",
-          "frozen": 2750.0,
-          "kite": 2746.2,
-          "diff_bp": -13.82,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
-        },
-        {
-          "symbol": "AXISBANK",
-          "date": "2026-07-20 00:00:00",
-          "field": "close",
-          "frozen": 1257.0,
-          "kite": 1256.0,
-          "diff_bp": -7.96,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
-        },
-        {
-          "symbol": "AXISBANK",
-          "date": "2026-07-22 00:00:00",
-          "field": "close",
-          "frozen": 1233.5,
-          "kite": 1238.4,
-          "diff_bp": 39.72,
-          "detected_utc": "2026-07-31T11:16:48+00:00"
+          "frozen": 1696.1,
+          "kite": 1701.0,
+          "diff_bp": 28.89,
+          "detected_utc": "2026-08-04T10:18:07+00:00"
         }
       ],
-      "decision_date": "2026-07-31",
-      "n_new_bars": 1425,
+      "decision_date": "2026-08-04",
+      "n_new_bars": 1615,
       "n_fresh_risk_snapshots": 95,
       "open_positions": {
         "ABB": {
@@ -386,195 +386,151 @@
         }
       },
       "armed_entries_next_open": {
-        "ADANIENT": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
-        },
-        "ADANIGREEN": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
-        },
-        "ADANIPORTS": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
-        },
-        "ADANIPOWER": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
-        },
         "BAJAJHLDNG": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "BHARTIARTL": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "BOSCHLTD": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
-        },
-        "CGPOWER": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "budget_inr": 5400.0
         },
         "CHOLAFIN": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "CIPLA": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
-        },
-        "CUMMINSIND": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "budget_inr": 5400.0
         },
         "DIVISLAB": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "DLF": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "EICHERMOT": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "ETERNAL": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "GAIL": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
-        },
-        "GRASIM": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "budget_inr": 5400.0
         },
         "HAL": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
-        },
-        "HDFCAMC": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "budget_inr": 5400.0
         },
         "HINDALCO": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
         },
         "ICICIBANK": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "INDHOTEL": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "INDIGO": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "JSWSTEEL": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "LODHA": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
+        },
+        "LT": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
         },
         "MAXHEALTH": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "MOTHERSON": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "NESTLEIND": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
-        },
-        "PFC": {
-          "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "PIDILITIND": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
-        },
-        "PNB": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "budget_inr": 5400.0
         },
         "RECLTD": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "SBIN": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
         },
         "SHREECEM": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
         },
         "SHRIRAMFIN": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "SIEMENS": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "SOLARINDS": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "SUNPHARMA": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
-        },
-        "TECHM": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "budget_inr": 5400.0
         },
         "TITAN": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "TORNTPHARM": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         },
         "TVSMOTOR": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
-        },
-        "ULTRACEMCO": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "budget_inr": 5400.0
         },
         "UNIONBANK": {
-          "sleeve": "tom",
-          "budget_inr": 4713.0
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
         },
         "ZYDUSLIFE": {
           "sleeve": "ts_mom",
-          "budget_inr": 6087.0
+          "budget_inr": 5400.0
         }
       },
       "armed_exits_next_open": {},
-      "equity_close": 59323.56,
+      "equity_close": 59956.16,
       "state_persisted": "paper_state.json",
       "ledger_rows": 4,
-      "skips_logged": 296,
+      "skips_logged": 358,
       "shadow": {
-        "decision_date": "2026-07-31",
-        "n_waiting": 43,
+        "decision_date": "2026-08-04",
+        "n_waiting": 46,
         "waiting_symbols": [
           "AXISBANK",
           "BAJAJHLDNG",
@@ -591,6 +547,7 @@
           "ETERNAL",
           "GAIL",
           "GRASIM",
+          "GRASIM",
           "HAL",
           "HDFCAMC",
           "ICICIBANK",
@@ -599,6 +556,7 @@
           "JSWSTEEL",
           "JSWSTEEL",
           "LODHA",
+          "LT",
           "MAXHEALTH",
           "MOTHERSON",
           "NESTLEIND",
@@ -611,6 +569,7 @@
           "SHRIRAMFIN",
           "SIEMENS",
           "SOLARINDS",
+          "SOLARINDS",
           "SUNPHARMA",
           "TECHM",
           "TITAN",
@@ -620,9 +579,9 @@
           "ZYDUSLIFE",
           "ZYDUSLIFE"
         ],
-        "mean_waiting_ret_pct": 1.5486720846176285,
-        "mean_hold_ret_pct": 1.2872336431894356,
-        "edge_pct": 0.26143844142819295
+        "mean_waiting_ret_pct": 1.625338325507036,
+        "mean_hold_ret_pct": 2.6402992610512617,
+        "edge_pct": -1.0149609355442257
       },
       "verdict": "LIVE SMOKE OK: real EOD bar -> one decision -> paper actions recorded"
     }

@@ -499,3 +499,76 @@ settlement restatements still washing through).
 **State at end (week close):** 6/6, NAV Rs.59,323.56, 95% invested, all gates green LIVE.
 Carries into Monday unchanged unless a stop hits. STILL PENDING: tom decision, the
 #011+#012 commit (now 3 days of verified uncommitted work), README.md call.
+
+**COMMITTED (later same session):** user committed the #011/#012 work themselves as
+`423b70f` (incl. their README.md; branch renamed master -> main); I committed the session
+logs + run artifact as `332e472`. Tree clean, secret scan clean. Only the tom decision
+remains open.
+
+---
+
+## Session 2026-08-03 (Mon) - guard enforced 4 min early, best live day, book near breakeven
+
+**GUARD ENFORCED (worth recording).** User said "run the afternoon routine" at **15:40:56
+IST** - 4 minutes BEFORE the 15:45 guard (clock verified against Google+Cloudflare, both
+agreed, so the PC clock was right and we were genuinely early). Did NOT run the decision
+early and did NOT bounce it back to the user: queued a background wait to 15:46:29, then ran.
+Decision made ~15:56 on a settled candle. This is the rule working as intended rather than
+being negotiated around.
+
+**Afternoon routine (day 12, token fresh 09:15).** All 6 gates PASS LIVE, hash
+45a27ba622b6e021 unchanged, 95/95 fresh bars, 96 revisions logged (first-seen kept).
+**NAV Rs.59,851.66, day +528.10 (+0.89%)** - beats Friday's record; the book is now just
+**-0.25% from the Rs.60,000 start** after being ~-2% mid-week. **Unrealized turned POSITIVE
+for the first time: +Rs.1,098.15.** No trades (ledger 4), same 6 holds, 95% invested.
+Highlight: **BAJFINANCE stop ratcheted to 1,038.38, ABOVE its 1,027.01 entry - the worst
+case on that position is now a profit**, the trailing stop doing exactly its job. ABB flipped
++157 (was -296 Fri); ADANIENSOL still the laggard (-498). Nothing armed to exit; 32 buys
+armed (all skip at 6/6) and **the tom signals are GONE** now the turn-of-month window passed
+(they were 15 of 45 on Friday). Shadow: 53 waiting, edge -0.79% (six readings:
++1.14/-0.33/+4.49/+0.87/+0.26/-0.79 - averaging toward "too early to say", as expected).
+
+**State at end:** 6/6, NAV Rs.59,851.66, 95% invested, all gates green LIVE, tree clean.
+STILL PENDING: the tom decision (drop vs keep) - the only open item.
+
+---
+
+## Session 2026-08-04 (Tue) - tom DROPPED (#013), and a wrong prediction of mine
+
+**`tom` explained, then dropped (DECISIONS #013).** User asked what tom is (calendar rule:
+buy last trading day of month if close>MA200; month-end salary/SIP/window-dressing flows),
+then "drop it". Evidence = G3.6's own flipped verdict on 95 names: ts_mom-alone dominates the
+2-sleeve combo on BOTH axes (Sharpe 0.59 vs 0.32, maxDD -21.0% vs -26.9%, CAGR 4.0% vs 2.2%)
+while risk-parity was handing MARGINAL tom ~55% of the risk budget. config.SLEEVES=["ts_mom"].
+New baseline hash **5a1795c42f9c605b** (7th). Backup data/backup_pre_013/. Reversible.
+
+**TWO CODE BUGS the change exposed (both fixed, neither cosmetic):** (1) p9.main() hardcoded
+`standalone["tom"]` writing swing_equity.parquet -> KeyError the instant SLEEVES shrank; now
+one equity column per ACTIVE sleeve. (2) G3.6 would have printed "risk-parity improves BOTH
+Sharpe and drawdown" while comparing the single-sleeve book AGAINST ITSELF (combo ==
+standalone, so `>=` is trivially true) - now detects len(SLEEVES)==1 and reports the
+comparison as DEGENERATE. Recorded because a vacuous self-congratulatory PASS is the same
+false-assurance class as the blind G4.6 source check (#002).
+
+**Guard behaviour, twice.** The "drop it" work landed 13:20 Tue (pre-close): verified in
+REPLAY only, live leg correctly guarded, live book preserved untouched by the #007 bootstrap
+guard. Then the routine ran at 15:45:35, just past the guard.
+
+**Afternoon routine (day 13). ALL 6 GATES PASS LIVE**, hash 5a1795c42f9c605b, 95/95 fresh
+bars, 127 revisions logged. **NAV Rs.59,956.16, day +104.50 (+0.17%)** - the book is now
+**-0.07% from the Rs.60,000 start** (Rs.44 below breakeven after 13 trading days). Unrealized
+**+1,202.65** (new high) vs realized -1,246.49: the open book has nearly earned back all four
+closed losses. No trades, nothing armed to exit, 34 armed buys (all skip at 6/6). Shadow: 46
+waiting, edge -1.01% (seven readings: +1.14/-0.33/+4.49/+0.87/+0.26/-0.79/-1.01).
+
+**MY PREDICTION WAS WRONG, recorded because it is instructive.** I told the user to expect the
+live book to RE-BASE with LARGER positions, since single-sleeve raises the per-position budget
+from ~Rs.4,488 to the full Rs.5,400. **Every share count came back IDENTICAL.** Reason (which
+I had already established days earlier and failed to apply): at 95% invested these positions
+are bound by the **20% notional cap and available cash**, NOT by the risk budget - so raising
+the risk allowance changes nothing when a different fence is doing the stopping. Consequence
+worth keeping: today's +104.50 is therefore a CLEAN market move, not a re-basing artifact.
+
+**State at end:** 6/6 unchanged, NAV Rs.59,956.16, 95% invested, all gates green LIVE, hash
+5a1795c42f9c605b. UNCOMMITTED: the #013 config+p9 fixes, DECISIONS #013, docs/memory, and
+this entry. No open decisions.

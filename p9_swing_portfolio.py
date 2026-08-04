@@ -526,11 +526,19 @@ def run_gates(mkt, res_ts, res_combo, weights) -> tuple[bool, dict]:
     rep["G3.6"] = {"oos_ts_mom_alone": m_ts, "oos_risk_parity_combo": m_cb,
                    "risk_parity_improves_sharpe": bool(better_sharpe),
                    "risk_parity_improves_drawdown": bool(better_dd)}
-    verdict = ("risk-parity 2-sleeve improves BOTH Sharpe and drawdown vs ts_mom-alone"
-               if (better_sharpe and better_dd) else
-               "risk-parity 2-sleeve does NOT dominate ts_mom-alone on both axes "
-               "(see numbers) -- honest finding: tom's marginal edge does not clearly "
-               "earn its risk allocation; ts_mom-alone remains the default")
+    if len(SLEEVES) == 1:
+        # Single sleeve (tom retired, DECISIONS #013): the "combo" IS ts_mom-alone, so the
+        # comparison is vacuous by construction. Say so rather than printing a self-
+        # congratulatory "improves BOTH" that compares a book against itself.
+        verdict = (f"single-sleeve book ({SLEEVES[0]}): comparison is degenerate -- combo == "
+                   f"standalone. Kept as a live check that no second sleeve is silently "
+                   f"active; restore SLEEVES=['ts_mom','tom'] to re-open the comparison")
+    else:
+        verdict = ("risk-parity 2-sleeve improves BOTH Sharpe and drawdown vs ts_mom-alone"
+                   if (better_sharpe and better_dd) else
+                   "risk-parity 2-sleeve does NOT dominate ts_mom-alone on both axes "
+                   "(see numbers) -- honest finding: tom's marginal edge does not clearly "
+                   "earn its risk allocation; ts_mom-alone remains the default")
     rep["G3.6"]["verdict"] = verdict
     # G3.6 is a REPORT gate: it always 'passes' (records the honest verdict), never loosened.
     check("G3.6 portfolio comparison computed (honest verdict recorded)", True,
@@ -617,9 +625,13 @@ def main() -> int:
 
     # ---- persist equity + report ----
     out = C.DATA_DIR / "swing_equity.parquet"
-    eqdf = pd.DataFrame({"date": mkt.dates, "is_oos": mkt.is_oos,
-                         "equity_combo": combo["equity"], "equity_ts_mom": standalone["ts_mom"]["equity"],
-                         "equity_tom": standalone["tom"]["equity"], "equity_buyhold": bh["equity"]})
+    # one equity column per ACTIVE sleeve (tom may be retired -- DECISIONS #013), so this
+    # does not KeyError when SLEEVES shrinks
+    eqcols = {"date": mkt.dates, "is_oos": mkt.is_oos, "equity_combo": combo["equity"],
+              "equity_buyhold": bh["equity"]}
+    for s in SLEEVES:
+        eqcols[f"equity_{s}"] = standalone[s]["equity"]
+    eqdf = pd.DataFrame(eqcols)
     eqdf.to_parquet(out, index=False)
     print(f"\n  wrote {out}")
 

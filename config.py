@@ -199,7 +199,14 @@ KILL_DD_THRESHOLD = 0.20         # flatten ALL + halt when drawdown from peak br
 KILL_COOLDOWN_DAYS = 21          # stay halted this many trading days, then re-arm (peak reset)
 
 # ---- sleeve risk-weighting (the principled replacement for Phase 2's 50/50) ----
-SLEEVES = ["ts_mom", "tom"]      # primary (strong) + secondary (marginal, uncorrelated)
+# 2026-08-03 (DECISIONS #013, user choice): `tom` DROPPED. On the 95-name universe the
+# pre-registered gate G3.6 flipped -- ts_mom-alone dominates the 2-sleeve risk-parity combo
+# on BOTH axes (OOS Sharpe 0.59 vs 0.32, maxDD -21.0% vs -26.9%). tom was always flagged
+# MARGINAL (deflated CI LB +2.8bp) and its turn-of-month edge dilutes across 95 names, yet
+# risk-parity was handing it ~55% of the risk budget. Single-sleeve => weights are trivially
+# 1.0 and budget_fn returns the flat per-position budget (n * 1.0 * base = base).
+# REVERSIBLE: restore ["ts_mom", "tom"] and re-run the chain to recover the 2-sleeve book.
+SLEEVES = ["ts_mom"]             # primary only (tom retired -- see DECISIONS #013)
 SLEEVE_WEIGHT_METHOD = "risk_parity"   # inverse realized-vol; walk-forward, prior-only
 SLEEVE_VOL_WINDOW = 252          # trailing window (days) for each sleeve's realized vol
 SLEEVE_REWEIGHT_EVERY = 21       # re-estimate sleeve weights monthly
