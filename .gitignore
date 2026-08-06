@@ -19,3 +19,7 @@ __pycache__/
 
 # derived render -- rebuilt from state by p11b_swing_report.py every run
 reports/
+
+# learning/summary notes - kept local, not published
+docs/*_learning.docx
+docs/*_summary.docx
