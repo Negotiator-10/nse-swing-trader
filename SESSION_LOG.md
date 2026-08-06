@@ -572,3 +572,90 @@ worth keeping: today's +104.50 is therefore a CLEAN market move, not a re-basing
 **State at end:** 6/6 unchanged, NAV Rs.59,956.16, 95% invested, all gates green LIVE, hash
 5a1795c42f9c605b. UNCOMMITTED: the #013 config+p9 fixes, DECISIONS #013, docs/memory, and
 this entry. No open decisions.
+
+**COMMITTED same session:** `1f7fb17` (the tom drop + both p9 bug fixes + DECISIONS #013).
+Tree clean, secret scan clean.
+
+---
+
+## Session 2026-08-05 (Wed) - exit/entry logic explained, trading-logic docx, book crosses
+## back above Rs.60,000
+
+**Three teaching threads (no code changes).** User asked, in turn: (1) the EXIT strategy -
+"when am I in profit, when do you sell, what triggers the stop"; (2) the ENTRY strategy;
+(3) whether the moving-average inputs can be changed. Answered each from the code with live
+numbers rather than from memory:
+- Exits: **no profit target exists** by design; four exits (ATR trailing stop 3.5x, ratchets
+  up only, fires intraday as `stop` or `stop_gap`; trend exit close<MA50 -> next open;
+  25-day max hold; 20% portfolio kill switch). Showed each holding's distance to BOTH its
+  stop and its MA50 -- for the four weaker names the TREND exit is nearer, for the two
+  winners the STOP is nearer. Highlighted BAJFINANCE: stop ratcheted ABOVE its entry, so the
+  worst case on that position is now a locked profit. Noted all 4 realized trades exited via
+  `trend`, ZERO via stop.
+- Entries: 3 conditions (close>MA200, 126d ret>0, close>MA50) re-tested daily on all 95;
+  armed at close -> fill next open +3bp; sizing = budget/VaR-per-share then FIVE shrink-only
+  caps. Traced live candidates showing CASH is the binding cap now, and that BOSCHLTD
+  (Rs.41,200/share) cannot be bought at all - one share breaches the 20% notional cap.
+- MA inputs: yes they are parameters, and **R1 already tested them** (ma_long 150/200/250,
+  ret_lb 63/126/189/252, ma_mid 40/50/60, stop_mult 2.5/3.5/4.5, hold_max 15/25/35 -
+  16/16 positive, a PLATEAU not a peak). Showed several alternatives score HIGHER than the
+  baseline (ret_lb 63 -> 65.7bp vs 54.5) and explained why picking them would be p-hacking:
+  those are OOS numbers, and selecting on them converts OOS into in-sample. Cited the GFS
+  precedent (best-on-all-data +325 vs honest-OOS +187 = the overfit premium). Protocol if a
+  change is genuinely wanted: structural reason, pre-register, one OOS shot, deflate as
+  trial #11+. Noted the periods are deliberately HARDCODED in p2._ts_mom, not config.
+
+**Deliverable: `docs/TRADING_LOGIC_EXPLAINED.docx`** (user: "I am getting confused, make me
+a word document"). 15 sections covering universe -> entry -> sizing -> protection -> exits ->
+costs -> daily cycle -> the six gates -> what the system is honestly for -> caveats -> change
+history. Built the project way (write .md -> md_to_docx.py -> delete .md). Every fact
+verified against code/config before writing (ATR len 14, stop_mult 3.5, maxhold 25, the full
+cost stack, current settings). **User asked NOT to commit it - it is for their own
+understanding.** Flagged that docs/ IS tracked, so it will show as untracked and could be
+swept into a future `git add -A`; offered .gitignore, user did not request it. **Do not
+stage docs/TRADING_LOGIC_EXPLAINED.docx in future commits.**
+
+**Afternoon routine (day 14; 15:57 IST, token fresh 09:21).** All 6 gates PASS LIVE, hash
+unchanged, 95/95 fresh bars, 110 revisions logged. **NAV Rs.60,124.16, day +272.50 (+0.46%)
+-- the book crossed BACK ABOVE its Rs.60,000 starting capital for the first time since the
+live era began (+124.16, +0.21%).** Unrealized **+1,370.65** (new high) vs realized
+-1,246.49: the open book has now more than repaid every closed loss. No trades; no exits
+armed; 33 buys armed (all skip at 6/6). Shadow: 48 waiting, edge **-0.85%** - the holdings
+are now OUTPERFORMING the queue, a reversal from last week (eight readings:
++1.14/-0.33/+4.49/+0.87/+0.26/-0.79/-1.01/-0.85).
+
+**Prediction I made and got wrong (again, recorded):** I flagged that APOLLOHOSP and
+ASIANPAINT looked close to breaking trend and might free a seat today. Both ROSE instead and
+remain ~2.5-2.9% above MA50. Two wrong short-horizon predictions in three days - a useful
+reminder that this system's day-to-day path is not forecastable, which is precisely why the
+rules are mechanical.
+
+**Two more teaching threads after the routine.**
+- *"When we are in profit, when do we sell?"* Answered with the distinction that matters:
+  **paper profit is not locked profit**. Computed what each holding would ACTUALLY book if
+  stopped out today: BAJFINANCE +125.68, but BAJAJ-AUTO **-197.31** despite being +697 on
+  paper, ABB -609.11, APOLLOHOSP -327.61, ASIANPAINT -692.28, ADANIENSOL -1,258.53.
+  **Five of six show a paper profit yet would still book a LOSS at their stop.** Only
+  BAJFINANCE's stop (1,049.77) has ratcheted above its entry (1,027.01), making it a
+  guaranteed winner. Trade-off stated: you always give back some of the peak; nothing is
+  ever sold at its high - that is the price of never capping a winner.
+- *"What was the logic of selling ASIANPAINT for ~137 profit?"* **Post-mortem that reframes
+  the trade as a whipsaw, not a win.** Trend exit fired the SAME DAY it was bought: qualified
+  07-23 by a **4-rupee margin** (close 2,668.80 vs MA50 2,665.10); bought 07-24 at the open
+  2,620.89 (a down open); that day's close 2,637.90 fell below MA50 -> exit armed; sold 07-27
+  at the open 2,665.00 into a bounce. Gross +176.46 - 38.82 costs = +137.63. **The profit was
+  the gap direction, not the strategy** - had Monday opened down, identical logic loses. And
+  the part that matters: it RE-BOUGHT on 07-29 at 2,747.02, i.e. **Rs.82/share higher, ~328
+  on 4 shares**. Actual path ~+178 vs simply holding ~+505 -> **the round trip cost ~Rs.328;
+  the "profitable" trade was net worse than doing nothing.** Recorded as the canonical
+  whipsaw example: not a bug, not fixable without delaying genuine exits - it is the premium
+  paid for crash protection.
+
+**Deliverable: `docs/SESSION_2026-08-05_QA.docx`** (user: "save this in document... the chat
+we did today"). Full Q&A record - the tom retirement, both wrong predictions, both routines,
+and all five questions with complete reasoning. Same convention (.md -> md_to_docx -> delete
+.md). **NOT committed** (same standing as TRADING_LOGIC_EXPLAINED.docx - personal reference;
+do not stage either in future commits).
+
+**State at end:** 6/6 unchanged, NAV Rs.60,124.16 (first time above the Rs.60,000 line),
+95% invested, all gates green LIVE, hash 5a1795c42f9c605b. No open decisions.

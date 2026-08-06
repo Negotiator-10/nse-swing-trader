@@ -83,19 +83,32 @@ def make_ctx(mkt: P9.Market, k: int, sleeves, budget_fn, caps, kill,
 
 def online_replay(mkt: P9.Market, budget_fn, *, caps, kill, st: P9.BookState = None,
                   start_k: int = 0, end_k: int = None, mtm_mult=None,
-                  finalize: bool = True, use_feed: bool = True) -> dict:
+                  finalize: bool = True, use_feed: bool = True,
+                  manual_exits: dict = None) -> dict:
     """Drive step_day one day at a time -- the ONLINE mirror of p9.run_book.
 
     st/start_k support resuming from persisted state (the live pattern). mtm_mult is
     the per-day mark-to-market fault-injection multiplier (G4.4). finalize replicates
-    run_book's end-of-tape residual close-out so G4.1 can compare byte-for-byte."""
+    run_book's end-of-tape residual close-out so G4.1 can compare byte-for-byte.
+
+    manual_exits (DECISIONS #014): {k -> [symbol,...]} discretionary sells to force on day
+    k's OPEN. Injected into pend_exit just before step_day, so section (A) fills them at
+    that day's open exactly like any rule-driven exit and the ledger tags them "manual".
+    Default None => untouched behaviour, so every gate path is bit-identical to before."""
     nD = len(mkt.dates)
     end_k = nD if end_k is None else end_k
     st = st if st is not None else P9.BookState()
     fh = P10.DailyFeedHandler()
     equity = np.full(end_k - start_k, np.nan)
     invested = np.zeros(end_k - start_k)
+    sidx = {s: j for j, s in enumerate(mkt.syms)}
     for k in range(start_k, end_k):
+        if manual_exits and k in manual_exits:
+            for sym in manual_exits[k]:
+                j = sidx.get(sym)
+                # only if actually held on that day; a rule exit may have beaten us to it
+                if j is not None and j in st.pos and j not in st.pend_exit:
+                    st.pend_exit[j] = "manual"
         if use_feed:                      # date discipline on the day's bars
             date_d = pd.Timestamp(mkt.dates[k]).date()
             for j, sym in enumerate(mkt.syms):
@@ -159,6 +172,39 @@ def load_state(mkt_syms: list, path=None) -> tuple[P9.BookState, int]:
     st.pend_entry = {si[s]: pe for s, pe in doc["pend_entry"].items()}
     st.pend_exit = {si[s]: r for s, r in doc["pend_exit"].items()}
     return st, int(doc["k_next"])
+
+
+def resolve_manual_exits(mkt: P9.Market) -> tuple[dict, list]:
+    """Map manual sell orders (DECISIONS #014) to the day index they must fill on.
+
+    An order issued on decision date D fills at the OPEN of the first trading day AFTER D --
+    the same next-open timing every rule-driven exit uses. Resolved against the real
+    calendar each run, so the order re-applies on the SAME day in every future replay (the
+    live era is rebuilt from scratch every run; a one-shot queue would silently vanish).
+
+    Returns ({k: [symbols]}, orders) -- orders is annotated in place with the resolved
+    fill_date so the dashboard and the file itself stay readable.
+    """
+    if not C.PAPER_MANUAL_ORDERS_PATH.exists():
+        return {}, []
+    try:
+        doc = json.loads(C.PAPER_MANUAL_ORDERS_PATH.read_text())
+    except json.JSONDecodeError:
+        print("  [warn] manual_orders.json unreadable -- ignoring manual orders this run")
+        return {}, []
+    orders = doc.get("orders", []) if isinstance(doc, dict) else list(doc)
+    dates = pd.to_datetime(mkt.dates)
+    out: dict = {}
+    for o in orders:
+        issued = pd.Timestamp(o["issued_date"])
+        later = np.where(dates > issued)[0]
+        if len(later) == 0:
+            o["fill_date"] = None          # market has not opened since; fills next session
+            continue
+        k = int(later[0])
+        o["fill_date"] = str(pd.Timestamp(mkt.dates[k]).date())
+        out.setdefault(k, []).append(o["symbol"])
+    return out, orders
 
 
 TRADE_COLS = ["symbol", "sleeve", "entry_date", "exit_date", "entry_px", "exit_px",
@@ -521,8 +567,12 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
     # LIVE-ERA BOOK: starts FLAT at INITIAL_CAPITAL on PAPER_ERA_START (the user's real
     # budget) -- earlier history is warmup/evidence, not the live book's P&L.
     era_k = int(np.argmax(pd.to_datetime(mkt2.dates) >= pd.Timestamp(C.PAPER_ERA_START)))
+    # Discretionary sells (DECISIONS #014) -- re-applied on their original fill day every
+    # replay, so the book stays self-consistent across runs.
+    man_map, man_orders = resolve_manual_exits(mkt2)
     online = online_replay(mkt2, budget_fn, caps=P9.default_caps(), kill=P9.default_kill(),
-                           start_k=era_k, finalize=False, use_feed=False)
+                           start_k=era_k, finalize=False, use_feed=False,
+                           manual_exits=man_map)
     st = online["state"]
     k_last = len(mkt2.dates) - 1
     save_state(st, k_last + 1, mkt2.syms)
@@ -544,6 +594,21 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
     import p11c_swing_shadow as P11C   # lazy: p11c imports us, avoid an import cycle
     shadow_summary = P11C.run_shadow(mkt2, budget_fn, era_k, st, persist=True)
 
+    # Mark manual orders that actually made it into the ledger as executed (a rule exit can
+    # legitimately beat one to the punch, in which case it stays pending and simply never
+    # fires -- the position is already gone). Status is derived from the ledger, never
+    # assumed, so the file cannot drift out of step with the book.
+    if man_orders:
+        done = {(str(r["symbol"]), str(pd.Timestamp(r["exit_date"]).date()))
+                for _, r in led.iterrows() if str(r["reason"]) == "manual"}
+        for o in man_orders:
+            o["status"] = ("executed" if (o["symbol"], o.get("fill_date")) in done
+                           else "pending")
+        C.PAPER_MANUAL_ORDERS_PATH.write_text(json.dumps(
+            {"note": "Discretionary sells. Filled at the next session's open, tagged "
+                     "reason='manual' in the ledger. Written by manual_sell.py; status "
+                     "refreshed from the ledger by p11.", "orders": man_orders}, indent=2))
+
     result.update({
         "decision_date": str(pd.Timestamp(mkt2.dates[k_last]).date()),
         "n_new_bars": len(new_rows),
@@ -561,6 +626,7 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
         "ledger_rows": int(len(led)),
         "skips_logged": int(len(skips)),
         "shadow": shadow_summary,
+        "manual_orders": man_orders,
         "verdict": "LIVE SMOKE OK: real EOD bar -> one decision -> paper actions recorded",
     })
     return result

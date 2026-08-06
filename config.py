@@ -242,6 +242,11 @@ PAPER_SKIPS_PATH = DATA_DIR / "paper_skips.parquet"           # live-era discard
 # candidate tracked as a hypothetical position vs the stocks we kept -- the evidence for
 # the eventual stock-exchange (rotation) feature. Rebuilt in full each run, like the ledger.
 PAPER_SHADOW_PATH = DATA_DIR / "paper_shadow.parquet"         # waiting-vs-holds what-if table
+# MANUAL override orders (DECISIONS #014). A persistent LOG, not a queue: the live era is
+# replayed from scratch every run, so a manual exit must be re-applied on its original fill
+# day every time or it would vanish on the next run. Exits land in the ledger tagged
+# reason="manual" so discretionary trades stay separable from the strategy's own record.
+PAPER_MANUAL_ORDERS_PATH = DATA_DIR / "manual_orders.json"    # user-issued discretionary sells
 # The LIVE paper book starts FLAT with INITIAL_CAPITAL on this date (2026-07-18 user
 # ruling: "my capital is 60k, not the simulation's grown equity"). History before this
 # date is signal/risk warmup + backtest evidence only; the live ledger begins here.

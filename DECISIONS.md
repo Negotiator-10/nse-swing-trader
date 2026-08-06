@@ -745,3 +745,64 @@ real but marginal; a different universe/weighting could revive it. The retiremen
 resource-allocation decision, recorded as such.
 
 **Status.** APPLIED. Baseline `5a1795c42f9c605b`. #012's open sub-finding is now CLOSED.
+
+---
+
+## Entry #014 - 2026-08-06 - Manual sell override (discretionary exit) --- APPLIED
+
+**Context.** User: "in the dashboard I want to add one more feature where there should be
+option of me manually selling any stock which I feel". Assessed before building, per #001-f.
+
+**Two constraints stated up front.**
+1. *Architectural.* The dashboard is a STATIC file with no server -- a button cannot sell
+   anything, because nothing is listening. Any manual order must be picked up by p11 at the
+   next evening run, filling at the next session's open like every other exit.
+2. *Measurement.* The paper trial exists to answer "does this STRATEGY work?". A
+   discretionary sell changes the question to "does the strategy PLUS my judgment work?",
+   and with one human and a handful of trades the two cannot be separated after the fact.
+   Flagged in context: the user had, within the previous hour, proposed two exit ideas
+   (weekly RSI<60, a 0.52-ATR candle stop) that measurement showed would have LOST money --
+   a manual button is the same impulse with no test in front of it. Also noted the user's
+   own earlier observation that emotionless rule-following is the system's strength.
+   **Legitimate uses exist anyway** (fraud/governance events, corporate actions the model
+   cannot see, halting something while learning) and it is a paper book. Built as asked.
+
+**Design that preserves the measurement (the reason this is acceptable).**
+  - Manual exits enter the ledger tagged **`reason="manual"`**, permanently distinguishable
+    from `trend` / `stop` / `stop_gap` / `maxhold` / `kill`.
+  - The dashboard reports **three realized P&L figures**: strategy-only, manual-only, and
+    actual. The strategy's own track record therefore survives intact, and the split
+    doubles as real data about the user's discretion.
+  - Confirmation dialog before anything is queued; `--undo` cancels a pending order.
+
+**Applied as.**
+  - `manual_sell.py` (new CLI): `python manual_sell.py SYMBOL` queues, `--undo` cancels,
+    `--list` shows. Refuses symbols not currently held and refuses duplicates.
+  - `config.PAPER_MANUAL_ORDERS_PATH` = `data/manual_orders.json`.
+  - `p11.resolve_manual_exits()` maps each order's issue date to the day index of the first
+    trading day AFTER it; `online_replay(..., manual_exits={k: [syms]})` injects
+    `pend_exit[j] = "manual"` just before `step_day`, so section (A) fills it at that day's
+    open exactly like a rule exit.
+  - `p11b`: a **Sell** button per open position (copies the command to the clipboard, since
+    the page is static), a manual-orders table, and the three-way P&L split.
+
+**Why it is a persistent LOG, not a one-shot queue (the subtle part).** p11 rebuilds the
+whole live era by replay on every run. An order that merely "executed once" would silently
+vanish from the book on the next run and the ledger would disagree with itself. Each order
+is therefore stored with its issue date and re-applied on the SAME resolved fill day in
+every future replay. Status is derived from the LEDGER each run, never assumed -- so if a
+rule exit beats a manual order to the punch, the order simply never fires and stays pending
+rather than corrupting anything.
+
+**Acceptance gate.** `manual_exits` defaults to `None`, so every existing path is
+bit-identical. Verified: full gate suite PASS, G4.5 `sha256=5a1795c42f9c605b` **UNCHANGED**,
+live book preserved. CLI guard rails tested: refuses a non-held symbol (RELIANCE), queues a
+held one (ABB), no-ops on duplicate, `--undo` removes it cleanly.
+
+**Not built, deliberately:** same-day selling (would break the next-open discipline that
+every other exit follows, and the system has no intraday data), and manual BUYS (sizing
+would have to be invented outside the VaR path; no request, and a far bigger hole in the
+measurement).
+
+**Status.** APPLIED. Baseline hash unchanged -- this is plumbing plus display, and it only
+alters the book when the user deliberately issues an order.

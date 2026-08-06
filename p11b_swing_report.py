@@ -310,6 +310,60 @@ def cost_rows(cb: dict) -> str:
             "</tr>" + "".join(rows))
 
 
+def manual_block(g46: dict, led: pd.DataFrame, esc) -> str:
+    """Manual-sell control + pending orders + the strategy-vs-actual P&L split
+    (DECISIONS #014). The dashboard is a static file with no server, so the button copies
+    the command that queues the sell; p11 executes it at the next run's open."""
+    orders = g46.get("manual_orders") or []
+    pend = [o for o in orders if o.get("status", "pending") == "pending"]
+    rows = ""
+    if orders:
+        rr = []
+        for o in orders:
+            st_ = o.get("status", "pending")
+            colour = GREEN2 if st_ == "executed" else INK2
+            rr.append(f"<tr><td><b>{esc(str(o['symbol']))}</b></td>"
+                      f"<td><span class='sell'>{esc(str(o.get('side','SELL')))}</span></td>"
+                      f"<td>{esc(str(o['issued_date']))}</td>"
+                      f"<td>{esc(str(o.get('fill_date') or 'next session'))}</td>"
+                      f"<td style='color:{colour}'>{esc(st_)}</td></tr>")
+        rows = ("<table><tr><th>Stock</th><th>Side</th><th>Issued</th><th>Fills</th>"
+                "<th>Status</th></tr>" + "".join(rr) + "</table>")
+    else:
+        rows = "<p class='muted'>No manual orders have been issued.</p>"
+
+    # strategy-only vs actual P&L -- the whole point of tagging manual exits
+    split = ""
+    if len(led):
+        man = led[led["reason"].astype(str) == "manual"]
+        rule = led[led["reason"].astype(str) != "manual"]
+        # Shown from the moment the first order is issued (not just executed) so the
+        # strategy-vs-discretion comparison is visible while it is still empty.
+        if len(man) or orders:
+            split = (f"<div class='kpis' style='margin:10px 0'>"
+                     f"<div class='kpi'><div class='l'>Realized: strategy only</div>"
+                     f"<div class='v'>Rs.{rule['pnl'].sum():,.2f}"
+                     f"<span style='font-size:12px'> ({len(rule)} trades)</span></div></div>"
+                     f"<div class='kpi'><div class='l'>Realized: your manual exits</div>"
+                     f"<div class='v'>Rs.{man['pnl'].sum():,.2f}"
+                     f"<span style='font-size:12px'> ({len(man)} trades)</span></div></div>"
+                     f"<div class='kpi'><div class='l'>Realized: actual (both)</div>"
+                     f"<div class='v'>Rs.{led['pnl'].sum():,.2f}</div></div></div>")
+    note = ("<div class='sub' style='margin-top:8px'><b>How this works.</b> This page is a "
+            "static file with no server, so the button copies a command. Paste it in a "
+            "terminal to queue the sell; it fills at the <b>next session's open</b>, the same "
+            "timing as every rule-driven exit. Manual exits are tagged "
+            "<code>reason=\"manual\"</code> in the ledger and reported separately above, so "
+            "the strategy's own track record stays measurable. Cancel a pending order with "
+            "<code>--undo</code>. See DECISIONS.md #014.</div>")
+    warn = ""
+    if pend:
+        warn = (f"<div class='sub' style='color:{RED};margin-top:6px'><b>"
+                f"{len(pend)} manual sell(s) pending</b> - they execute at the next "
+                f"evening run.</div>")
+    return split + rows + warn + note
+
+
 def shadow_block(esc) -> str:
     """The 'Waiting stocks (what-if)' section (DECISIONS #005 Piece 1). Read-only from
     paper_shadow.parquet -- each skipped candidate tracked as a hypothetical buy vs the
@@ -393,10 +447,13 @@ def build() -> str:
                     f"<td class='r'>{p['entry_px']:,.2f}</td><td class='r'>{mark:,.2f}</td>"
                     f"<td class='r'>{p['shares']*p['entry_px']:,.0f}</td>"
                     f"<td class='r'>{money(upnl, True)} ({upct:+.1f}%)</td>"
-                    f"<td class='r'>{p['stop']:,.2f}</td></tr>")
+                    f"<td class='r'>{p['stop']:,.2f}</td>"
+                    f"<td class='r'><button class='sellbtn' data-sym='{esc(sym)}'>"
+                    f"Sell</button></td></tr>")
     pos_tbl = ("<tr><th>Stock</th><th>Sleeve</th><th>Entry date</th><th class='r'>Qty</th>"
                "<th class='r'>Avg. buy</th><th class='r'>LTP (close)</th><th class='r'>"
-               "Invested Rs.</th><th class='r'>Unrealized P&L</th><th class='r'>Stop</th></tr>"
+               "Invested Rs.</th><th class='r'>Unrealized P&L</th><th class='r'>Stop</th>"
+               "<th class='r'>Manual</th></tr>"
                + "".join(prow)) if prow else "<tr><td class='muted'>no open positions</td></tr>"
 
     # ---- armed actions (tomorrow's orders) ----
@@ -488,6 +545,15 @@ def build() -> str:
  .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px; }}
  .chd {{ display:flex; justify-content:space-between; align-items:baseline;
         font-size:12.5px; margin-bottom:1px; }}
+ .sellbtn {{ background:{SURF}; color:{RED}; border:1px solid {GRID}; border-radius:6px;
+        padding:2px 10px; font-size:11.5px; font-weight:600; cursor:pointer;
+        font-family:inherit; }}
+ .sellbtn:hover, .sellbtn:focus {{ background:{RED}; color:{SURF}; border-color:{RED};
+        outline:2px solid transparent; outline-offset:2px; }}
+ .sellbtn:focus-visible {{ outline:2px solid {BLUE}; }}
+ .sellbtn.done {{ color:{GREEN2}; border-color:{GREEN2}; }}
+ code {{ font-family:Consolas,ui-monospace,monospace; background:{PAGE};
+        border:1px solid {GRID}; border-radius:4px; padding:1px 5px; font-size:12px; }}
 </style>
 <div class='wrap'>
  <h1>nse_paper_v1 - paper trading book</h1>
@@ -510,6 +576,8 @@ def build() -> str:
  <h2>NAV curve (live era)</h2><div class='card'>{svg_curve(curve)}</div>
  <h2>Open positions (marked to last close)</h2><table>{pos_tbl}</table>
  <h2>Orders armed for the next open</h2><table>{arm_tbl}</table>
+ <h2>Manual sell (discretionary override)</h2>
+ {manual_block(g46, led, esc)}
  <h2>Waiting stocks (what-if) - candidates skipped at the {C.MAX_CONCURRENT_POSITIONS}/{C.MAX_CONCURRENT_POSITIONS} cap, tracked as if we had bought them</h2>
  {shadow_block(esc)}
  <h2>Trade blotter (closed round trips; hover Costs for the full breakdown)</h2>
@@ -538,6 +606,32 @@ def build() -> str:
   position closes, and every open position still owes a sell leg (another 0.1% STT plus
   the flat Rs.{C.COSTS_EQUITY_DELIVERY['dp_charge_sell_inr']:.2f} DP charge) when it
   exits. See DECISIONS.md #003.</div>
+<script>
+// Manual-sell buttons (DECISIONS #014). This page is static -- no server -- so the button
+// copies the command that queues the sell. p11 executes it at the next run's open.
+document.querySelectorAll('.sellbtn').forEach(function (b) {{
+  b.addEventListener('click', function () {{
+    var sym = b.dataset.sym;
+    var cmd = 'python manual_sell.py ' + sym;
+    if (!window.confirm('Queue a MANUAL SELL of ' + sym + '?\\n\\n' +
+        'This copies the command below. Paste it in a terminal in the project folder to ' +
+        'queue the order.\\n\\n  ' + cmd + '\\n\\n' +
+        'It fills at the NEXT session\\'s open and is tagged reason="manual" in the ledger.')) {{
+      return;
+    }}
+    var done = function () {{
+      b.textContent = 'Copied';
+      b.classList.add('done');
+      setTimeout(function () {{ b.textContent = 'Sell'; b.classList.remove('done'); }}, 2500);
+    }};
+    if (navigator.clipboard && navigator.clipboard.writeText) {{
+      navigator.clipboard.writeText(cmd).then(done, function () {{ window.prompt('Copy this command:', cmd); }});
+    }} else {{
+      window.prompt('Copy this command:', cmd);
+    }}
+  }});
+}});
+</script>
  <div class='sub' style='margin-top:6px'>Library and charts cover the LIVE ERA ONLY.
   Backtest trades are deliberately never merged in - see DECISIONS.md #001-b. Chart lines
   are daily CLOSES while fills happen at the OPEN, so a marker may sit off the line on a
