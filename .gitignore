@@ -23,3 +23,7 @@ reports/
 # learning/summary notes - kept local, not published
 docs/*_learning.docx
 docs/*_summary.docx
+
+# internal build prompts/logs - kept local
+*_kickoff_prompt.txt
+SESSION_LOG.md
