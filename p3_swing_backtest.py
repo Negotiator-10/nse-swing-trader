@@ -38,17 +38,33 @@ DC = C.COSTS_EQUITY_DELIVERY
 
 
 # ---------------------------------------------------------------- cost model
+# Split into the two LEGS a real broker actually charges (DECISIONS #016). Buy-side costs
+# are incurred the moment you buy; sell-side when you sell. delivery_buy_cost +
+# delivery_sell_cost == delivery_roundtrip_cost EXACTLY, so the lifetime total is unchanged
+# -- only the TIMING differs, which is the whole point of the fix.
+def delivery_buy_cost(buy_val: float) -> float:
+    """NSE equity-DELIVERY cost (INR) charged on the BUY leg. Brokerage=0 (Zerodha)."""
+    stt = DC["stt_pct_each_side"] * buy_val
+    exch = DC["exch_txn_pct"] * buy_val
+    sebi = DC["sebi_pct"] * buy_val
+    stamp = DC["stamp_buy_pct"] * buy_val                   # buy side only
+    gst = DC["gst_pct"] * (exch + sebi)
+    return float(stt + exch + sebi + stamp + gst)
+
+
+def delivery_sell_cost(sell_val: float) -> float:
+    """NSE equity-DELIVERY cost (INR) charged on the SELL leg, incl. the flat DP charge."""
+    stt = DC["stt_pct_each_side"] * sell_val
+    exch = DC["exch_txn_pct"] * sell_val
+    sebi = DC["sebi_pct"] * sell_val
+    gst = DC["gst_pct"] * (exch + sebi)
+    dp = DC["dp_charge_sell_inr"]                           # flat, on sell
+    return float(stt + exch + sebi + gst + dp)
+
+
 def delivery_roundtrip_cost(buy_val: float, sell_val: float) -> float:
     """Total NSE equity-DELIVERY cost (INR) for a buy+sell round trip. Brokerage=0 (Zerodha)."""
-    turnover = buy_val + sell_val
-    stt = DC["stt_pct_each_side"] * (buy_val + sell_val)
-    exch = DC["exch_txn_pct"] * turnover
-    sebi = DC["sebi_pct"] * turnover
-    stamp = DC["stamp_buy_pct"] * buy_val
-    brokerage = DC["brokerage_per_order_inr"] * 0.0        # free on delivery
-    gst = DC["gst_pct"] * (brokerage + exch + sebi)
-    dp = DC["dp_charge_sell_inr"]                          # flat, on sell
-    return float(stt + exch + sebi + stamp + brokerage + gst + dp)
+    return delivery_buy_cost(buy_val) + delivery_sell_cost(sell_val)
 
 
 def net_trade_return(entry_px: float, exit_px: float) -> tuple[float, float]:

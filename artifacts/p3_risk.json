@@ -11,16 +11,16 @@
   ],
   "drift_zero": true,
   "n_snapshots": 441050,
-  "n_tradable": 385187,
-  "median_var_frac": 0.21233503004816723,
-  "median_es_frac": 0.28166733965213087,
+  "n_tradable": 420119,
+  "median_var_frac": 0.19254037926262094,
+  "median_es_frac": 0.2506711691258256,
   "gates": {
     "G3.1": {
       "unit_shares": 12,
       "unit_ok": true,
-      "n_tradable": 385187,
-      "n_sizeable": 378814,
-      "max_risk_used": 5399.99808026694,
+      "n_tradable": 420119,
+      "n_sizeable": 413746,
+      "max_risk_used": 5399.997631520694,
       "budget": 5400.0
     },
     "G3.2": {
@@ -29,8 +29,8 @@
       "garch_converged": true,
       "min_exceedances_ok": true,
       "min_n_u": 81,
-      "xi_median": 0.11393957015010944,
-      "tradable_coverage": 0.8733408910554359
+      "xi_median": 0.09340972431136432,
+      "tradable_coverage": 0.9525427956014058
     },
     "G3.3": {
       "probes": 40,
@@ -38,7 +38,7 @@
       "worst_abs_diff": 0.0
     },
     "G3.5_engine": {
-      "hash": "cc2cedaa4e1e2f83e8fd51d166dc73d266d5d4a005dc203763ad4e6defd58a81",
+      "hash": "5dc44cbced1823e40cd27794c52604be2bba75f80d3e136c06fe1c77a78b4b5b",
       "identical": true
     },
     "all_passed": true

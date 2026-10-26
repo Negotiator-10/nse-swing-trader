@@ -191,6 +191,44 @@ def _log_returns(close: np.ndarray) -> np.ndarray:
     return np.log(close[1:] / close[:-1])
 
 
+def fit_returns(close: np.ndarray) -> np.ndarray:
+    """Return series used for FITTING, with bad-print pairs folded out (DECISIONS #019).
+
+    A bad print is one wrong closing price between two correct ones, so it produces a
+    matched pair of monstrous opposite returns (BAJFINANCE 2005: +4.696 then -4.695 in
+    logs). Left alone they dominate the likelihood: ABB's single bad bar collapsed its GJR
+    fit to alpha=0, gamma=0.
+
+    A GARCH recursion cannot skip an observation -- h_t is defined from h_{t-1} -- so the
+    pair is FOLDED into the move it actually spans: r[i] becomes r[i] + r[i+1] (exactly
+    log(close[i+2]/close[i]), the true two-day return) and r[i+1] becomes 0. Nothing is
+    invented; the cumulative price path is preserved exactly and the two impossible
+    observations are re-attributed to the one real move between them.
+
+    DERIVED FROM PRICES ALONE, deliberately. An earlier version read a `drop_from_fit`
+    column, which only the panel builder had -- the as-of recompute in snapshot_asof takes
+    a bare price array, so the two paths disagreed and gate G3.3 caught it (2/40 probes,
+    worst diff 31.7). Both paths now call THIS function, so they cannot drift apart, and
+    the repair depends only on close[:i+2] -- strictly causal by construction.
+    """
+    r = _log_returns(close)
+    if not getattr(C, "USE_CLEAN_TAPE", False) or len(r) < 2:
+        return r
+    r = r.copy()
+    i = 0
+    while i < len(r) - 1:
+        a, b = abs(r[i]), abs(r[i + 1])
+        hi, lo = (a, b) if a >= b else (b, a)
+        if (hi >= C.CLEAN_REVERT_LOGRET and np.sign(r[i + 1]) != np.sign(r[i])
+                and lo >= C.CLEAN_REVERT_FRAC * hi):
+            r[i] = r[i] + r[i + 1]
+            r[i + 1] = 0.0
+            i += 2
+        else:
+            i += 1
+    return r
+
+
 def _refit_index(i: int) -> int:
     """Deterministic last-refit index at decision day i (>= MIN_WIN). Cadence anchored at
     MIN_WIN so an independent as-of recompute lands on the identical fit window."""
@@ -211,7 +249,7 @@ def snapshot_asof(close: np.ndarray, i: int) -> dict | None:
     """Risk snapshot for a decision at the CLOSE of return-index i, using ONLY close[:i+2]
     (i indexes the RETURN series; close is one longer). Independent, from-scratch path used
     both by the panel builder's logic and by the causality gate."""
-    r = _log_returns(close)
+    r = fit_returns(close)
     if i < MIN_WIN or i >= len(r):
         return None
     refit_idx = _refit_index(i)
@@ -251,7 +289,7 @@ def build_symbol_panel(g: pd.DataFrame) -> pd.DataFrame:
     close = g["close"].to_numpy(float)
     dates = g["date"].to_numpy()
     split = g["split"].to_numpy()
-    r = _log_returns(close)
+    r = fit_returns(close)          # same function the as-of gate uses -- cannot drift (G3.3)
     N = len(r)
     rows = []
     if N <= MIN_WIN:
@@ -430,7 +468,14 @@ def main() -> int:
     print("  PHASE 3 - per-stock GARCH-EVT risk engine + VaR sizing")
     print(f"  horizon={H}d  q={Q:.2f}  refit_every={REFIT_EVERY}  min_win={MIN_WIN}")
     print("=" * 64)
-    panel = pd.read_parquet(C.DATA_DIR / "swing_daily.parquet")
+    src = (C.CLEAN_TAPE_PATH if (getattr(C, "USE_CLEAN_TAPE", False)
+                                 and C.CLEAN_TAPE_PATH.exists())
+           else C.DATA_DIR / "swing_daily.parquet")
+    panel = pd.read_parquet(src)
+    print(f"  tape: {src.name}" + ("  (CLEANED - DECISIONS #019)" if src == C.CLEAN_TAPE_PATH
+                                   else "  (original)"))
+    if "drop_from_fit" in panel.columns:
+        print(f"  bad-print returns folded out of the fit: {int(panel['drop_from_fit'].sum())}")
     print(f"  loaded {len(panel):,} bars, {panel['symbol'].nunique()} symbols")
     print("\n  building walk-forward risk snapshots (numba GJR + EVT/GPD):")
     risk = build_risk_panel(panel)

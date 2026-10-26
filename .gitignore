@@ -27,3 +27,9 @@ docs/*_summary.docx
 # internal build prompts/logs - kept local
 *_kickoff_prompt.txt
 SESSION_LOG.md
+
+# discretionary override tools - kept local, not published
+manual_sell.py
+p13_live_monitor.py
+artifacts/hourly_monitor.json
+data/manual_orders.json

@@ -1,0 +1,46 @@
+{
+  "n_live": 11,
+  "n_backtest_oos": 667,
+  "min_trades_for_verdict": 30,
+  "net_bp": {
+    "live_mean": -403.94097754065655,
+    "live_ci95": [
+      -546.0292072385624,
+      -271.52960756636867
+    ],
+    "backtest_mean": -81.46208646472641,
+    "backtest_within_live_ci": false
+  },
+  "days_held": {
+    "live_mean": 9.363636363636363,
+    "backtest_mean": 15.334332833583208
+  },
+  "win_rate": {
+    "live": 0.0,
+    "backtest": 0.3523238380809595
+  },
+  "exit_mix": {
+    "live": {
+      "trend": 0.7272727272727273,
+      "stop": 0.18181818181818182,
+      "maxhold": 0.09090909090909091
+    },
+    "backtest": {
+      "trend": 0.3988005997001499,
+      "maxhold": 0.3328335832083958,
+      "stop": 0.22338830584707647,
+      "stop_gap": 0.035982008995502246,
+      "eod": 0.008995502248875561
+    }
+  },
+  "cost_pct_of_notional": {
+    "live_mean": 0.3740339251313424
+  },
+  "stop_exits_live": 2,
+  "finding_001c_measurable": false,
+  "era_trading_days": 29,
+  "maxhold_days": 25,
+  "duration_comparison_censored": true,
+  "maxhold_exit_possible_yet": true,
+  "verdict": "ACCUMULATING - 11 of 30 trades. Differences at this sample size are noise; no verdict is rendered by design."
+}

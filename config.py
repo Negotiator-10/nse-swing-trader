@@ -194,6 +194,28 @@ MAX_CONCURRENT_POSITIONS = 6           # hard cap on simultaneous open names
 MAX_POSITION_NOTIONAL_FRAC = 0.20      # <= 20% of current equity in any single name
 MAX_GROSS_EXPOSURE_FRAC = 1.00         # long-only, no leverage: invested <= equity
 
+# ---- entry ranking: WHICH candidate gets a scarce slot (DECISIONS #018) ----
+# Until now the answer was ALPHABETICAL, by accident: Market.syms is sorted(), step_day
+# section (F) armed entries in ascending symbol index, and section (B) consumed that dict
+# in insertion order. Harmless at 20 names where signals were scarce; decisive after #012
+# widened the universe to 95, where ~37 candidates compete for 6 slots EVERY day. Evidence:
+# all 10 slot-fills of the live era begin with A or B, 4 of them Adani-group.
+#
+# ts_mom is a TIME-SERIES momentum filter (Moskowitz-Ooi-Pedersen): it says "is this name
+# trending?", not "which trending name is best". The standard fix is a CROSS-SECTIONAL
+# overlay (Jegadeesh-Titman): score every armed candidate, fill free slots best-first.
+#
+# SCORE = (L-day return) / (stdev of daily log returns over the same L) -- risk-adjusted
+# momentum. L reuses ts_mom's OWN 126-day lookback, so this introduces NO new tuned
+# parameter. Any constant scaling (e.g. sqrt(252)) is monotone and would not change the
+# ranking, so it is omitted. Scored at the decision CLOSE = same causality as the signal.
+#
+# SCOPE: ranking allocates FREE slots only. It never displaces an incumbent -- that is
+# rotation (DECISIONS #005), a separate feature awaiting the skip/shadow evidence.
+# REVERSIBLE: set ENTRY_RANKING="alpha" to restore the legacy alphabetical order exactly.
+ENTRY_RANKING = "xs_score"       # "xs_score" (cross-sectional) | "alpha" (legacy)
+ENTRY_SCORE_LOOKBACK = 126       # == ts_mom's ret126 horizon; NOT independently tuned
+
 # ---- rolling-drawdown kill switch ----
 KILL_DD_THRESHOLD = 0.20         # flatten ALL + halt when drawdown from peak breaches 20%
 KILL_COOLDOWN_DAYS = 21          # stay halted this many trading days, then re-arm (peak reset)
@@ -251,6 +273,64 @@ PAPER_MANUAL_ORDERS_PATH = DATA_DIR / "manual_orders.json"    # user-issued disc
 # ruling: "my capital is 60k, not the simulation's grown equity"). History before this
 # date is signal/risk warmup + backtest evidence only; the live ledger begins here.
 PAPER_ERA_START = "2026-07-17"        # first live decision day (Fri close -> Mon fills)
+
+# ---- ERA 2: grandfathered handover to the cleaned data (DECISIONS #019, user ruling) ----
+# The live era is REPLAYED FROM SCRATCH every run, so any input change rewrites the whole
+# recorded past. Cleaning the tape (#019) would therefore have re-based the book and moved
+# holdings the user never sold. Their ruling: "whatever current holdings are, let them be --
+# when we sell and then buy new stock, buy with the updated system."
+#
+# Era 2 implements exactly that. A SEED file (a snapshot of paper_state.json taken at the
+# handover) carries the open positions across untouched -- real entry prices, entry dates,
+# stops, share counts, cash and drawdown peak. The replay then starts at the seed's OWN
+# k_next, so era 1 is never recomputed and every decision from the handover onward uses the
+# cleaned data.
+#
+# Consequences, stated rather than buried:
+#   * era 1 (2026-07-17..handover) ran on CONTAMINATED data. Its 11 closed trades are
+#     archived under data/era1/ and are NOT mixed into era 2's ledger.
+#   * Phase 5's 30-trade verdict counts ERA 2 ONLY. Era 1 cannot be pooled with it.
+#   * the grandfathered positions were selected by the OLD numbers. Bounded: every one
+#     exits within the 25-day max hold, so the book is fully clean-selected within ~5 weeks.
+#   * the drawdown peak carries over truthfully (the book really did peak at ~60,124), so
+#     the kill switch is NOT given a fresh start.
+# Delete the seed file to fall back to the original single-era replay.
+PAPER_ERA2_SEED_PATH = DATA_DIR / "paper_era2_seed.json"   # presence activates era 2
+PAPER_ERA1_ARCHIVE_DIR = DATA_DIR / "era1"                 # era-1 ledger/state/curve
+
+# ================================================================ DATA CLEANING (#019)
+# 117 bars across 37 of the 95 symbols carry moves that cannot be real prices. They enter
+# the GARCH/EVT fit as ordinary observations and dominate it: ABB's single +443% bar gave
+# it skew 28.3 / excess kurtosis 1,555 and collapsed the GJR fit to alpha=0, gamma=0.
+#
+# yfinance auto_adjust=True is ALREADY applied in p1 and handles every split Yahoo knows
+# about. Verified 2026-08-25: NOT ONE flagged jump matches a known split -- what survives
+# are DEMERGERS (VEDL, TMPV) and older actions missing from Yahoo's database. So the feed
+# cannot classify these; the tape has to.
+#
+# Three-way classification (user ruling 2026-08-25, DECISIONS #019):
+#   jumps and REVERTS next day      -> bad print. Exclude both returns from fitting; the
+#                                      bar is marked untradeable. Nothing is interpolated:
+#                                      we do not invent a price that never traded.
+#   one-way, matches a known split  -> already handled upstream by auto_adjust.
+#   one-way, large, no known split  -> CORPORATE ACTION. Back-adjust prior prices onto one
+#                                      continuous series and KEEP TRADING the symbol.
+#
+# The classifier leans on a physical fact: NSE price bands cap most scrips at 20% a day, so
+# a genuine one-way move past 40% in a NIFTY-100 name is effectively impossible.
+# HONEST LIMIT: the adjustment ratio is INFERRED from the observed jump, so it absorbs that
+# day's real market move -- an error of roughly 1.5% on a 65% jump. Every adjustment is
+# logged so a hand-verified ratio can replace it. A demerger also splices two different
+# entities into one series (pre-demerger VEDL was a bigger company); vendors do the same,
+# but state it, never bury it.
+CLEAN_ONEWAY_LOGRET = 0.40    # one-way bar: |log-return| above this = corporate action
+CLEAN_REVERT_LOGRET = 0.25    # spike-revert: looser, because the reversal is self-verifying
+CLEAN_REVERT_FRAC = 0.70      # next bar must undo >= this fraction of the move to count
+CLEAN_TAPE_PATH = DATA_DIR / "swing_daily_clean.parquet"      # cleaned research tape
+CLEAN_REPORT_PATH = ARTIFACTS_DIR / "p1b_clean_report.json"   # full audit of every change
+# Master switch. False = the original tape, byte-for-byte previous behaviour (reversible).
+# True = p8/p9 read the cleaned tape and honour its drop_from_fit column.
+USE_CLEAN_TAPE = True
 
 # ---------------------------------------------------------------- reproducibility
 SEED = 42

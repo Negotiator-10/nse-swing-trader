@@ -1,19 +1,19 @@
 {
   "phase": 4,
-  "run_mode": "REPLAY",
+  "run_mode": "LIVE",
   "mode_info": {
-    "keys_present": false,
-    "token_present": false,
-    "requested": "REPLAY",
-    "note": "REPLAY (default). Set RUN_MODE=LIVE + env secrets to arm the live pull."
+    "keys_present": true,
+    "token_present": true,
+    "requested": "LIVE",
+    "note": "LIVE armed: Kite key+token present in env (values never read here)."
   },
   "gates": {
     "G4.1": {
       "max_equity_err": 0.0,
-      "n_trades_batch": 2618,
-      "n_trades_online": 2618,
+      "n_trades_batch": 2451,
+      "n_trades_online": 2451,
       "trades_identical": true,
-      "equity_hash": "5a1795c42f9c605b3fd477bff2ac588c4cda218e91dac62fe42c850e0544d7d2"
+      "equity_hash": "f5bbcb284907c59d0e991a0fc44918175a66d8cb3ed6ade0e6bd2ed11f12c5a0"
     },
     "G4.2": {
       "fault_injection": {
@@ -41,28 +41,494 @@
     },
     "G4.4": {
       "tight_cap": {
-        "n_skips": 158458,
+        "n_skips": 173077,
         "max_concurrent": 2
       },
       "kill": {
-        "kill_exits": 51,
+        "kill_exits": 40,
         "fills_during_halt": 0,
-        "crash_at": "2018-07-13",
-        "mtm_shock": 0.5330442665189008
+        "crash_at": "2015-12-09",
+        "mtm_shock": 0.48913910891486645
       }
     },
     "G4.5": {
-      "equity_hash": "5a1795c42f9c605b3fd477bff2ac588c4cda218e91dac62fe42c850e0544d7d2",
+      "equity_hash": "f5bbcb284907c59d0e991a0fc44918175a66d8cb3ed6ade0e6bd2ed11f12c5a0",
       "rerun_identical": true,
-      "run_mode_stamped": "REPLAY",
+      "run_mode_stamped": "LIVE",
       "secrets_presence_only": {
-        "keys_present": false,
-        "token_present": false
+        "keys_present": true,
+        "token_present": true
       }
     },
     "all_passed_replay": true,
     "G4.6": {
-      "verdict": "SKIPPED: no key/token in env (REPLAY run). Rerun with RUN_MODE=LIVE + secrets loaded after 15:30 IST."
+      "n_symbols": 95,
+      "n_fresh": 95,
+      "n_stale": 0,
+      "stale_symbols": [],
+      "dead_man": false,
+      "bar_date": "2026-09-03",
+      "source_diff_bp": {
+        "ABB": -12.7,
+        "ADANIENSOL": 24.2,
+        "ADANIENT": 30.7,
+        "ADANIGREEN": 64.4,
+        "ADANIPORTS": 0.0,
+        "ADANIPOWER": -37.1,
+        "AMBUJACEM": 0.0,
+        "APOLLOHOSP": -54.8,
+        "ASIANPAINT": -75.4,
+        "AXISBANK": 0.0,
+        "BAJAJ-AUTO": 6.0,
+        "BAJAJFINSV": 10.0,
+        "BAJAJHLDNG": 60.0,
+        "BAJFINANCE": -18.4,
+        "BANKBARODA": 38.3,
+        "BEL": 24.4,
+        "BHARTIARTL": -39.8,
+        "BOSCHLTD": 8.2,
+        "BPCL": -76.5,
+        "BRITANNIA": 22.7,
+        "CANBK": 0.8,
+        "CGPOWER": 66.1,
+        "CHOLAFIN": 64.9,
+        "CIPLA": 46.0,
+        "COALINDIA": 12.5,
+        "CUMMINSIND": 22.2,
+        "DIVISLAB": 0.0,
+        "DLF": -85.8,
+        "DMART": 32.3,
+        "DRREDDY": 8.5,
+        "EICHERMOT": 0.0,
+        "ETERNAL": -15.2,
+        "GAIL": 61.3,
+        "GODREJCP": 32.6,
+        "GRASIM": -64.0,
+        "HAL": 47.0,
+        "HCLTECH": -28.8,
+        "HDFCAMC": 0.0,
+        "HDFCBANK": -48.3,
+        "HDFCLIFE": -34.6,
+        "HINDALCO": 38.7,
+        "HINDUNILVR": -15.4,
+        "HINDZINC": -47.3,
+        "ICICIBANK": -29.0,
+        "INDHOTEL": 34.9,
+        "INDIGO": 0.0,
+        "INFY": -5.4,
+        "IOC": 27.0,
+        "IRFC": -2.4,
+        "ITC": 28.0,
+        "JINDALSTEL": 17.1,
+        "JSWSTEEL": 30.0,
+        "KOTAKBANK": -3.5,
+        "LODHA": -45.5,
+        "LT": -21.3,
+        "LTM": -57.9,
+        "M&M": -36.2,
+        "MARUTI": -3.7,
+        "MAXHEALTH": 21.9,
+        "MAZDOCK": 0.0,
+        "MOTHERSON": 44.2,
+        "MUTHOOTFIN": 45.6,
+        "NESTLEIND": 18.0,
+        "NTPC": 53.2,
+        "ONGC": 3.0,
+        "PFC": 33.8,
+        "PIDILITIND": 3.6,
+        "PNB": -8.7,
+        "POWERGRID": -37.6,
+        "RECLTD": -10.9,
+        "RELIANCE": -45.8,
+        "SBILIFE": 1.1,
+        "SBIN": -11.5,
+        "SHREECEM": 18.4,
+        "SHRIRAMFIN": -17.2,
+        "SIEMENS": 12.2,
+        "SOLARINDS": 36.6,
+        "SUNPHARMA": 14.7,
+        "TATACONSUM": 24.1,
+        "TATAPOWER": 14.2,
+        "TATASTEEL": 5.4,
+        "TCS": -23.1,
+        "TECHM": -37.7,
+        "TITAN": -12.0,
+        "TMPV": 6.3,
+        "TORNTPHARM": 58.4,
+        "TRENT": -22.5,
+        "TVSMOTOR": 20.5,
+        "ULTRACEMCO": 0.0,
+        "UNIONBANK": -45.9,
+        "UNITDSPR": 13.2,
+        "VBL": -29.8,
+        "VEDL": 5.3,
+        "WIPRO": -62.0,
+        "ZYDUSLIFE": 4.2
+      },
+      "source_consistent_lt_2pct": true,
+      "n_revisions_detected": 2008,
+      "n_revisions_newly_logged": 99,
+      "revisions": [
+        {
+          "symbol": "ABB",
+          "date": "2026-07-29 00:00:00",
+          "field": "close",
+          "frozen": 7314.5,
+          "kite": 7310.5,
+          "diff_bp": -5.47,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-07-30 00:00:00",
+          "field": "close",
+          "frozen": 7290.0,
+          "kite": 7291.5,
+          "diff_bp": 2.06,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-07-31 00:00:00",
+          "field": "close",
+          "frozen": 7201.5,
+          "kite": 7284.5,
+          "diff_bp": 115.25,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-03 00:00:00",
+          "field": "close",
+          "frozen": 7655.0,
+          "kite": 7601.0,
+          "diff_bp": -70.54,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-04 00:00:00",
+          "field": "close",
+          "frozen": 7763.0,
+          "kite": 7700.0,
+          "diff_bp": -81.15,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-05 00:00:00",
+          "field": "close",
+          "frozen": 7720.0,
+          "kite": 7690.5,
+          "diff_bp": -38.21,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-07 00:00:00",
+          "field": "close",
+          "frozen": 7596.0,
+          "kite": 7600.0,
+          "diff_bp": 5.27,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-10 00:00:00",
+          "field": "close",
+          "frozen": 7672.0,
+          "kite": 7649.5,
+          "diff_bp": -29.33,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-11 00:00:00",
+          "field": "close",
+          "frozen": 7577.0,
+          "kite": 7611.5,
+          "diff_bp": 45.53,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-12 00:00:00",
+          "field": "close",
+          "frozen": 7716.5,
+          "kite": 7710.0,
+          "diff_bp": -8.42,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-13 00:00:00",
+          "field": "close",
+          "frozen": 7709.0,
+          "kite": 7710.0,
+          "diff_bp": 1.3,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-17 00:00:00",
+          "field": "close",
+          "frozen": 7685.5,
+          "kite": 7660.0,
+          "diff_bp": -33.18,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-18 00:00:00",
+          "field": "close",
+          "frozen": 7589.0,
+          "kite": 7546.0,
+          "diff_bp": -56.66,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-19 00:00:00",
+          "field": "close",
+          "frozen": 7395.0,
+          "kite": 7430.0,
+          "diff_bp": 47.33,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-20 00:00:00",
+          "field": "close",
+          "frozen": 7457.0,
+          "kite": 7479.0,
+          "diff_bp": 29.5,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-25 00:00:00",
+          "field": "high",
+          "frozen": 7624.5,
+          "kite": 7627.0,
+          "diff_bp": 3.28,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-25 00:00:00",
+          "field": "close",
+          "frozen": 7615.0,
+          "kite": 7627.0,
+          "diff_bp": 15.76,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-27 00:00:00",
+          "field": "low",
+          "frozen": 7494.0,
+          "kite": 7490.0,
+          "diff_bp": -5.34,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ABB",
+          "date": "2026-08-27 00:00:00",
+          "field": "close",
+          "frozen": 7499.5,
+          "kite": 7490.0,
+          "diff_bp": -12.67,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        },
+        {
+          "symbol": "ADANIENSOL",
+          "date": "2026-07-29 00:00:00",
+          "field": "close",
+          "frozen": 1663.0,
+          "kite": 1667.8,
+          "diff_bp": 28.86,
+          "detected_utc": "2026-09-03T10:33:42+00:00"
+        }
+      ],
+      "decision_date": "2026-09-03",
+      "n_new_bars": 3705,
+      "n_fresh_risk_snapshots": 475,
+      "open_positions": {
+        "SIEMENS": {
+          "shares": 2,
+          "sleeve": "ts_mom",
+          "entry_px": 3969.29
+        },
+        "TITAN": {
+          "shares": 2,
+          "sleeve": "ts_mom",
+          "entry_px": 5086.43
+        },
+        "MOTHERSON": {
+          "shares": 65,
+          "sleeve": "ts_mom",
+          "entry_px": 171.2
+        },
+        "ZYDUSLIFE": {
+          "shares": 7,
+          "sleeve": "ts_mom",
+          "entry_px": 1160.35
+        },
+        "ETERNAL": {
+          "shares": 34,
+          "sleeve": "ts_mom",
+          "entry_px": 327.9
+        },
+        "GRASIM": {
+          "shares": 2,
+          "sleeve": "ts_mom",
+          "entry_px": 3276.08
+        }
+      },
+      "armed_entries_next_open": {
+        "ABB": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "BAJAJ-AUTO": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "BAJAJHLDNG": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "BOSCHLTD": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "CHOLAFIN": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "DIVISLAB": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "DLF": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "GAIL": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "HAL": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "HINDALCO": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "HINDZINC": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "ICICIBANK": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "INDHOTEL": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "JSWSTEEL": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "KOTAKBANK": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "LODHA": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "MAZDOCK": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "PIDILITIND": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "SOLARINDS": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "TECHM": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "TORNTPHARM": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "TVSMOTOR": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "UNIONBANK": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        },
+        "UNITDSPR": {
+          "sleeve": "ts_mom",
+          "budget_inr": 5400.0
+        }
+      },
+      "armed_exits_next_open": {},
+      "equity_close": 56485.15,
+      "state_persisted": "paper_state.json",
+      "ledger_rows": 14,
+      "skips_logged": 173,
+      "shadow": {
+        "decision_date": "2026-09-03",
+        "n_waiting": 30,
+        "waiting_symbols": [
+          "ADANIPOWER",
+          "BAJAJ-AUTO",
+          "BAJAJHLDNG",
+          "BAJFINANCE",
+          "CGPOWER",
+          "CHOLAFIN",
+          "DLF",
+          "EICHERMOT",
+          "GAIL",
+          "GAIL",
+          "HAL",
+          "HDFCAMC",
+          "HINDALCO",
+          "HINDZINC",
+          "ICICIBANK",
+          "INDHOTEL",
+          "INDIGO",
+          "JSWSTEEL",
+          "KOTAKBANK",
+          "LODHA",
+          "M&M",
+          "MAZDOCK",
+          "PIDILITIND",
+          "SHRIRAMFIN",
+          "SOLARINDS",
+          "TECHM",
+          "TVSMOTOR",
+          "TVSMOTOR",
+          "UNIONBANK",
+          "UNITDSPR"
+        ],
+        "mean_waiting_ret_pct": -2.3385696855335625,
+        "mean_hold_ret_pct": -1.0363665884435787,
+        "edge_pct": -1.3022030970899838
+      },
+      "manual_orders": [],
+      "verdict": "LIVE SMOKE OK: real EOD bar -> one decision -> paper actions recorded"
     }
   },
   "seed": 42,

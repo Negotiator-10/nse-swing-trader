@@ -12,112 +12,159 @@
     "ts_mom": 1.0
   },
   "combined_exposure_turnover": {
-    "n_trades": 2618,
-    "turnover_x_per_yr": 6.603999478506903,
-    "win_rate": 0.31856378915202443,
-    "mean_exposure": 0.379717489543987,
+    "n_trades": 2441,
+    "turnover_x_per_yr": 6.3325652073712355,
+    "win_rate": 0.33797623924621056,
+    "mean_exposure": 0.3566456918906566,
     "max_concurrent": 6,
-    "n_skips": 134834
+    "n_skips": 148319
   },
   "metrics": {
     "combo_full": {
       "n_days": 8968,
       "years": 35.58730158730159,
-      "cagr": 0.04403611951830455,
-      "ann_sharpe": 0.29355506520256225,
-      "max_drawdown": -0.5872195421659892,
-      "total_return": 3.6348425967455027,
-      "end_equity": 278090.55580473016
+      "cagr": 0.041695077851050755,
+      "ann_sharpe": 0.2686776394502446,
+      "max_drawdown": -0.6349448036390313,
+      "total_return": 3.278982516075107,
+      "end_equity": 256738.95096450645
     },
     "combo_IS": {
       "n_days": 6278,
       "years": 24.91269841269841,
-      "cagr": 0.04559050503959816,
-      "ann_sharpe": 0.28451907894273953,
-      "max_drawdown": -0.5872195421659892,
-      "total_return": 2.0363404721887575,
-      "end_equity": 182180.42833132544
+      "cagr": 0.04721211807119907,
+      "ann_sharpe": 0.28056055136848584,
+      "max_drawdown": -0.6349448036390313,
+      "total_return": 2.15585775856724,
+      "end_equity": 189351.46551403438
     },
     "combo_OOS": {
       "n_days": 2690,
       "years": 10.674603174603174,
-      "cagr": 0.04010807363235447,
-      "ann_sharpe": 0.5903895557673903,
-      "max_drawdown": -0.21009781105554926,
-      "total_return": 0.5216187933127276,
-      "end_equity": 278090.55580473016
+      "cagr": 0.02811156164312356,
+      "ann_sharpe": 0.38563144540358785,
+      "max_drawdown": -0.2068665340814697,
+      "total_return": 0.34438858596558974,
+      "end_equity": 256738.95096450645
     },
     "ts_mom_alone_OOS": {
       "n_days": 2690,
       "years": 10.674603174603174,
-      "cagr": 0.04010807363235447,
-      "ann_sharpe": 0.5903895557673903,
-      "max_drawdown": -0.21009781105554926,
-      "total_return": 0.5216187933127276,
-      "end_equity": 278090.55580473016
+      "cagr": 0.02811156164312356,
+      "ann_sharpe": 0.38563144540358785,
+      "max_drawdown": -0.2068665340814697,
+      "total_return": 0.34438858596558974,
+      "end_equity": 256738.95096450645
     },
     "buy_hold_OOS": {
       "n_days": 2690,
       "years": 10.674603174603174,
-      "cagr": 0.25504502017792907,
-      "ann_sharpe": 0.9626045186681906,
-      "max_drawdown": -0.4977395194467996,
-      "total_return": 10.3018341151416,
-      "end_equity": 89437488.83018263
+      "cagr": 0.16593994763153552,
+      "ann_sharpe": 0.9289977901090595,
+      "max_drawdown": -0.3698565819638683,
+      "total_return": 4.14922404522083,
+      "end_equity": 22695776.57974634
     },
     "buy_hold_full": {
       "n_days": 8968,
       "years": 35.58730158730159,
-      "cagr": 0.22790821089701008,
-      "ann_sharpe": 0.6394743901281446,
-      "max_drawdown": -0.7045023180614745,
-      "total_return": 1488.9575583473668,
-      "end_equity": 89437488.83018263
+      "cagr": 0.18149071164304043,
+      "ann_sharpe": 0.5743147004398415,
+      "max_drawdown": -0.6800054392789645,
+      "total_return": 377.09361935198194,
+      "end_equity": 22695776.57974634
     }
   },
   "gates": {
     "G3.4a_killswitch": {
       "fills_during_halt": 0,
-      "kill_exits": 51,
-      "crash_at": "2018-07-13",
-      "exposure_at_crash": 0.6424591850784996,
-      "mtm_shock": 0.5330442665189008
+      "kill_exits": 49,
+      "crash_at": "2018-07-16",
+      "exposure_at_crash": 0.6085085333489277,
+      "mtm_shock": 0.5069913015862744
     },
     "G3.4b_capbinding": {
-      "n_skips": 158458,
+      "n_skips": 173290,
       "skip_reasons": {
-        "max_positions": 158234,
-        "risk_budget": 224
+        "max_positions": 173285,
+        "risk_budget": 5
       },
       "max_concurrent": 2,
       "cap": 2
     },
     "G3.5": {
-      "hash": "5a1795c42f9c605b3fd477bff2ac588c4cda218e91dac62fe42c850e0544d7d2",
+      "hash": "4363b13baf25d262f316c2c0bd705540bb2a4eaedc8db042ee229b0dea855932",
       "identical": true
     },
     "G3.6": {
       "oos_ts_mom_alone": {
         "n_days": 2690,
         "years": 10.674603174603174,
-        "cagr": 0.04010807363235447,
-        "ann_sharpe": 0.5903895557673903,
-        "max_drawdown": -0.21009781105554926,
-        "total_return": 0.5216187933127276,
-        "end_equity": 278090.55580473016
+        "cagr": 0.02811156164312356,
+        "ann_sharpe": 0.38563144540358785,
+        "max_drawdown": -0.2068665340814697,
+        "total_return": 0.34438858596558974,
+        "end_equity": 256738.95096450645
       },
       "oos_risk_parity_combo": {
         "n_days": 2690,
         "years": 10.674603174603174,
-        "cagr": 0.04010807363235447,
-        "ann_sharpe": 0.5903895557673903,
-        "max_drawdown": -0.21009781105554926,
-        "total_return": 0.5216187933127276,
-        "end_equity": 278090.55580473016
+        "cagr": 0.02811156164312356,
+        "ann_sharpe": 0.38563144540358785,
+        "max_drawdown": -0.2068665340814697,
+        "total_return": 0.34438858596558974,
+        "end_equity": 256738.95096450645
       },
       "risk_parity_improves_sharpe": true,
       "risk_parity_improves_drawdown": true,
       "verdict": "single-sleeve book (ts_mom): comparison is degenerate -- combo == standalone. Kept as a live check that no second sleeve is silently active; restore SLEEVES=['ts_mom','tom'] to re-open the comparison"
+    },
+    "G3.7a_score_causal": {
+      "probes": 380,
+      "mismatches": 0,
+      "lookback": 126
+    },
+    "G3.7b_rank_order": {
+      "probe_order": [
+        2,
+        7,
+        5,
+        1,
+        9
+      ],
+      "expected": [
+        2,
+        7,
+        5,
+        1,
+        9
+      ]
+    },
+    "G3.7c_ranking_effect": {
+      "oos_alphabetical": {
+        "n_days": 2690,
+        "years": 10.674603174603174,
+        "cagr": 0.06425543686167656,
+        "ann_sharpe": 0.7191092889308954,
+        "max_drawdown": -0.20749315471057195,
+        "total_return": 0.944034687339014,
+        "end_equity": 279691.6666791032
+      },
+      "oos_xs_score": {
+        "n_days": 2690,
+        "years": 10.674603174603174,
+        "cagr": 0.02811156164312356,
+        "ann_sharpe": 0.38563144540358785,
+        "max_drawdown": -0.2068665340814697,
+        "total_return": 0.34438858596558974,
+        "end_equity": 256738.95096450645
+      },
+      "ranking_changes_book": true,
+      "n_trades_alpha": 2662,
+      "n_trades_score": 2441,
+      "hash_alpha": "ce9cbfbbd2f58387cce65aa563df8480e60af6bb24a52c2d6f4720d412cef47b",
+      "hash_score": "4363b13baf25d262f316c2c0bd705540bb2a4eaedc8db042ee229b0dea855932",
+      "active": "xs_score"
     },
     "all_passed": true
   },

@@ -19,20 +19,26 @@ from pathlib import Path
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Pt, RGBColor
+from docx.shared import Inches, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parent
 
-_INLINE = re.compile(r"(\*\*.+?\*\*|`.+?`)")
+# Order matters: **bold** must be tried before *italic*, or the italic branch would
+# swallow the first two asterisks of a bold span and emit stray '*' into the document.
+# The italic branch requires non-space immediately inside both delimiters, so a bare
+# asterisk used as multiplication ("4 * 5") is left alone instead of being italicised.
+_INLINE = re.compile(r"(\*\*.+?\*\*|\*(?=\S)[^*\n]*?(?<=\S)\*|`.+?`)")
 
 
 def _add_runs(paragraph, text: str):
-    """Render **bold** and `code` inline spans into a paragraph."""
+    """Render **bold**, *italic* and `code` inline spans into a paragraph."""
     for part in _INLINE.split(text):
         if not part:
             continue
         if part.startswith("**") and part.endswith("**"):
             r = paragraph.add_run(part[2:-2]); r.bold = True
+        elif part.startswith("*") and part.endswith("*") and len(part) > 2:
+            r = paragraph.add_run(part[1:-1]); r.italic = True
         elif part.startswith("`") and part.endswith("`"):
             r = paragraph.add_run(part[1:-1])
             r.font.name = "Consolas"; r.font.color.rgb = RGBColor(0xB0, 0x30, 0x60)
@@ -66,6 +72,7 @@ def convert(md_path: Path) -> Path:
     doc.styles["Normal"].font.size = Pt(11)
 
     tbl_buf: list[list[str]] = []
+    in_code = False
 
     def flush():
         nonlocal tbl_buf
@@ -75,6 +82,40 @@ def convert(md_path: Path) -> Path:
 
     for raw in lines:
         line = raw.rstrip()
+
+        # ``` fenced blocks -> verbatim monospace (equations, formulas, worked arithmetic).
+        # Nothing inside is parsed as markdown, so asterisks and pipes survive intact.
+        if line.strip().startswith("```"):
+            flush()
+            in_code = not in_code
+            continue
+        if in_code:
+            p = doc.add_paragraph()
+            p.paragraph_format.space_after = Pt(0)
+            r = p.add_run(raw if raw.strip() else " ")
+            r.font.name = "Consolas"
+            r.font.size = Pt(9.5)
+            continue
+
+        # ![alt](path) -> embedded picture, scaled to the text width
+        m_img = re.match(r"^\s*!\[([^\]]*)\]\(([^)]+)\)\s*$", line)
+        if m_img:
+            flush()
+            src = Path(m_img.group(2))
+            if not src.is_absolute():
+                src = (md_path.parent / src).resolve()
+            if src.exists():
+                doc.add_picture(str(src), width=Inches(6.0))
+                doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                if m_img.group(1):
+                    cap = doc.add_paragraph()
+                    cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    cr = cap.add_run(m_img.group(1))
+                    cr.italic = True
+                    cr.font.size = Pt(9)
+            else:
+                doc.add_paragraph(f"[missing figure: {src}]")
+            continue
 
         # table rows
         if line.startswith("|") and line.endswith("|"):

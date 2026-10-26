@@ -78,7 +78,7 @@ def make_ctx(mkt: P9.Market, k: int, sleeves, budget_fn, caps, kill,
                      entry={s: mkt.entry[s][k] for s in sleeves},
                      exit_sig={s: mkt.exit[s][k] for s in sleeves},
                      vpu=mkt.vpu[k], trad=mkt.trad[k], split=mkt.split[k],
-                     caps=caps, kill=kill, budget_fn=budget_fn)
+                     score=mkt.score[k], caps=caps, kill=kill, budget_fn=budget_fn)
 
 
 def online_replay(mkt: P9.Market, budget_fn, *, caps, kill, st: P9.BookState = None,
@@ -91,9 +91,11 @@ def online_replay(mkt: P9.Market, budget_fn, *, caps, kill, st: P9.BookState = N
     the per-day mark-to-market fault-injection multiplier (G4.4). finalize replicates
     run_book's end-of-tape residual close-out so G4.1 can compare byte-for-byte.
 
-    manual_exits (DECISIONS #014): {k -> [symbol,...]} discretionary sells to force on day
-    k's OPEN. Injected into pend_exit just before step_day, so section (A) fills them at
-    that day's open exactly like any rule-driven exit and the ledger tags them "manual".
+    manual_exits (DECISIONS #014/#015): {k -> [{symbol, px, reason}, ...]} discretionary
+    sells. px=None means a NEXT-OPEN exit: injected into pend_exit just before step_day so
+    section (A) fills it at that day's open like any rule exit ("manual"). px=<float> means
+    a SAME-DAY exit at the recorded live price ("manual_now") -- booked directly, before the
+    day is stepped, because a daily bar cannot reconstruct a mid-session quote.
     Default None => untouched behaviour, so every gate path is bit-identical to before."""
     nD = len(mkt.dates)
     end_k = nD if end_k is None else end_k
@@ -104,11 +106,18 @@ def online_replay(mkt: P9.Market, budget_fn, *, caps, kill, st: P9.BookState = N
     sidx = {s: j for j, s in enumerate(mkt.syms)}
     for k in range(start_k, end_k):
         if manual_exits and k in manual_exits:
-            for sym in manual_exits[k]:
-                j = sidx.get(sym)
-                # only if actually held on that day; a rule exit may have beaten us to it
-                if j is not None and j in st.pos and j not in st.pend_exit:
-                    st.pend_exit[j] = "manual"
+            for mo in manual_exits[k]:
+                j = sidx.get(mo["symbol"])
+                # only if actually held; a rule exit may have beaten the order to it
+                if j is None or j not in st.pos:
+                    continue
+                if mo["px"] is None:
+                    if j not in st.pend_exit:
+                        st.pend_exit[j] = mo["reason"]
+                else:
+                    # same-day: book it now at the recorded live price, net of slippage
+                    P9._do_exit(st, j, k, mkt.dates[k],
+                                float(mo["px"]) * (1 - P9.SLIP), mo["reason"])
         if use_feed:                      # date discipline on the day's bars
             date_d = pd.Timestamp(mkt.dates[k]).date()
             for j, sym in enumerate(mkt.syms):
@@ -197,18 +206,47 @@ def resolve_manual_exits(mkt: P9.Market) -> tuple[dict, list]:
     out: dict = {}
     for o in orders:
         issued = pd.Timestamp(o["issued_date"])
+        if o.get("same_day"):
+            # SAME-DAY sell (DECISIONS #015): books on the ISSUE date at the RECORDED live
+            # price. Storing the price is what keeps the live book reproducible -- a daily
+            # bar alone cannot tell us what the mid-session quote was.
+            same = np.where(dates == issued)[0]
+            if len(same) == 0:
+                o["fill_date"] = None       # that session's bar has not arrived yet
+                continue
+            k = int(same[0])
+            o["fill_date"] = str(issued.date())
+            out.setdefault(k, []).append(
+                {"symbol": o["symbol"], "px": float(o["fill_px"]), "reason": "manual_now"})
+            continue
         later = np.where(dates > issued)[0]
         if len(later) == 0:
             o["fill_date"] = None          # market has not opened since; fills next session
             continue
         k = int(later[0])
         o["fill_date"] = str(pd.Timestamp(mkt.dates[k]).date())
-        out.setdefault(k, []).append(o["symbol"])
+        out.setdefault(k, []).append({"symbol": o["symbol"], "px": None,
+                                      "reason": "manual"})
     return out, orders
 
 
 TRADE_COLS = ["symbol", "sleeve", "entry_date", "exit_date", "entry_px", "exit_px",
               "shares", "reason", "days_held", "split", "pnl"]
+
+
+def load_era1_trades() -> list:
+    """Era-1 closed trades, reloaded so era 2 continues the record instead of restarting it
+    (user ruling, DECISIONS #019). Each is tagged era=1 so the two regimes stay separable --
+    era 1 ran on contaminated data, so any statistic spanning both is a blend and must be
+    reported as one. Returns [] if the archive is missing."""
+    src = C.PAPER_ERA1_ARCHIVE_DIR / C.PAPER_LEDGER_PATH.name
+    if not src.exists():
+        return []
+    df = pd.read_parquet(src)
+    recs = df.to_dict("records")
+    for r in recs:
+        r["era"] = 1
+    return recs
 
 
 def trades_df(trades: list) -> pd.DataFrame:
@@ -564,19 +602,49 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
     risk2.to_parquet(C.DATA_DIR / "swing_risk_panel.parquet", index=False)
 
     mkt2 = P9.Market(panel2, risk2)
-    # LIVE-ERA BOOK: starts FLAT at INITIAL_CAPITAL on PAPER_ERA_START (the user's real
-    # budget) -- earlier history is warmup/evidence, not the live book's P&L.
-    era_k = int(np.argmax(pd.to_datetime(mkt2.dates) >= pd.Timestamp(C.PAPER_ERA_START)))
     # Discretionary sells (DECISIONS #014) -- re-applied on their original fill day every
     # replay, so the book stays self-consistent across runs.
     man_map, man_orders = resolve_manual_exits(mkt2)
-    online = online_replay(mkt2, budget_fn, caps=P9.default_caps(), kill=P9.default_kill(),
-                           start_k=era_k, finalize=False, use_feed=False,
-                           manual_exits=man_map)
+
+    seed_path = getattr(C, "PAPER_ERA2_SEED_PATH", None)
+    era2 = bool(seed_path and seed_path.exists())
+    if era2:
+        # ERA 2 (DECISIONS #019): the handover book is carried across VERBATIM and era 1 is
+        # never recomputed. start_k comes from the seed's own k_next, so the replay resumes
+        # exactly where the old book stopped -- open positions keep their real entry prices,
+        # entry days and stops, and only NEW decisions see the cleaned data.
+        seed_st, era_k = load_state(mkt2.syms, path=seed_path)
+        # USER RULING 2026-08-27: carry the trade history FORWARD rather than restarting the
+        # count. Era 1's closed trades are prepended so the ledger stays one continuous
+        # record and Phase 5 keeps counting from 11 rather than 0.
+        # I advised against pooling (era 1 ran on contaminated data, so a statistic spanning
+        # both regimes is a blend); the user overruled, and their reasoning -- an unbroken
+        # track record is worth more than a clean one that starts from nothing -- is a
+        # legitimate call. Mitigated by tagging every trade with its era, so the two can
+        # always be separated after the fact.
+        seed_st.trades = load_era1_trades()
+        online = online_replay(mkt2, budget_fn, caps=P9.default_caps(), kill=P9.default_kill(),
+                               st=seed_st, start_k=era_k, finalize=False, use_feed=False,
+                               manual_exits=man_map)
+        print(f"  ERA 2 active: seeded from {seed_path.name}, resuming at k={era_k} "
+              f"({str(mkt2.dates[era_k])[:10]}) with {len(seed_st.pos)} grandfathered "
+              f"position(s) and {len(seed_st.trades)} era-1 trade(s) carried forward")
+    else:
+        # LIVE-ERA BOOK: starts FLAT at INITIAL_CAPITAL on PAPER_ERA_START (the user's real
+        # budget) -- earlier history is warmup/evidence, not the live book's P&L.
+        era_k = int(np.argmax(pd.to_datetime(mkt2.dates) >= pd.Timestamp(C.PAPER_ERA_START)))
+        online = online_replay(mkt2, budget_fn, caps=P9.default_caps(), kill=P9.default_kill(),
+                               start_k=era_k, finalize=False, use_feed=False,
+                               manual_exits=man_map)
     st = online["state"]
     k_last = len(mkt2.dates) - 1
     save_state(st, k_last + 1, mkt2.syms)
     led = trades_df(st.trades)
+    if era2:
+        # Carried-forward era-1 rows arrive pre-tagged; anything without a tag was decided
+        # in era 2 on the cleaned data. Keeping the column means the pooled record can
+        # always be split back apart -- the two eras used different inputs.
+        led["era"] = led["era"].fillna(2).astype(int) if "era" in led.columns else 2
     led.to_parquet(C.PAPER_LEDGER_PATH, index=False)
 
     # Skipped-candidate log (DECISIONS #005): freeze the live-era slice of the discards.
@@ -600,7 +668,8 @@ def live_smoke(panel, mkt, budget_fn) -> dict:
     # assumed, so the file cannot drift out of step with the book.
     if man_orders:
         done = {(str(r["symbol"]), str(pd.Timestamp(r["exit_date"]).date()))
-                for _, r in led.iterrows() if str(r["reason"]) == "manual"}
+                for _, r in led.iterrows()
+                if str(r["reason"]) in ("manual", "manual_now")}
         for o in man_orders:
             o["status"] = ("executed" if (o["symbol"], o.get("fill_date")) in done
                            else "pending")

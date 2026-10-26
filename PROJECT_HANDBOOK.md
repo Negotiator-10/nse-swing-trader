@@ -206,49 +206,98 @@ decisions silently vanished from later replays. Fixed: snapshots are now compute
 
 ## 4. HOW A TRADE ACTUALLY HAPPENS (the part worth re-reading)
 
+> **Current as of 2026-08-09, baseline hash `d3a7e18d4002dde2`.** This section was rewritten
+> after DECISIONS #010–#018 changed the chain. If you are reading a printout that says
+> "max 4" or "Rs.1,800", it predates #011/#010 and is wrong.
+
 ### Step 1 — At the close, a signal fires
 `ts_mom`: close > MA200 **and** 126-day return > 0 **and** close > MA50.
-Skipped if the stock is already held or already armed.
+Skipped if the stock is already held, already armed, or already pending exit.
+Single sleeve since #013 — `tom` was retired for failing its own gate.
 
-### Step 2 — Risk sizing decides the size
-`budget = Rs.1,800 × risk-parity sleeve weight` (this is why an armed budget often reads
-~Rs.1,541, not 1,800). Then `shares = floor(budget / var_per_unit)`.
+### Step 2 — Candidates are RANKED against each other  *(new, #018)*
+Roughly **37 names signal on a typical day and there are only 6 slots**, so the order they
+are served in decides the book. They are sorted by
 
-**This is the single most important thing to understand about the system: positions are
-sized by TAIL RISK, not by cash.** Since median VaR is ~21% of price, **one rupee of risk
-budget supports only ~Rs.4.8 of stock.**
+    score = (126-day return) / (stdev of daily log returns over 126 days)
 
-### Step 3 — The order is ARMED for the next open
+— risk-adjusted momentum, best first. NaN sorts last, ties break by symbol index.
+The score is captured at the decision close, so tomorrow's ordering cannot peek at
+tomorrow's tape. **Before #018 this order was the alphabet**, and every position the live
+book had ever taken began with A or B.
+
+`ts_mom` asks "is this name trending?" (time-series momentum). The score asks "which of the
+trending names is best?" (cross-sectional). You need both.
+
+### Step 3 — Risk sizing decides the size
+`budget = Rs.5,400 × sleeve weight`. Single sleeve ⇒ weight is 1.0, so the budget is the
+flat Rs.5,400. Then `shares = floor(budget / var_per_unit)`.
+
+**The single most important thing to understand about the system: positions are sized by
+TAIL RISK, not by cash.** Median 99%/12-day VaR is ~21% of price, so **one rupee of risk
+budget supports only about Rs.4.80 of stock.**
+
+### Step 4 — The order is ARMED for the next open
 Nothing executes at the close. The decision is recorded and waits.
 
-### Step 4 — At the next open, five caps apply (each can only SHRINK the size)
-1. Per-position risk: `floor(budget / var_per_unit)`
-2. Per-name notional: ≤ 20% of equity in any single stock
-3. **Position count: max 4** ← *this is what has blocked SHRIRAMFIN twice*
-4. Portfolio risk room: `floor((4,800 − open_risk) / var_per_unit)`
-5. Cash available — **no leverage, ever**
+### Step 5 — At the next open, five caps apply (each can only SHRINK the size)
+Applied in this order, best-ranked candidate served first:
 
-Zero shares → logged as a skip **with its reason**. Otherwise it fills at
-`open × 1.0003` (3bp slippage) and the stop is set at `entry_px − 3.5 × ATR`.
+1. **Per-position risk** — `floor(5,400 / var_per_unit)`
+2. **Per-name notional** — ≤ 20% of equity in any single stock *(both inside `size_position`)*
+3. **Position count** — max **6** concurrent names
+4. **Portfolio risk room** — `floor((14,400 − open_risk) / var_per_unit)`
+5. **Gross exposure ≤ equity, then cash** — and since #016 the cash test must also cover the
+   **buy-side cost charged at entry**, not just the notional. **No leverage, ever.**
 
-### Step 5 — While the position is open, two different exits watch it
+Zero shares → logged as a skip **with its reason, its score, and the incumbents it lost
+to**. Otherwise it fills at `open × 1.0003` (3bp slippage) and the stop is set at
+`entry_px − 3.5 × ATR`.
+
+Note that caps 3 and 4 are *portfolio* constraints: a perfectly good candidate is turned
+away because the book is full, not because anything is wrong with it. That is the queue the
+skip log exists to measure.
+
+### Step 6 — While the position is open, two different exits watch it
 - **ATR trailing stop — rests INTRADAY.** If the day's low breaches it, the exit is booked
   that same day at the stop price; a gap-down fills at the open. **This is the crash
   defence and it is not a day late.**
 - **Trend exit (close < MA50) or max-hold** — arms a market exit at the *next* open.
   Deliberately slower; it is a regime filter, not a risk stop.
 
-### Step 6 — Portfolio backstop
-A rolling-drawdown **kill switch** (20% over 21 days) flattens the book and halts
+### Step 7 — Portfolio backstop
+A rolling-drawdown **kill switch** (20% from peak, 21-day halt) flattens the book and halts
 re-entry. Note the ordering: ATR stops are the first line of defence and usually flatten a
 crashing book *before* the kill switch ever fires.
 
-### WHY THE BOOK HOLDS SO MUCH CASH (asked 2026-07-21)
-As of today: cash is **57.6%** of NAV — but the **risk budget is 94.3% used**
-(Rs.4,527.26 of Rs.4,800). You are 42% invested in *cash* terms and 94% invested in *risk*
-terms. The cash is not idle by oversight; it is the arithmetic consequence of the risk cap.
-Being fully invested would require a risk budget of ~Rs.12,600 (21% of the book at
-99%/12-day) instead of Rs.4,800 (8%). **The cash IS the drawdown control.**
+**Know this limitation cold — it is the sharpest question the project attracts.** The switch
+bounds a single **leg**, not the cumulative path: it flattens at −20% from the *running*
+peak, halts 21 days, then re-arms with the peak **reset to current equity**. In a grinding
+bear market a sequence of bounded legs compounds well past 20% from the original high.
+That is exactly what happened in 2008–09: the switch fired (4 kill exits in 2008; 44 across
+the whole history) and the book still went from Rs.153,513 on 2005-07-28 to Rs.74,545 on
+2009-03-06 — **a −51.4% drawdown under a 20% kill switch.**
+
+The generalizable lesson: ATR stops plus a drawdown switch handle **fast** crashes well and
+**slow** ones badly. The OOS max drawdown of −19.2% partly reflects that the worst event in
+that window was COVID — a V-shaped crash, the shape this machinery is best at. Do not claim
+−19.2% generalizes to a 2008-shaped market.
+
+### WHERE THE MONEY SITS, AND WHY (rewritten 2026-08-09)
+This answer **inverted** when the risk dial was raised (#010: per-position 3%→9%, portfolio
+8%→24%) and the book widened (#011: 4→6 names).
+
+- **Before**, at the 8% dial: cash was ~58% of NAV while the *risk* budget was 94% used. The
+  cash was not idle by oversight — it was the arithmetic consequence of the risk cap. Being
+  fully invested would have needed a risk budget of ~Rs.12,600, not Rs.4,800.
+- **Now**, at the 24% dial: the book runs ~95% invested (cash Rs.2,895 on 2026-08-07) and the
+  **binding constraint has moved from the risk budget to the 6-position count cap** — which
+  is precisely why ~31 candidates get turned away every day.
+
+**The general principle survives both regimes: sizing is by tail risk, and whatever is not
+deployed is the drawdown cushion.** What changes with the dial is *which* cap binds. Being
+able to say which one binds today, and why, is the answer that demonstrates you understand
+your own book.
 
 ### THE COST STACK (every rupee of friction)
 | Component | Rate | Note |

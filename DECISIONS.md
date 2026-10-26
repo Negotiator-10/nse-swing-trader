@@ -806,3 +806,400 @@ measurement).
 
 **Status.** APPLIED. Baseline hash unchanged -- this is plumbing plus display, and it only
 alters the book when the user deliberately issues an order.
+
+---
+
+## Entry #015 - 2026-08-07 - Live monitor + SAME-DAY manual sell --- APPLIED
+
+**Context.** BAJFINANCE showed ~+Rs.900 unrealized on Thu 08-06 and closed Fri 08-07 at
+~+Rs.400. The user had asked to sell it on Thursday, could not, and concluded the system
+needs intraday awareness: "add intraday time also like it will check hourly so we can take
+the decision far more early than afterwards regret."
+
+**Assessed first (and I recommended AGAINST, then was overruled -- recorded as such).**
+The decisive measurement: pulled real hourly bars and decomposed the Rs.74 fall.
+
+| Segment | Move | Catchable intraday? |
+|---|---|---|
+| Overnight gap (1,152 -> 1,107) | **-3.9%** | **NO** - market shut |
+| Friday intraday drift (1,107 -> 1,078) | -2.6% | partially |
+
+**~60% of the loss was the gap**, which no intraday tool can act on; Thursday's hourly bars
+traded a flat 1,144-1,159 with no warning to catch; and the stop (1,049.80) was never
+breached, so an hourly stop-checker would have done nothing all day. Also noted: n=1 correct
+instinct against two measured-worse exit ideas the same week (RSI<60, the 0.52-ATR candle
+level), and that a +/-6% day is normal for a 12-25 day swing book.
+
+**User reaffirmed ("No build the hourly tracker", then "I want same day sell thats all we
+are doing here"). Built in full, per the standing rule that a reaffirmed decision is the
+user's to make.**
+
+### 015-a - `p12_hourly_monitor.py` (read-only live monitor)
+
+Run any time: pulls live Kite quotes for the open positions and prints, per holding, the
+live price, day move, trailing stop, **% to stop**, MA50, **% to MA50**, and flags
+(`STOP BREACHED`, `NEAR STOP` <=3%, `BELOW MA50`, `DOWN >3%`, `profit locked`). `--watch N`
+re-checks hourly N times. Writes ONLY `artifacts/hourly_monitor.json`; touches no production
+path (#007 rule) and changes no rule. It loads `secrets.env` itself (it is a user-facing
+tool; values are used to authenticate and never printed), so no shell incantation is needed.
+
+### 015-b - `manual_sell.py SYMBOL --now` (same-day sell at the live price)
+
+**I OVERSTATED AN OBJECTION AND CORRECTED IT, worth recording.** I initially said intraday
+execution "breaks G4.1". That is true for an intraday STRATEGY RULE, but NOT for a
+discretionary same-day sell: G4.1 replays the historical daily tape, which a manual override
+never touches. What actually matters is that the fill price is RECORDED, so the live book
+stays reproducible -- exactly the pattern #014 already established. Once that was clear the
+feature was legitimate to build.
+
+Mechanism: fetch the live quote -> apply the standard 3bp slippage -> require the user to
+type `SELL` -> record `{same_day: true, fill_px, quoted_local}` in the order file. The replay
+books it directly via `_do_exit` at the recorded price on the issue date, tagged
+**`reason="manual_now"`** (distinct from next-open `"manual"`). Storing the price is
+essential: a daily bar cannot reconstruct a mid-session quote, so without it the book would
+be irreproducible on the next replay.
+
+**Verified.** Unit test on a simulated order: resolved to the correct day index, booked at
+1,077.68 (1,078 less slippage), position removed, net +Rs.323 after full costs, real order
+file restored untouched. Full gate suite PASS, hash **5a1795c42f9c605b UNCHANGED**, live book
+unchanged (6 positions, cash Rs.2,895). Dashboard's three-way P&L split now counts both
+`manual` and `manual_now` as discretionary.
+
+**Honest limits, stated to the user and repeated here.** (1) User-initiated only -- nothing
+fires automatically; there is no watcher pulling a trigger. (2) A genuinely live price needs
+market hours; outside 09:15-15:30 it warns and uses the last traded price. (3) It cannot
+catch gaps -- the very loss that motivated the build. (4) It remains paper: no order reaches
+the broker. (5) The measured +54.5bp edge does not include same-day exits, which is precisely
+why they are tagged and reported separately.
+
+**Status.** APPLIED. Baseline hash unchanged; the book only changes when the user issues an
+order deliberately.
+
+---
+
+## Entry #016 - 2026-08-07 - Charge the BUY leg at entry (CLOSES finding #003) --- APPLIED
+
+**Context.** #003 (opened 2026-07-21) recorded that `_do_exit` charged the ENTIRE round-trip
+cost at exit and nothing at entry, so NAV was overstated while positions were open. It was
+deferred to Phase 5. Re-measured today before deciding:
+
+| | 2026-07-21 (when opened) | 2026-08-07 |
+|---|---|---|
+| Open notional | Rs.25,176 | Rs.55,858 |
+| Unbooked buy-side cost | Rs.29.88 | **Rs.66.26** |
+| As % of NAV | 0.05% | **0.112%** |
+
+The distortion **more than doubled** because the book went from 42% to 95% invested, and at
+that exposure it is now permanent. User chose to fix it.
+
+**Why fix rather than leave it.** (a) It is a SYSTEMATIC bias that always flatters, never
+the reverse. (b) It is more realistic -- a real broker debits each leg when it happens.
+(c) It is not purely presentational: position sizing reads `st.last_equity`, so an
+overstated NAV sized positions marginally too large.
+
+**Applied as.** `p3_swing_backtest` split into `delivery_buy_cost(buy_val)` +
+`delivery_sell_cost(sell_val)`, with `delivery_roundtrip_cost` redefined as exactly their
+sum. **Identity verified on 5 value pairs to 1e-9** -- lifetime cost is provably unchanged,
+only the TIMING moved. `p9.step_day` now deducts `delivery_buy_cost` at entry and sizes
+against cash inclusive of it (`_BUY_COST_FRAC` = 11.86 bp of notional, exact and constant
+since every buy-side component is proportional); `_do_exit` charges only the sell leg but
+still reports the FULL round trip in the trade record, so per-trade P&L is unchanged.
+Dashboard `cost_breakdown` updated: open positions' buy legs now count as CHARGED, and the
+second column is the estimated sell leg still owed (Rs.260.50 charged / Rs.167.28 owed).
+
+**HONEST RESULT -- the numbers got WORSE, which is the right direction for a correction.**
+
+| OOS metric | Before (#013 baseline) | After |
+|---|---|---|
+| CAGR | 4.0% | **3.6%** |
+| Sharpe | 0.59 | **0.48** |
+| maxDD | -21.0% | **-25.6%** |
+
+The degradation exceeds the raw 11.86 bp because cash is the BINDING constraint at 95%
+invested (established in #013): charging the buy leg earlier reduces available cash, which
+changes WHICH entries fill, which cascades through the path. Backtest trade count moved
+2,618 -> 2,639. This is the honest cost of removing an optimistic bias, and it is exactly
+why the change was worth making.
+
+**Verified.** p9: all portfolio gates PASS. p11: all gates PASS, G4.1 online==batch
+2,639/2,639 byte-identical, **G4.3 hand-calculated cost check still exact (acct_err=0.0)**.
+New baseline hash **`64ce5741b7112edf`** (8th; supersedes `5a1795c42f9c605b`). Live book
+preserved by the #007 bootstrap guard; it re-bases at the next post-15:45 LIVE run.
+
+**Status.** APPLIED. **Finding #003 is CLOSED.** Baseline `64ce5741b7112edf`.
+
+---
+
+## Entry #017 - 2026-08-07 - Phase 5 reconciliation harness --- APPLIED (accumulating)
+
+**Context.** User asked whether Phase 5 can run now. Honest answer given: not the part that
+matters -- 4 closed trades, and the projected rate (0.25 trades/day) puts 30 trades ~120
+trading days away (~6 months). Critically, **0 live stop exits**, so finding #001-c (stops
+modelled as filling exactly at the stop price) is not merely under-powered, it is currently
+UNMEASURABLE. Agreed plan: build the harness now so it accumulates automatically.
+
+**Applied as `p12_swing_reconcile.py`** (read-only; writes only `artifacts/p5_reconcile.json`).
+Compares the live ledger against the PORTFOLIO book's OOS trades **re-run at the current
+config** -- deliberately not `swing_trades.parquet`, which is the Phase-2 signal-level
+backtest and goes stale the moment the config changes. Compares net bp/trade (with a
+bootstrap 95% CI), holding period, win rate, exit-reason mix, and cost %.
+
+**It refuses to render a verdict below 30 trades** and says so. A green light on n=4 would
+be a lie.
+
+**A statistical flaw the first run exposed, then fixed: RIGHT-CENSORING.** The first output
+showed live holding 3.8 days vs backtest 14.6, and live 100% trend exits vs backtest 34%
+maxhold -- alarming until you notice the live era is 16 trading days old against a 25-day
+max hold. Long trades are still OPEN, so the closed ledger is biased toward SHORT holds, and
+a max-hold exit is ARITHMETICALLY IMPOSSIBLE yet. The harness now computes the era length
+and prints a `[CENSORED]` banner labelling the duration and exit-mix rows as ARTIFACTS until
+the era is well past the max hold. Recorded because reporting that gap as a finding would
+have been a false alarm of exactly the kind these gates exist to prevent.
+
+**First reading (all labelled not-yet-meaningful):** live -301.8 bp/trade (CI [-478, -9])
+vs backtest OOS +9.8 on 678 trades; win rate 25% vs 34%; 0 live stop exits. Note the 4 live
+trades include 3 generated by the retroactive replay when the universe expanded (#012), not
+real-time decisions.
+
+**Naming.** Phase 5 takes `p12_swing_reconcile.py` as originally planned; the live monitor
+built earlier today was renamed out of the way (it is a local-only tool, see #015).
+
+**Status.** APPLIED, accumulating. No verdict before ~30 trades / ~6 months.
+
+---
+
+## #018 -- 2026-08-09 -- Cross-sectional entry ranking (slot allocation was ALPHABETICAL)
+
+**Proposal (user, after an architecture review).** Rank competing entry candidates instead
+of taking whoever comes first.
+
+**The finding that prompted it.** Slot allocation was alphabetical *by accident*.
+`Market.__init__` sets `self.syms = sorted(...)`; `step_day` section (F) armed entries with
+`for j in range(len(cx.syms))` (ascending index = alphabetical); section (B) then consumed
+that dict in insertion order, and slots/risk/cash are spent as it goes -- so whoever is
+served first wins the scarce slot. Grep confirmed no `rank`/`argsort`/score anywhere in p9
+or p11.
+
+This was harmless at 20 names where signals were scarce. **#012 made it decisive:** at 95
+names the skip log shows **27-34 candidates discarded every single day for 6 slots** (~37
+compete). Evidence from the live era: **all 10 slot-fills ever taken begin with A or B**
+(held ABB/ADANIENSOL/APOLLOHOSP/ASIANPAINT/BAJAJ-AUTO/BAJFINANCE; closed ADANIGREEN/
+ADANIPORTS/ASIANPAINT/ADANIENT), and **4 of the 10 are Adani-group** -- the concentration
+was an alphabet artifact, not a view. The binding constraint had moved from signal SUPPLY to
+signal CHOICE, and choice was unmanaged.
+
+**Reasoning.** `ts_mom` is a TIME-SERIES momentum filter (Moskowitz-Ooi-Pedersen): it answers
+"is this name trending?", never "which trending name is best". The standard complement is a
+CROSS-SECTIONAL overlay (Jegadeesh-Titman): score the candidates, fill free slots best-first.
+
+**Pre-registered rule (fixed BEFORE the run, one trial, one OOS read):**
+
+    score_t = (close_t / close_{t-126} - 1) / stdev(daily log returns, last 126)
+
+L=126 reuses `ts_mom`'s own momentum horizon, so **no new lookback was introduced or tuned**.
+Constant scalings (sqrt(252)) are omitted -- ranking is invariant to them. Scored at the
+decision close, captured into `pend_entry` at arm time, so tomorrow's ordering cannot peek at
+tomorrow's tape. NaN (window not full / dead tape) sorts LAST. Ties break by symbol index,
+keeping the order total and G3.5-reproducible.
+
+**SCOPE: free slots only.** Ranking never displaces an incumbent -- that is rotation (#005),
+still awaiting the skip/shadow evidence.
+
+**Decision: APPLIED.** `config.ENTRY_RANKING = "xs_score"`; set `"alpha"` to restore the
+legacy alphabetical order byte-for-byte. New `p9.xs_score()` + `p9._rank_key()`; `score`
+added to the Market tensor, DayCtx, pend_entry and the skip log (so the #005 study inherits
+it). `load_state` on a pre-#018 book yields no score -> NaN -> ranks last, which is safe.
+
+**Evidence (OOS, 95 names, 1 shot).**
+
+| order          | CAGR  | Sharpe | maxDD  |
+|----------------|-------|--------|--------|
+| alphabetical   | 3.59% | 0.48   | -25.6% |
+| cross-sectional| 4.79% | 0.61   | -19.2% |
+
+**It dominates on BOTH axes** -- +1.20pp CAGR, +0.13 Sharpe, and drawdown 6.4pp shallower.
+The drawdown half is the part worth trusting: ranking by *risk-adjusted* momentum was always
+going to raise return, but it also cut the worst loss, which a pure return-chase would not.
+
+**New gates.** G3.7a score causality (380 truncated-recompute probes, 0 mismatches);
+G3.7b ranker is a total score-descending order with NaN last; G3.7c runs the book BOTH ways
+and records the comparison (a REPORT gate -- if signals never contend it would say so rather
+than claim an improvement that is not there; `binds=True` here).
+
+**Verification.** p9: all Phase-3 gates PASS. p11 REPLAY: all 5 gates PASS, G4.1 online ==
+batch byte-for-byte, 2470/2470 trades identical. **NEW BASELINE HASH `d3a7e18d4002dde2`**
+(9th; retires `64ce5741b7112edf`). Live book PRESERVED by the #007 guard (still 2026-08-07,
+k_next 8988, ledger 4) -- **it re-bases at the next post-15:45 LIVE run**, and the new book
+will NOT be the A-B names. Backup at `data/backup_pre_018/`.
+
+**Honest caveats.** (1) The alphabetical baseline is an arbitrary order, not a null model --
+beating it is a lower bar than beating a random-order distribution, which was not run.
+(2) This is one new trial against the multiple-testing budget; it is exactly the kind of
+result the Deflated-Sharpe upgrade (queued) exists to re-score. (3) Nothing here changes the
+survivorship caveat: the universe is still the CURRENT NIFTY 100.
+
+**Status.** APPLIED, gates green, awaiting the next LIVE run to re-base the book.
+
+---
+
+## Entry #019 - 2026-08-26/27 - Tape cleaning, the #018 reversal, and the era-2 handover --- APPLIED
+
+### The finding
+
+A scan of all 95 symbols found **117 bars across 37 of them** carrying moves that cannot be
+real prices. They enter the GARCH/EVT fit as ordinary observations and dominate it, because
+the likelihood squares each surprise.
+
+ABB is the clearest case: one +443% bar (2007-06-28) gave it skew 28.3 and excess kurtosis
+1,555, and the GJR optimiser returned **alpha=0, gamma=0** -- a model claiming an equity has
+no volatility dynamics. Every ABB position was sized from that. It also explained BAJFINANCE
+reading a 99%/12-day VaR of 53% of price against 14-26% for its peers.
+
+This was NOT "yfinance forgot the splits". p1 already pulls with auto_adjust=True, and
+checking every flagged jump against Yahoo's own split feed found **not one match**. What
+survives are demergers (VEDL 2026-04-30, TMPV 2025-10-14) and older actions missing from
+Yahoo entirely. The feed cannot classify these; the tape has to.
+
+### The user's decisions
+
+Three were put to the user with options and recommendations:
+
+1. **Bad prints** (84 events, 26 symbols -- price jumps and reverts next day): fold the two
+   impossible returns into the true move they span. Nothing interpolated.
+2. **Corporate actions** (35 events, 23 symbols -- price shifts level and stays): the user
+   rejected all three offered options and specified a better one -- "the model should know
+   this was a corporate action not a price fall, so it will trade". Implemented as
+   back-adjustment: prior prices rescaled onto one continuous series, symbol keeps trading.
+3. **Thresholds**: 0.40 one-way, 0.25 spike-revert. Now config values, so changing them is a
+   re-run rather than a rebuild.
+
+Why the one-way rule is defensible: NSE price bands cap most scrips at 20% a day, so a
+genuine one-way move past 40% in a NIFTY-100 name is effectively impossible.
+
+### TWO BUGS MY OWN VERIFICATION CAUGHT -- both recorded, neither shipped
+
+**Bug 1 - spike-revert pairs misfiled as corporate actions.** The first classifier scanned
+returns largest-first and asked "does the NEXT return undo this one?" But in a pair the
+larger leg is often the SECOND one, so its forward-looking check saw an ordinary day and the
+leg was filed as a corporate action. BEL would have been back-adjusted by ratio **0.0294** --
+dividing every earlier price by 34. Caught because corporate actions came out at 79 when the
+original scan said 40. Fixed with a chronological two-pass scan comparing the two legs
+against each other; counts then reconciled.
+
+**Bug 2 - gate G3.3 FAILED (40 probes, 2 mismatches, worst 31.7).** The repair was wired only
+into build_symbol_panel, which reads a dataframe column. The as-of causality recompute in
+snapshot_asof takes a bare price array and never saw it, so the panel and its independent
+verifier disagreed. Not a causality violation -- an inconsistency between two paths, which is
+exactly what that gate exists to catch. Fixed with a shared fit_returns() that both paths
+call and that derives the repair **from prices alone**, so they cannot drift apart and the
+result depends only on close[:i+2]. The panel hash was unchanged, confirming the panel was
+always right and only the verifier was inconsistent.
+
+### Results of the full refit
+
+| metric | before | after |
+|---|---|---|
+| median 99%/12d VaR | 21.2% of price | **19.25%** |
+| median ES | 28.2% | **25.07%** |
+| median tail shape xi | 0.114 | 0.093 |
+| tradable coverage | 87.3% | **95%** |
+
+Sizing impact was large where contaminated: BAJFINANCE VaR/share **-64.6%**, BEL -59.1%,
+TATASTEEL -53.3%, CIPLA -40.8%. Two collapsed fits repaired (ABB and NESTLEIND, both
+alpha 0.0000 -> 0.19/0.25). TITAN, used as a control, moved 0.0%.
+
+Signal distortion was repaired too -- VEDL's 126-day return went from **-55.5% to +26.9%** --
+though none of VEDL/TRENT/TMPV recovers a buy signal today (all fail MA50).
+
+### #018 REVERSED, then settled by a null test
+
+On clean data, both books run identically:
+
+    alphabetical       OOS Sharpe 0.72 / CAGR 6.43%
+    cross-sectional    OOS Sharpe 0.39 / CAGR 2.81%
+
+The opposite of the dirty-data result (0.61 vs 0.48) that justified #018 two weeks earlier.
+
+Rather than conclude "alphabetical is better" -- an accidental ordering cannot contain
+information about future returns -- a null test ran the identical book **25 times with random
+slot orderings**, everything else held constant:
+
+    null: Sharpe mean +0.497  sd 0.163  range [+0.187, +0.849]
+    alphabetical      +0.719  ->  84th percentile
+    cross-sectional   +0.386  ->  20th percentile
+    Sharpe spread from slot ORDER ALONE: 0.662
+
+**Both rules sit inside the noise band. Neither has demonstrated skill.** This closes the gap
+flagged in #018's own caveats ("beating an alphabetical baseline is a lower bar than beating
+a random-order distribution, which I haven't run").
+
+**The consequence is larger than #018.** Slot order alone moves Sharpe by 0.662 --
+comparable to the entire strategy's Sharpe -- so every single-configuration OOS number in
+this project carries roughly +/- 0.16 of allocation noise and must be quoted that way.
+
+ENTRY_RANKING stays xs_score on principle (it is the theoretically motivated rule);
+reverting to alphabetical would be selecting the lucky draw. Recorded as UNPROVEN.
+
+Deeper implication, now the highest-value open experiment: picking 6 from ~37 is a tiny
+high-variance sample. **More positions, each smaller, averages the allocation noise down.**
+#011 already found 4 -> 6 helped.
+
+### Other numbers that moved
+
+Buy-and-hold OOS fell **25.5% -> 16.6% CAGR**: it had been collecting the fake +10,849% and
++443% bars as real gains. Part of the gap the strategy was being measured against did not
+exist. Strategy OOS fell 4.79% -> 2.81% CAGR, Sharpe 0.61 -> 0.39. Full-period drawdown
+worsened -51.4% -> -63.5%. **The anti-overfitting signature survives**: IS Sharpe 0.28 is
+still below OOS 0.39.
+
+### The era-2 handover (user ruling)
+
+The live era replays from scratch every run, so applying the clean tape would have re-based
+the book and moved holdings the user never sold -- exactly what #018 did and what they had
+asked never to happen again. Their ruling: "whatever current holdings are, let them be --
+when we sell and then buy new stock, buy with the updated system."
+
+Implemented as p11d_seed_era2.py plus an era-2 branch in live_smoke. A seed file (a snapshot
+of paper_state.json) carries the open book across verbatim; the replay resumes at the seed's
+own k_next, so **era 1 can never be recomputed again**. Era 1 archived to data/era1/.
+
+Two sub-rulings:
+
+- **Drawdown peak carries forward** (Rs.60,362.43). The kill switch does NOT get a fresh
+  start -- the book really did peak there.
+- **Trade count carries forward.** I recommended era 2 count its own trades, since era 1 ran
+  on contaminated data and pooling makes any statistic a blend. **The user overruled**, and
+  their reasoning (an unbroken record is worth more than a clean one starting from zero) is
+  legitimate. Mitigated by tagging every trade with its era so the two remain separable.
+
+**Verified on the first era-2 LIVE run (2026-08-27):** all 6 gates PASS; all five surviving
+positions carry identical entry prices and share counts; NAV moved +679.40 from two days of
+real market action, not a re-base jump. First clean-data entry: ZYDUSLIFE 7 sh @ 1,160.35.
+Ledger 12 trades (11 era-1, 1 era-2).
+
+### Status and what stays open
+
+APPLIED. Reversible: USE_CLEAN_TAPE=False plus data/backup_pre_019/, and deleting the seed
+file restores the single-era replay.
+
+Open: NAV-curve mis-dating (display-only); skip log missing its score column; a cosmetic
+wrong count in the era-2 log line (len(seed_st.trades) printed after the replay mutates it);
+and the "more positions" experiment the null test motivates.
+
+**Found 2026-08-30 while answering user questions -- RISK HORIZON vs ACTUAL HOLD.**
+RISK_HORIZON_DAYS is set to SWING_HOLD_TARGET_DAYS = 12, so var_per_unit is the 99% loss over
+12 days. But the backtest's MEAN HOLD on cleaned data is **15.3 days** (p5_reconcile), and the
+hard max is 25. Risk is therefore measured over a window ~28% shorter than the position is
+actually exposed for; since volatility scales with the square root of time, that understates
+position risk by roughly 13%.
+
+Not a bug -- the horizon is a documented design choice -- but the MISMATCH was never
+documented, and it biases in the un-conservative direction, which is the direction that
+matters. Three honest options: (a) raise RISK_HORIZON_DAYS to the observed mean hold,
+(b) keep 12 and state the understatement explicitly wherever VaR is quoted, or (c) treat the
+12-day target as the thing to enforce and ask why realised holds overshoot it by 3 days.
+Note (a) would shrink every position by ~13% and re-base the book, so it is a decision, not a
+correction. UNRESOLVED -- user's call.
+
+---
+

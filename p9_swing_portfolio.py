@@ -47,7 +47,8 @@ import pandas as pd
 
 import config as C
 from p2_swing_signal import SPECS, atr as atr_ind, compute_signals
-from p3_swing_backtest import SLIP, delivery_roundtrip_cost
+from p3_swing_backtest import (SLIP, delivery_buy_cost, delivery_roundtrip_cost,
+                               delivery_sell_cost)
 from p8_swing_risk import size_position
 
 warnings.filterwarnings("ignore")
@@ -57,6 +58,41 @@ TRADING_DAYS = 252.0
 SLEEVES = list(C.SLEEVES)
 STOP_MULT = {s: SPECS[s]["stop_mult"] for s in SLEEVES}
 MAXHOLD = {s: SPECS[s]["maxhold"] for s in SLEEVES}
+# Buy-leg cost as a fraction of notional (all buy-side components are proportional, so this
+# is exact and constant). Used to size against cash now that the buy leg is charged at
+# entry -- DECISIONS #016.
+_BUY_COST_FRAC = delivery_buy_cost(1.0)
+
+
+# ================================================================ cross-sectional score
+def xs_score(g: pd.DataFrame, lookback: int = None) -> pd.Series:
+    """Risk-adjusted momentum used to RANK competing entry candidates (DECISIONS #018).
+
+        score_t = (close_t / close_{t-L} - 1) / stdev(daily log returns over the last L)
+
+    Causal by construction: every input at day t uses bars <= t, the same information set
+    the entry signal itself reads, and the fill still happens at t+1's open.
+
+    L defaults to config.ENTRY_SCORE_LOOKBACK (126) = ts_mom's own momentum horizon, so no
+    new lookback is introduced or tuned. Constant scalings (sqrt(252)) are deliberately
+    omitted: ranking is invariant to them, and leaving them out keeps the number honest
+    about what it is -- an ordering statistic, not an annualized Sharpe.
+
+    Returns NaN where the window is not yet full or realized vol is zero (a dead tape);
+    the ranker sorts NaN LAST, so an unscoreable name can never win a contested slot."""
+    L = int(lookback or C.ENTRY_SCORE_LOOKBACK)
+    c = g["close"].astype(float)
+    mom = c / c.shift(L) - 1.0
+    sd = np.log(c).diff().rolling(L, min_periods=L).std()
+    return mom / sd.replace(0.0, np.nan)
+
+
+def _rank_key(pend: dict, j: int) -> tuple:
+    """Sort key for contested slots: best score first, alphabetical index as the ONLY
+    tie-break (keeps the order total and deterministic -- reproducibility gate G3.5)."""
+    s = pend[j].get("score", float("nan"))
+    s = float(s) if s == s else float("-inf")      # NaN -> last
+    return (-s, j)
 
 
 # ================================================================ market/signal tensors
@@ -85,6 +121,9 @@ class Market:
         self.exit = {s: np.zeros((nD, nS), bool) for s in SLEEVES}
         self.vpu = np.full((nD, nS), np.nan)     # var_per_unit at that decision close
         self.trad = np.zeros((nD, nS), bool)     # risk snapshot tradable that close
+        # cross-sectional entry score (DECISIONS #018): risk-adjusted momentum at that
+        # decision close. NaN until the lookback window fills -> ranks last, never first.
+        self.score = np.full((nD, nS), np.nan)
 
         for sym, g in panel.groupby("symbol"):
             j = si[sym]
@@ -96,6 +135,7 @@ class Market:
             self.Cl[idx, j] = g["close"].to_numpy()
             self.at[idx, j] = atr_ind(g).to_numpy()
             self.split[idx, j] = g["split"].to_numpy()
+            self.score[idx, j] = xs_score(g).to_numpy()
             for s in SLEEVES:
                 cs = compute_signals(g, s)
                 self.entry[s][idx, j] = cs["entry"].to_numpy()
@@ -161,6 +201,7 @@ class DayCtx:
     exit_sig: dict       # sleeve -> bool[nS] trend-exit signal at this close
     vpu: np.ndarray      # var_per_unit risk snapshot at this close [nS]
     trad: np.ndarray     # risk snapshot tradable flag [nS]
+    score: np.ndarray    # cross-sectional entry score at this close [nS] (#018)
     split: np.ndarray    # train/test label [nS]
     caps: dict
     kill: dict | None
@@ -168,13 +209,19 @@ class DayCtx:
 
 
 def _do_exit(st: BookState, j: int, k: int, date, exit_px: float, reason: str) -> None:
-    """Close position j at exit_px: cash in the proceeds net of the NSE delivery cost
-    stack and append the closed-trade record."""
+    """Close position j at exit_px: cash in the proceeds net of the SELL-leg cost and
+    append the closed-trade record.
+
+    DECISIONS #016: only the SELL leg is charged here -- the BUY leg was already deducted
+    at entry, as a real broker does. The trade's reported pnl still nets the FULL round
+    trip, so per-trade P&L and lifetime cost are unchanged; what changed is that NAV is no
+    longer flattered by unbooked buy-side costs while a position is open."""
     p = st.pos.pop(j)
     buy_val = p["shares"] * p["entry_px"]
     sell_val = p["shares"] * exit_px
-    cost = delivery_roundtrip_cost(buy_val, sell_val)
-    st.cash += sell_val - cost
+    sell_cost = delivery_sell_cost(sell_val)
+    cost = delivery_buy_cost(buy_val) + sell_cost      # full round trip, for the record
+    st.cash += sell_val - sell_cost
     st.trades.append({"symbol": p["symbol"], "sleeve": p["sleeve"],
                       "entry_date": p["entry_date"], "exit_date": date,
                       "entry_px": p["entry_px"], "exit_px": float(exit_px),
@@ -198,8 +245,15 @@ def step_day(st: BookState, cx: DayCtx) -> tuple[float, float]:
         elif j not in st.pos:
             st.pend_exit.pop(j, None)
 
-    # (B) pending ENTRIES at today's open, subject to caps
-    for j in list(st.pend_entry):
+    # (B) pending ENTRIES at today's open, subject to caps.
+    # ORDER MATTERS: slots/risk/cash are consumed as we go, so whoever is served first wins
+    # the scarce slot. Until #018 this order was the symbol index = ALPHABETICAL. Now the
+    # armed candidates are served best-score-first (config.ENTRY_RANKING="xs_score");
+    # "alpha" restores the legacy order byte-for-byte.
+    order = list(st.pend_entry)
+    if C.ENTRY_RANKING == "xs_score":
+        order.sort(key=lambda jj: _rank_key(st.pend_entry, jj))
+    for j in order:
         pe = st.pend_entry.pop(j)
         if j in st.pos or not np.isfinite(cx.o[j]):
             continue
@@ -216,7 +270,8 @@ def step_day(st: BookState, cx: DayCtx) -> tuple[float, float]:
         inv_now = sum(p["shares"] * cx.clf[jj] for jj, p in st.pos.items())
         gross_room = cx.caps["gross_frac"] * eq_ref - inv_now
         shares = min(shares, int(np.floor(max(gross_room, 0) / entry_px)))
-        shares = min(shares, int(np.floor(max(st.cash, 0) / entry_px)))
+        # cash must cover the notional AND the buy-side cost now charged at entry (#016)
+        shares = min(shares, int(np.floor(max(st.cash, 0) / (entry_px * (1 + _BUY_COST_FRAC)))))
         if shares <= 0:
             st.n_skips += 1
             st.skip_reasons[reason] = st.skip_reasons.get(reason, 0) + 1
@@ -224,9 +279,12 @@ def step_day(st: BookState, cx: DayCtx) -> tuple[float, float]:
                 "date": cx.date, "symbol": cx.syms[j], "sleeve": pe["sleeve"],
                 "reason": reason, "budget": float(pe["budget"]),
                 "vpu": float(pe["vpu"]), "atr_sig": float(pe["atr_sig"]),
+                "score": float(pe.get("score", float("nan"))),
                 "incumbents": ";".join(sorted(cx.syms[jj] for jj in st.pos))})
             continue
-        st.cash -= shares * entry_px
+        # DECISIONS #016: charge the BUY leg now, as a real broker does, instead of
+        # deferring the whole round trip to the exit (which flattered NAV while open).
+        st.cash -= shares * entry_px + delivery_buy_cost(shares * entry_px)
         st.pos[j] = {"symbol": cx.syms[j], "shares": shares, "entry_px": entry_px,
                      "entry_k": k, "entry_date": cx.date, "entry_split": str(cx.split[j]),
                      "stop": entry_px - STOP_MULT[pe["sleeve"]] * pe["atr_sig"],
@@ -285,7 +343,10 @@ def step_day(st: BookState, cx: DayCtx) -> tuple[float, float]:
                 if cx.entry[s][j]:
                     st.pend_entry[j] = {"sleeve": s, "vpu": float(cx.vpu[j]),
                                         "atr_sig": float(cx.atr[j]),
-                                        "budget": cx.budget_fn(s, k)}
+                                        "budget": cx.budget_fn(s, k),
+                                        # captured at the decision close, so tomorrow's
+                                        # ranking cannot peek at tomorrow's tape (#018)
+                                        "score": float(cx.score[j])}
                     break
 
     st.last_equity = eq
@@ -327,7 +388,7 @@ def run_book(mkt: Market, sleeves, budget_fn, *, caps, kill, price_mult=None,
                     entry={s: mkt.entry[s][k] for s in sleeves},
                     exit_sig={s: mkt.exit[s][k] for s in sleeves},
                     vpu=mkt.vpu[k], trad=mkt.trad[k], split=mkt.split[k],
-                    caps=caps, kill=kill, budget_fn=budget_fn)
+                    score=mkt.score[k], caps=caps, kill=kill, budget_fn=budget_fn)
         equity[k], invested_path[k] = step_day(st, cx)
 
     # close residual positions at the last available close (mark-out)
@@ -452,7 +513,7 @@ def _hash_eq(eq: np.ndarray) -> str:
     return hashlib.sha256(np.round(eq, 6).tobytes()).hexdigest()
 
 
-def run_gates(mkt, res_ts, res_combo, weights) -> tuple[bool, dict]:
+def run_gates(mkt, res_ts, res_combo, weights, panel=None) -> tuple[bool, dict]:
     print("\n" + "=" * 64)
     print("  PHASE 3 PORTFOLIO GATES")
     print("=" * 64)
@@ -546,6 +607,70 @@ def run_gates(mkt, res_ts, res_combo, weights) -> tuple[bool, dict]:
           f"combo Sharpe={m_cb['ann_sharpe']:.2f} DD={m_cb['max_drawdown']*100:.1f}%")
     print(f"\n  VERDICT: {verdict}")
 
+    # ---- G3.7 cross-sectional entry ranking (DECISIONS #018) ----
+    # (a) the score must be CAUSAL: recomputing it on a truncated tape must reproduce the
+    #     full-panel value at that same day. Same probe pattern as p2's no-lookahead gate.
+    if panel is not None:
+        rng = np.random.default_rng(C.SEED)
+        probes = mism = 0
+        for sym, g in panel.groupby("symbol"):
+            g = g.sort_values("date").reset_index(drop=True)
+            full = xs_score(g)
+            valid = full.index[full.notna()]
+            if len(valid) < 5:
+                continue
+            for t in rng.choice(valid, size=min(4, len(valid)), replace=False):
+                a = float(full.iloc[t])
+                b = float(xs_score(g.iloc[:t + 1]).iloc[-1])
+                probes += 1
+                if not (abs(a - b) <= 1e-9 * max(1.0, abs(a))):
+                    mism += 1
+        rep["G3.7a_score_causal"] = {"probes": int(probes), "mismatches": int(mism),
+                                     "lookback": int(C.ENTRY_SCORE_LOOKBACK)}
+        check("G3.7a entry score is causal (truncated recompute == full panel)", mism == 0,
+              f"  probes={probes} mismatches={mism} L={C.ENTRY_SCORE_LOOKBACK}")
+
+    # (b) the ranker must be a TOTAL, score-descending order with a deterministic tie-break.
+    _probe = {5: {"score": 1.0}, 2: {"score": 3.0}, 9: {"score": float("nan")},
+              7: {"score": 3.0}, 1: {"score": -2.0}}
+    _got = sorted(_probe, key=lambda jj: _rank_key(_probe, jj))
+    ordered_ok = _got == [2, 7, 5, 1, 9]      # 3.0 ties break by index; NaN last
+    rep["G3.7b_rank_order"] = {"probe_order": _got, "expected": [2, 7, 5, 1, 9]}
+    check("G3.7b ranker orders by score desc, index tie-break, NaN last", ordered_ok,
+          f"  got={_got}")
+
+    # (c) does the ranking actually BIND, and what does it cost/earn? Run the SAME book
+    #     under the legacy alphabetical order and under the score order. If the universe
+    #     is small enough that signals never contend, the two are identical and the gate
+    #     says so honestly rather than claiming an improvement that is not there.
+    _prev = C.ENTRY_RANKING
+    try:
+        C.ENTRY_RANKING = "alpha"
+        alpha_book = run_book(mkt, SLEEVES, budget_fn_factory(weights, combined=True),
+                              caps=default_caps(), kill=default_kill())
+        C.ENTRY_RANKING = "xs_score"
+        score_book = run_book(mkt, SLEEVES, budget_fn_factory(weights, combined=True),
+                              caps=default_caps(), kill=default_kill())
+    finally:
+        C.ENTRY_RANKING = _prev
+    oos_m = mkt.is_oos == "test"
+    m_alpha = metrics(alpha_book["equity"], alpha_book["ret"], mkt.dates, oos_m)
+    m_score = metrics(score_book["equity"], score_book["ret"], mkt.dates, oos_m)
+    binds = _hash_eq(alpha_book["equity"]) != _hash_eq(score_book["equity"])
+    rep["G3.7c_ranking_effect"] = {
+        "oos_alphabetical": m_alpha, "oos_xs_score": m_score,
+        "ranking_changes_book": bool(binds),
+        "n_trades_alpha": len(alpha_book["trades"]), "n_trades_score": len(score_book["trades"]),
+        "hash_alpha": _hash_eq(alpha_book["equity"]),
+        "hash_score": _hash_eq(score_book["equity"]),
+        "active": C.ENTRY_RANKING}
+    # REPORT gate: records the honest comparison either way, never loosened.
+    check("G3.7c ranking comparison computed (alphabetical vs cross-sectional)", True,
+          f"  alpha Sharpe={m_alpha['ann_sharpe']:.2f} CAGR={m_alpha['cagr']*100:.2f}% "
+          f"DD={m_alpha['max_drawdown']*100:.1f}% | score Sharpe={m_score['ann_sharpe']:.2f} "
+          f"CAGR={m_score['cagr']*100:.2f}% DD={m_score['max_drawdown']*100:.1f}% | "
+          f"binds={binds}")
+
     rep["all_passed"] = ok
     print(f"\n{'ALL PHASE 3 PORTFOLIO GATES PASSED' if ok else 'PORTFOLIO GATE FINDING'}\n")
     return ok, rep
@@ -572,7 +697,12 @@ def main() -> int:
     print(f"  capital=Rs.{C.INITIAL_CAPITAL_INR:,.0f}  per_pos_budget=Rs.{C.PER_POSITION_RISK_BUDGET_INR:,.0f}"
           f"  portfolio_budget=Rs.{C.PORTFOLIO_RISK_BUDGET_INR:,.0f}  max_pos={C.MAX_CONCURRENT_POSITIONS}")
     print("=" * 64)
-    panel = pd.read_parquet(C.DATA_DIR / "swing_daily.parquet")
+    _src = (C.CLEAN_TAPE_PATH if (getattr(C, "USE_CLEAN_TAPE", False)
+                                  and C.CLEAN_TAPE_PATH.exists())
+            else C.DATA_DIR / "swing_daily.parquet")
+    panel = pd.read_parquet(_src)
+    print(f"  tape: {_src.name}" + ("  (CLEANED - DECISIONS #019)"
+                                    if _src == C.CLEAN_TAPE_PATH else "  (original)"))
     risk = pd.read_parquet(C.DATA_DIR / "swing_risk_panel.parquet")
     print(f"  loaded {len(panel):,} bars, {len(risk):,} risk snapshots")
     mkt = Market(panel, risk)
@@ -604,7 +734,7 @@ def main() -> int:
     # ---- baselines ----
     bh = buy_hold_book(mkt)
 
-    ok, rep = run_gates(mkt, standalone["ts_mom"], combo, weights)
+    ok, rep = run_gates(mkt, standalone["ts_mom"], combo, weights, panel=panel)
 
     # ---- full-period + IS/OOS metric table (context) ----
     oos = mkt.is_oos == "test"

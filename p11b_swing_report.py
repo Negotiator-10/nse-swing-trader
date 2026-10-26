@@ -240,15 +240,14 @@ def library_rows(led: pd.DataFrame, pos: dict) -> str:
             "<th class='r'>Net P&L</th><th class='r'>Avg days</th></tr>" + "".join(rows))
 
 
-def cost_breakdown(led: pd.DataFrame, pos: dict) -> dict:
+def cost_breakdown(led: pd.DataFrame, pos: dict, last_close: dict = None) -> dict:
     """Every rupee of cost, split into what has actually been CHARGED vs what has been
     incurred but not yet charged.
 
-    IMPORTANT (see DECISIONS.md #003): the engine books the WHOLE round-trip cost at
-    EXIT (`_do_exit` -> delivery_roundtrip_cost(buy_val, sell_val)); nothing is deducted
-    at entry. So an open position has paid nothing yet, even though its buy-side STT and
-    stamp duty are already economically incurred -- NAV is overstated by that amount
-    until the position closes."""
+    DECISIONS #016 (closes #003): each leg is now charged when it happens -- the BUY-side
+    cost is deducted at ENTRY and the SELL-side at exit, as a real broker does. "Charged"
+    therefore includes the buy leg of open positions; "incurred, not yet charged" is only
+    the sell leg they still owe. NAV is no longer flattered while positions are open."""
     dc = C.COSTS_EQUITY_DELIVERY
     s = C.SLIPPAGE_BPS / 1e4
     keys = ("stt", "dp", "stamp", "exch", "sebi", "gst")
@@ -265,15 +264,28 @@ def cost_breakdown(led: pd.DataFrame, pos: dict) -> dict:
             # slippage is embedded in the fill prices: entry = O*(1+s), exit = O*(1-s)
             slip_booked += sh * (epx * s / (1 + s) + xpx * s / (1 - s))
 
-    for p in pos.values():
+    last_close = last_close or {}
+    for sym, p in pos.items():
         bv = p["shares"] * p["entry_px"]
-        accrued["stt"] += dc["stt_pct_each_side"] * bv      # buy leg only
-        accrued["stamp"] += dc["stamp_buy_pct"] * bv
+        mark = float(last_close.get(sym, p["entry_px"]))
+        mv = p["shares"] * mark                 # estimated eventual sell value
+        # BUY leg: charged at ENTRY since #016, so it belongs in "booked", not "accrued".
+        booked["stt"] += dc["stt_pct_each_side"] * bv
+        booked["stamp"] += dc["stamp_buy_pct"] * bv
         e, sb = dc["exch_txn_pct"] * bv, dc["sebi_pct"] * bv
-        accrued["exch"] += e
-        accrued["sebi"] += sb
-        accrued["gst"] += dc["gst_pct"] * (e + sb)
-        slip_accrued += p["shares"] * p["entry_px"] * s / (1 + s)
+        booked["exch"] += e
+        booked["sebi"] += sb
+        booked["gst"] += dc["gst_pct"] * (e + sb)
+        slip_booked += p["shares"] * p["entry_px"] * s / (1 + s)
+        # SELL leg: still OWED. Estimated on the current mark, since the eventual sell
+        # value is unknown -- an estimate of a future charge, not a booked liability.
+        accrued["stt"] += dc["stt_pct_each_side"] * mv
+        e2, sb2 = dc["exch_txn_pct"] * mv, dc["sebi_pct"] * mv
+        accrued["exch"] += e2
+        accrued["sebi"] += sb2
+        accrued["gst"] += dc["gst_pct"] * (e2 + sb2)
+        accrued["dp"] += dc["dp_charge_sell_inr"]
+        slip_accrued += mv * s
 
     return {"booked": booked, "accrued": accrued, "slip_booked": slip_booked,
             "slip_accrued": slip_accrued,
@@ -335,8 +347,9 @@ def manual_block(g46: dict, led: pd.DataFrame, esc) -> str:
     # strategy-only vs actual P&L -- the whole point of tagging manual exits
     split = ""
     if len(led):
-        man = led[led["reason"].astype(str) == "manual"]
-        rule = led[led["reason"].astype(str) != "manual"]
+        MAN = ("manual", "manual_now")
+        man = led[led["reason"].astype(str).isin(MAN)]
+        rule = led[~led["reason"].astype(str).isin(MAN)]
         # Shown from the moment the first order is issued (not just executed) so the
         # strategy-vs-discretion comparison is visible while it is still empty.
         if len(man) or orders:
@@ -513,7 +526,7 @@ def build() -> str:
                      f"</div>{svg_trade_chart(ser, eps)}</div>")
     charts = "".join(cards) or "<p class='muted'>no stocks traded yet</p>"
     lib_tbl = library_rows(led, pos)
-    cb = cost_breakdown(led, pos)
+    cb = cost_breakdown(led, pos, last_close)
     cost_tbl = cost_rows(cb)
     cpt = cb["total_booked"] / len(led) if len(led) else 0.0
 
@@ -599,13 +612,13 @@ def build() -> str:
    <div class='v'>{(cb['total_booked']+cb['total_accrued'])/eq*100:.3f}%</div></div>
  </div>
  <table>{cost_tbl}</table>
- <div class='sub' style='margin-top:6px'><b>Why two columns.</b> The engine charges the
-  WHOLE round-trip cost at EXIT (<code>_do_exit</code>), nothing at entry. So an open
-  position has paid nothing yet even though its buy-side STT and stamp duty are already
-  economically incurred - column 2. NAV is therefore overstated by that amount until each
-  position closes, and every open position still owes a sell leg (another 0.1% STT plus
-  the flat Rs.{C.COSTS_EQUITY_DELIVERY['dp_charge_sell_inr']:.2f} DP charge) when it
-  exits. See DECISIONS.md #003.</div>
+ <div class='sub' style='margin-top:6px'><b>Why two columns.</b> Since DECISIONS #016 the
+  engine charges each leg when it happens, as a real broker does: the BUY-side cost is
+  deducted at entry, so column 1 now includes it for open positions too. Column 2 is what
+  each open position still OWES on its eventual sell leg (0.1% STT plus the flat
+  Rs.{C.COSTS_EQUITY_DELIVERY['dp_charge_sell_inr']:.2f} DP charge). NAV is no longer
+  flattered by unbooked buy-side costs while positions are open - that was finding #003,
+  now closed.</div>
 <script>
 // Manual-sell buttons (DECISIONS #014). This page is static -- no server -- so the button
 // copies the command that queues the sell. p11 executes it at the next run's open.
