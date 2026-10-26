@@ -457,7 +457,7 @@ rotation (#005), live-book-state versioning (open question), skipped-candidate l
 cd "C:\Users\Admin\Desktop\Hedge funds\nse_paper_v1"
 C:\Users\Admin\anaconda3\python.exe kite_login.py
 ```
-Browser login (Client ID BW0770 + password + 2FA) → paste `request_token` → "session
+Browser login (Zerodha Client ID + password + 2FA) → paste `request_token` → "session
 verified". Tokens expire every morning. Skipping a day is safe — the book self-heals by
 replay at correct historical prices.
 
